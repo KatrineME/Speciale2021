@@ -10,7 +10,7 @@ print("Hello World Lets Go Home")
 import torch
 import os
 #import cv2
-import nibabel as nib
+#import nibabel as nib
 import numpy   as np
 #import pandas  as pd
 import matplotlib.pyplot as plt
