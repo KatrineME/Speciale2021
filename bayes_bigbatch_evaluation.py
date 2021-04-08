@@ -531,3 +531,6 @@ m,s = normal_func(out_image[1,1,:,:])
 #%%
 plt.imshow(out_image[1,1,:,:].detach().numpy())
 m = np.mean(out_image[1,1,:,:],axis=None, dtype=None)
+
+#%% kjhfdkshflksdjfælkdhkdjgfkjdshlkfdslk
+"I HAVE ADDED A COMMENT"
