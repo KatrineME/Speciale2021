@@ -7,3 +7,5 @@ Bayes U-Net
   Training and eval
   
 Inspired by https://github.com/toologicbv/cardiacSegUncertainty/tree/b2ee4f0458b746fa343127853ad9a56caa4bdcec
+Data from: https://acdc.creatis.insa-lyon.fr/
+
