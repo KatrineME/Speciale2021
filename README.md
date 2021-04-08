@@ -1,7 +1,7 @@
 # Speciale2021
 Master Thesis 2021
 Bayes U-Net 
-  Dropout: 0.1
+  Dropout: 0.1\\
   Learning rate: 0.001
   Loss: CrossEntropy
   Training and eval
