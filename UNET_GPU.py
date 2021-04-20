@@ -258,10 +258,10 @@ for i in range(0,num_patients):
     data_gt.append(in_gt.astype(object))
 
 #%% BATCH GENERATOR
-
-num_train = 64 #num
-num_eval  = 16 #num + num_train 
-num_test  = 20 #num + num_eval
+num = 5
+num_train = num  # 64 
+num_eval  = num + num_train  # 16
+num_test  = num + num_eval   # 20
 
 im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
