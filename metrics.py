@@ -219,6 +219,19 @@ def recall(result, reference):
     
     return recall
 
+def risk(result, reference):
+    """
+    Our own function to calcluate risk-coverage curves
+    """
+    
+    result = numpy.atleast_1d(result.astype(numpy.bool))
+    reference = numpy.atleast_1d(reference.astype(numpy.bool))
+    
+    fn = numpy.count_nonzero(~result & reference)
+    fp = numpy.count_nonzero(result & ~reference)
+    return fn, fp
+    
+
 
 def sensitivity(result, reference):
     """
