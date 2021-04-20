@@ -264,6 +264,8 @@ num_train = num
 num_eval  = num + num_train 
 num_test  = num + num_eval
 
+print('length of data_im',len(data_im))
+
 im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
 
