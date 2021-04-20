@@ -198,9 +198,9 @@ if __name__ == "__main__":
     
 #%% Specify directory
 cwd = os.getcwd()
-#os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")
-os.chdir('/Users/michalablicher/Desktop/training')
-#os.chdir("/home/michala/Speciale2021/Speciale2021/data/training")
+#os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")   # Local directory katrine
+#os.chdir('/Users/michalablicher/Desktop/training')     # Local directory michala
+os.chdir("/home/michala/training")                      # Server directory michala
 
 #%% Load image  
 frame_im = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9].nii.gz'))
@@ -263,6 +263,8 @@ num = 5
 num_train = num
 num_eval  = num + num_train 
 num_test  = num + num_eval
+
+print('length of data_im',len(data_im))
 
 im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)

@@ -293,8 +293,8 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
+num_epoch = 4
 
-num_epoch = 1
 #%% BATCH GENERATOR
 
 num_train = 2 #1
@@ -428,6 +428,7 @@ plt.figure(figsize=(15,15))
    
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
 for i in range(0,4):
+
     plt.suptitle('Softmax prob of test image', fontsize=40)
     plt.subplot(2, 2, i+1)
     plt.subplots_adjust(hspace = 0.15, wspace = 0.25)
@@ -531,6 +532,3 @@ m,s = normal_func(out_image[1,1,:,:])
 #%%
 plt.imshow(out_image[1,1,:,:].detach().numpy())
 m = np.mean(out_image[1,1,:,:],axis=None, dtype=None)
-
-#%% kjhfdkshflksdjfælkdhkdjgfkjdshlkfdslk
-"I HAVE ADDED A COMMENT"
