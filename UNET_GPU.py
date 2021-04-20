@@ -200,7 +200,7 @@ if __name__ == "__main__":
 cwd = os.getcwd()
 #os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")
 #os.chdir('/Users/michalablicher/Desktop/training')
-os.chdir("/home/michala/Speciale2021/Speciale2021/data/training")
+os.chdir("/home/michala/training")
 
 #%% Load image  
 frame_im = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9].nii.gz'))
