@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Thu Apr  8 14:59:43 2021
+
+@author: michalablicher
+"""
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Tue Mar 23 11:35:53 2021
 
 @author: michalablicher
@@ -26,11 +33,27 @@ Created on Tue Mar 23 11:35:53 2021
 # |num_downs|: number of downsamplings in UNet. For example,
 # if |num_downs| == 7, image of size 128x128 will become of size 1x1 at the bottleneck
 
-# recursive implementation of Unet
+#%% Load packages
 import torch
+import os
+#import cv2
+import nibabel as nib
+import numpy   as np
+#import pandas  as pd
+import matplotlib.pyplot as plt
+import torchvision
+import glob2
+#import time
 
+#from skimage.transform import resize
 from torch import nn
+from torch import Tensor
 
+#!pip install torch-summary
+#!pip install opencv-python
+
+#%% BayesUNet
+# recursive implementation of Unet
 
 def weights_init(m):
     classname = m.__class__.__name__
@@ -45,7 +68,7 @@ class UNet(nn.Module):
                  norm_layer=nn.InstanceNorm2d, drop_prob=0.):
         super(UNet, self).__init__()
         self.drop_prob = drop_prob
-        # construct unet structure
+        # construct UNet structure
         unet_block = UnetSkipConnectionBlock(in_channels=initial_filter_size * 2 ** (num_downs-1), out_channels=initial_filter_size * 2 ** num_downs,
                                              num_classes=num_classes, kernel_size=kernel_size, norm_layer=norm_layer,
                                              innermost=True, drop_prob=self.drop_prob)
@@ -196,37 +219,20 @@ if __name__ == "__main__":
     #model.cuda()
     #torchsummary.summary(model, (1, 128, 128))
 
-#%% Load packages
-import os
-#import cv2
-import nibabel as nib
-import numpy   as np
-#import pandas  as pd
-import matplotlib.pyplot as plt
-import torchvision
-import glob2
-#import time
-
-#from skimage.transform import resize
-from torch import Tensor
-
-#!pip install opencv-python
 
 #%% Load image  
 cwd = os.getcwd()
 os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")
 #os.chdir('/Users/michalablicher/Desktop/training')
 
-
 frame_dia_im = np.sort(glob2.glob('patient*/**/patient*_frame01.nii.gz'))
 
-num_patients = 4#len(frame_dia_im)
+num_patients = len(frame_dia_im)
 H = 128
 W = 128
 in_c = 1
-slices = 11
 
-data_im = []#np.zeros((num_patients,slices,in_c,H,W))
+data_im = []
 centercrop     = torchvision.transforms.CenterCrop((H,W))
 
 for i in range(0,num_patients):
@@ -241,21 +247,18 @@ for i in range(0,num_patients):
    
     in_image = np.expand_dims(centercrop_img,0)
     in_image = Tensor(in_image).permute(3,0,1,2).detach().numpy()
-    #print('in_image shape',in_image.shape)
     
-    #data_im[i] = in_image
     data_im.append(in_image.astype(object))
-    #print('Patient done', i)
 
 #%% Load annotations
 frame_dia_gt = np.sort(glob2.glob('patient*/**/patient*_frame01_gt.nii.gz'))
 
-num_patients = 4#len(frame_dia_gt)
+num_patients = len(frame_dia_gt)
 H = 128
 W = 128
-slices = 10
 
-data_gt = [] #np.zeros((num_patients,slices,H,W))
+
+data_gt = [] 
 centercrop     = torchvision.transforms.CenterCrop((H,W))
 
 for i in range(0,num_patients):
@@ -269,42 +272,52 @@ for i in range(0,num_patients):
         centercrop_gt[:,:,j] = centercrop(Tensor(gt[:,:,j]))
    
     in_gt = Tensor(centercrop_gt).permute(2,0,1).detach().numpy()
-    #print('in_gt shape',in_gt.shape)
     
-    #data_gt[i] = in_gt
     data_gt.append(in_gt.astype(object))
-    #print('Patient done', i)
+
+#%% BATCH GENERATOR
+
+num = 5
+
+num_train = num 
+num_eval  = num + num_train 
+num_test  = num + num_eval
+
+im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
+gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
+
+#im_flat_eval = np.concatenate(data_im[num_train:len(data_im)]).astype(None)
+#gt_flat_eval = np.concatenate(data_gt[num_train:len(data_gt)]).astype(None)
+
+im_flat_eval = np.concatenate(data_im[num_train:num_eval]).astype(None)
+gt_flat_eval = np.concatenate(data_gt[num_train:num_eval]).astype(None)
+
+im_flat_test = np.concatenate(data_im[num_eval:num_test]).astype(None)
+gt_flat_test = np.concatenate(data_gt[num_eval:num_test]).astype(None)
 
 #%% Setting up training loop
-import torch.optim as optim
-from torch.autograd import Variable
+# OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
 
-LEARNING_RATE = 0.001 
+import torch.optim as optim
+from torch.autograd  import Variable
+#from sklearn.metrics import brier_score_loss
+
+LEARNING_RATE = 0.0001 # 
 criterion    = nn.CrossEntropyLoss() 
 #criterion     = nn.BCELoss()
 #criterion     = SoftDice
-#criterion     = Brier
+#criterion     = brier_score_loss()
 
 # weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_decay=1e-4)
+# torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 
 # and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 4
-
-#%% BATCH GENERATOR
-
-num_train = 2 #1
-
-im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
-gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
-
-im_flat_eval = np.concatenate(data_im[num_train:len(data_im)]).astype(None)
-gt_flat_eval = np.concatenate(data_gt[num_train:len(data_gt)]).astype(None)
-
+num_epoch = 10
 
 #%% Training
 losses = []
@@ -321,7 +334,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #inputs, labels = data
         inputs = Tensor(im_flat_train)
         labels = Tensor(gt_flat_train)
-        print('i=',i)
+        #print('i=',i)
 
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
@@ -355,7 +368,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #inputs, labels = data
         inputs = Tensor(im_flat_eval)
         labels = Tensor(gt_flat_eval)
-        print('i=',i)
+        #print('i=',i)
 
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
@@ -373,28 +386,47 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         (epoch + 1, i + 1, eval_loss)
         eval_loss = 0.0
 
-print('Finished Training')
+print('Finished Training + Evaluation')
         
-#%%    
+#%% Plot loss curves
+
 epochs = np.arange(len(losses))
 epochs_eval = np.arange(len(losses_eval))
-plt.figure()
+plt.figure(dpi=200)
 plt.plot(epochs, losses, 'b', label='Training Loss')
 plt.plot(epochs_eval, losses_eval, 'r', label='Validation Loss')
+plt.xlabel('Iteration')
+plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
 plt.show()
-print('Finished Training')
+
+#%% Save model
+PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
+PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
+torch.save(model, PATH_model)
+torch.save(model.state_dict(), PATH_state)
+
+
+#%%
+PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
+PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
+
+# Load
+model = torch.load(PATH_model)
+#model.load_state_dict(torch.load(PATH_state))
+model.eval()
+
 
 
 #%% TESTING! 
 # Load new image for testing
 cwd = os.getcwd()
-os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training/patient008")
-#os.chdir('/Users/michalablicher/Desktop/training/patient008')
+os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training/patient051")
+#os.chdir('/Users/michalablicher/Desktop/training/patient009')
 
-nimg = nib.load('patient008_frame01.nii.gz')
-img  = nimg.get_data()
+nimg = nib.load('patient051_frame01.nii.gz')
+img  = nimg.get_fdata()
 
 im_slices = img.shape[2]
 
@@ -403,132 +435,267 @@ for i in range(0,im_slices):
     plt.subplot(2,5,i+1)
     plt.imshow(img[:,:,i])    
     
-#%%
+#%% Prepare image and run through model
 # Crop image
 centercrop     = torchvision.transforms.CenterCrop((128,128))
 centercrop_img = Tensor(np.zeros((128,128,im_slices)))
 
 for i in range(0,im_slices):
     centercrop_img[:,:,i] = centercrop(Tensor(img[:,:,i]))
-    #plt.subplot(3,4,i+1)
-    #plt.imshow(centercrop_img[:,:,i])
 
 in_image = np.expand_dims(centercrop_img,0)
 in_image = Tensor(in_image).permute(3,0,1,2)
 
+
+model.eval()
 out_trained = model(in_image)
 out_image = out_trained["softmax"]
-#%%
 
-test_slice = 4
+#%% Plot softmax probabilities for a single slice
+test_slice = 0
 out_img = np.squeeze(out_image[test_slice,:,:,:].detach().numpy())
 
 fig = plt.figure()
-plt.figure(figsize=(15,15))
-   
-class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
-for i in range(0,4):
 
-    plt.suptitle('Softmax prob of test image', fontsize=40)
+class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
+plt.figure(dpi=200, figsize=(15,15))
+for i in range(0,4):
+    plt.suptitle('Softmax prob of test image at slice %i' %test_slice, fontsize=20)
     plt.subplot(2, 2, i+1)
-    plt.subplots_adjust(hspace = 0.15, wspace = 0.25)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0)
     plt.imshow(out_img[i,:,:])
-    #plt.xlabel('Property type')
-    #plt.ylabel('Number of listings')
-    #plt.xticks(rotation=90)
     plt.title(class_title[i], fontsize =16)
     plt.xticks(
     rotation=40,
-    #horizontalalignment='right',
     fontweight='light',
-    fontsize=10,
-    )
+    fontsize=7)
     plt.yticks(
-    #rotation=40,
     horizontalalignment='right',
     fontweight='light',
-    fontsize=10,
-    )
+    fontsize=7)
 plt.show()   
-save_image(img1, 'img1.png')
     
 #%% Uncertainty maps (E-maps)   
 import scipy.stats
-#plt.figure(figsize=(15,15))
+
+plt.figure(dpi=200)
 for i in range(0, out_image.shape[0]):
-    plt.suptitle('E-maps')
+    plt.suptitle('E-maps', fontsize=16)
     plt.subplot(3,5,i+1)
-    plt.subplots_adjust(hspace = 0.25, wspace = 0.4)
+    plt.subplots_adjust(hspace = 0.50, wspace = 0.4)
     out_img = (out_image[i,:,:].detach().numpy())
     entropy2 = scipy.stats.entropy(out_img)
-    plt.imshow(entropy2) 
-    plt.xticks(fontsize=5)
-    plt.yticks(fontsize=5)
-    plt.title('Slice %i' %i, fontsize =12) 
     
+    # Normalize 
+    m_entropy = np.max(entropy2)
+    entropy = entropy2/m_entropy
+
+    plt.imshow(entropy) 
+    plt.xticks(fontsize=0, fontweight='light')
+    plt.yticks(fontsize=0, fontweight='light')
+    plt.title('Slice %i' %i, fontsize =7) 
+    cbar = plt.colorbar(fraction=0.045)
+    cbar.ax.tick_params(labelsize=4) 
+    fig.tight_layout()
+    plt.show
 
 #%% UNCERTAINTY B-MAPS
-T = 10 # Find optimal
+T = 10 # OBS Set up to find optimal
 C = out_image.shape[1]
-#smax_prob = np.array([[10],[10],[4],[128,128]], np.int32)
 
 b = np.zeros((T,out_image.shape[0],out_image.shape[1],out_image.shape[2],out_image.shape[3]))
+
+model.train()
+plt.figure(dpi=200)
 
 for i in range(0,T):
     out_trained_bmap = model(in_image)
     out_bmap = out_trained_bmap["softmax"]
     b[i,:,:,:,:] = out_bmap.detach().numpy()
     
-    plt.suptitle('Softmax for each of T iterations at slice 4')
+    plt.suptitle('Softmax prob. for each of T iterations at slice 4', fontsize=16)
     out_img_bmap = np.squeeze(out_bmap[4,:,:,:].detach().numpy())
     plt.subplot(4,T,i+1)
-    plt.subplots_adjust(hspace = 0.30, wspace = 0.50)
-    plt.xticks(fontsize=6)
-    plt.yticks(fontsize=6)
+    plt.subplots_adjust(hspace = 0.0, wspace = 0.1)
+    plt.xticks(fontsize=7, fontweight='light')
+    plt.yticks(fontsize=7, fontweight='light')
     plt.imshow(out_img_bmap[0,:,:])
+    plt.axis('off')
+    
     plt.subplot(4,T,i+1+T)
-    plt.subplots_adjust(hspace = 0.30, wspace = 0.50)
-    plt.xticks(fontsize=6)
-    plt.yticks(fontsize=6)
+    plt.subplots_adjust(hspace = 0.0, wspace = 0.1)
+    plt.xticks(fontsize=7, fontweight='light')
+    plt.yticks(fontsize=7, fontweight='light')
     plt.imshow(out_img_bmap[1,:,:])
+    plt.axis('off')
+    
     plt.subplot(4,T,i+1+T*2)
-    plt.subplots_adjust(hspace = 0.30, wspace = 0.50)
-    plt.xticks(fontsize=6)
-    plt.yticks(fontsize=6)
+    plt.subplots_adjust(hspace = 0.0, wspace = 0.1)
+    plt.xticks(fontsize=7, fontweight='light')
+    plt.yticks(fontsize=7, fontweight='light')
     plt.imshow(out_img_bmap[2,:,:])
+    plt.axis('off')
+    
     plt.subplot(4,T,i+1+T*3)
-    plt.subplots_adjust(hspace = 0.30, wspace = 0.50)
-    plt.xticks(fontsize=6)
-    plt.yticks(fontsize=6)
+    plt.subplots_adjust(hspace = 0.0, wspace = 0.1)
+    plt.xticks(fontsize=7, fontweight='light')
+    plt.yticks(fontsize=7, fontweight='light')
     plt.imshow(out_img_bmap[3,:,:])
-
+    plt.axis('off')
+    
+   
 pred_mean = (1/T)*sum(b,0)
 d = (1/(T-1)) * sum((b-pred_mean)**2,0)
 
-b_map     = (1/C) * np.sum(np.sqrt(d),axis=1) 
+k = np.zeros(b.shape)
+for i in range(0,T):
+    m = b[i,:,:,:,:]-pred_mean
+    k[i,:,:,:,:] = m
 
-#%%
+#d = (1/(T-1)) * sum((k)**2,0)
+b_map     = (1/C) * np.sum(np.sqrt(d),axis=1)
+
+
+print(np.max(b_map))
+
+
+#%% Plot B-maps
 #plt.figure(figsize=(10,10))
 
+plt.figure(dpi=200)
 for i in range(0, b_map.shape[0]):
     plt.suptitle('B-maps', fontsize =16)
-    fig_test = plt.subplot(2,5,i+1)
-    plt.subplots_adjust(bottom=0.3, top=0.9, wspace=0.35)#hspace = 0.01, wspace = 0.4)
+    fig_test = plt.subplot(3,5,i+1)
+    plt.subplots_adjust(hspace = 0.50, wspace = 0.35)
     plt.imshow(b_map[i,:,:]) 
-    plt.xticks(fontsize=5)
-    plt.yticks(fontsize=5)
-    plt.title('Slice %i' %i, fontsize =11) 
+    plt.xticks(fontsize=0,fontweight='light')
+    plt.yticks(fontsize=0,fontweight='light')
+    plt.title('Slice %i' %i, fontsize =7) 
+    cbar = plt.colorbar(fraction=0.045)
+    cbar.ax.tick_params(labelsize=5)
+    #cbar.ax.set_yticklabels(['low','','high'])
     fig.tight_layout()
     plt.show
+    
+
+#%% METRICS
+
+model.eval()
+out_metrics = model(Tensor(im_flat_test))
+seg_metrics = out_metrics["softmax"]
+#%% Threshold prediction probabilities
+
+seg_met = np.argmax(seg_metrics.detach().numpy(), axis=1)
+
+#%% Create Plot 
+plt.figure(dpi=200)
+plt.suptitle('Comparison of GT and predicted segmentation', fontsize=16 , y=0.8)
+
+#n = 36 # anatomically incoherent 
+n = 43 # anatomcally incoherent 
+#n = 28 # totally incoherent 
+
+plt.subplot(1, 3, 1)
+plt.imshow(np.squeeze(im_flat_test[n,:,:]))
+plt.xticks(rotation=40, fontweight='light', fontsize=7,)
+plt.yticks(horizontalalignment='right',fontweight='light', fontsize=7,)
+plt.title('MRI', fontsize =10)
+
+plt.subplot(1, 3, 2)
+plt.imshow(gt_flat_test[n,:,:])
+plt.xticks(rotation=40, fontweight='light', fontsize=7,)
+plt.yticks(horizontalalignment='right',fontweight='light', fontsize=7,)
+plt.title('Ground truth', fontsize =10)
+
+plt.subplot(1, 3, 3)
+plt.imshow(seg_met[n,:,:])
+plt.xticks(rotation=40, fontweight='light', fontsize=7,)
+plt.yticks(horizontalalignment='right',fontweight='light', fontsize=7,)
+plt.title('Predicted', fontsize =10)
+
+plt.tight_layout()
+plt.show()
+
+#%% calculate metrics
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021/")
+from metrics import dc, jc, hd
+
+dice = np.zeros(seg_met.shape[0])
+haus = np.zeros(seg_met.shape[0])
+
+for i in range(0,seg_met.shape[0]):
+    dice_m  = dc(seg_met[i,:,:],gt_flat_test[i,:,:])  
+    dice[i] = dice_m
+    
+    haus_m  = hd(seg_met[i,:,:],gt_flat_test[i,:,:])  
+    haus[i] = haus_m
+
+mean_dice = np.mean(dice)  
+mean_haus = np.mean(haus)
+print('mean overall dice = ',mean_dice)  
+print('mean overall haus = ',mean_haus)
+
+print('Dice for test image [n] = ',dc(seg_met[n,:,:],gt_flat_test[n,:,:]) )
+print('Hausdorff for test image [n] = ',hd(seg_met[n,:,:],gt_flat_test[n,:,:]) )
 
 #%%
-os.chdir("C:/Users/katrine/Documents/Universitet/Speciale")
 
-from test_script import normal_func 
+seg = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().numpy()
+ref = torch.nn.functional.one_hot(Tensor(gt_flat_test).to(torch.int64), num_classes=4).detach().numpy()
+
+dice_c = np.zeros((seg_met.shape[0],3))
+haus_c = np.zeros((seg_met.shape[0],3))
 
 
-m,s = normal_func(out_image[1,1,:,:])
+# dim[0] = BG
+# dim[1] = RV
+# dim[2] = MYO
+# dim[3] = LV
 
-#%%
-plt.imshow(out_image[1,1,:,:].detach().numpy())
-m = np.mean(out_image[1,1,:,:],axis=None, dtype=None)
+for i in range(0,seg_met.shape[0]):
+    dice_rv     = dc(seg[i,:,:,1],ref[i,:,:,1])  
+    dice_c[i,0] = dice_rv
+    dice_myo    = dc(seg[i,:,:,2],ref[i,:,:,2])  
+    dice_c[i,1] = dice_myo
+    dice_lv     = dc(seg[i,:,:,3],ref[i,:,:,3])  
+    dice_c[i,2] = dice_lv
+    
+    #haus_rv     = hd(seg[i,:,:,1],ref[i,:,:,1])  
+    #haus_c[i,0] = haus_rv
+    haus_myo    = hd(seg[i,:,:,2],ref[i,:,:,2])  
+    haus_c[i,1] = haus_myo
+    #haus_lv     = hd(seg[i,:,:,3],ref[i,:,:,3])  
+    #haus_c[i,2] = haus_lv
+
+mean_dice = np.mean(dice_c, axis=0)  
+mean_haus = np.mean(haus_c, axis=0)
+print('mean dice = ',mean_dice)  
+print('mean haus = ',mean_haus)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
