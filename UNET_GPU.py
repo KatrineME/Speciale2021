@@ -199,8 +199,8 @@ if __name__ == "__main__":
 #%% Specify directory
 cwd = os.getcwd()
 #os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")
-#os.chdir('/Users/michalablicher/Desktop/training')
-os.chdir("/home/michala/training")
+os.chdir('/Users/michalablicher/Desktop/training')
+#os.chdir("/home/michala/Speciale2021/Speciale2021/data/training")
 
 #%% Load image  
 frame_im = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9].nii.gz'))
@@ -259,9 +259,10 @@ for i in range(0,num_patients):
 
 #%% BATCH GENERATOR
 num = 5
-num_train = num  # 64 
-num_eval  = num + num_train  # 16
-num_test  = num + num_eval   # 20
+
+num_train = num
+num_eval  = num + num_train 
+num_test  = num + num_eval
 
 im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
