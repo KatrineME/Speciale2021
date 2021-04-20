@@ -196,7 +196,8 @@ if __name__ == "__main__":
 
 #%% Load image  
 cwd = os.getcwd()
-os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")
+os.chdir("/home/katrine/Speciale2021")
+#os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")
 #os.chdir('/Users/michalablicher/Desktop/training')
 
 frame_dia_im = np.sort(glob2.glob('patient*/**/patient*_frame01.nii.gz'))
