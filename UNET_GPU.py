@@ -333,7 +333,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Calculate loss
         train_loss += loss.item()
-    losses.append(train_loss/trainloader.shape[0]) # This should be normalised by batch size
+    losses.append(train_loss/trainloader.shape[0]) # This is normalised by batch size
     train_loss = 0.0
      
     model.eval()
@@ -358,7 +358,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
 
         # Calculate loss
         eval_loss += loss.item()
-    losses_eval.append(eval_loss/trainloader.shape[0])
+    losses_eval.append(eval_loss/trainloader.shape[0]) # This is normalised by batch size
         #(epoch + 1, i + 1, eval_loss)
     eval_loss = 0.0
 
