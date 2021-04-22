@@ -205,10 +205,13 @@ os.chdir("/home/michala/training")                      # Server directory micha
 #%% Load image  
 frame_im = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9].nii.gz'))
 dia      = np.linspace(0,len(frame_im)-2,100).astype(int)
+sys      = np.linspace(1,len(frame_im)-1,100).astype(int)
 
 frame_dia_im = frame_im[dia]
+frame_sys_im = frame_im[sys]
 
-num_patients = len(frame_dia_im)
+#num_patients = len(frame_dia_im)
+num_patients = len(frame_sys_im)
 H    = 128
 W    = 128
 in_c = 1
@@ -217,7 +220,7 @@ data_im = []
 centercrop = torchvision.transforms.CenterCrop((H,W))
 
 for i in range(0,num_patients):
-    nimg = nib.load(frame_dia_im[i])
+    nimg = nib.load(frame_sys_im[i]) # OBS -  CHANGE TO OR SYSTOLE AND DIASTOLE 
     img  = nimg.get_fdata()
     
     im_slices      = img.shape[2]
@@ -235,8 +238,10 @@ for i in range(0,num_patients):
 
 frame_gt = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9]_gt.nii.gz'))
 frame_dia_gt = frame_gt[dia]
+frame_sys_gt = frame_gt[sys]
 
-num_patients = len(frame_dia_gt)
+#num_patients = len(frame_dia_gt)
+num_patients = len(frame_sys_gt)
 H = 128
 W = 128
 
@@ -244,7 +249,7 @@ data_gt = []
 centercrop     = torchvision.transforms.CenterCrop((H,W))
 
 for i in range(0,num_patients):
-    n_gt = nib.load(frame_dia_gt[i])
+    n_gt = nib.load(frame_sys_gt[i]) # OBS -  CHANGE TO OR SYSTOLE AND DIASTOLE  
     gt  = n_gt.get_fdata()
     
     gt_slices      = gt.shape[2]
@@ -266,17 +271,6 @@ num_test  = 2#0
 lim_eval  = num_train + num_eval
 lim_test  = lim_eval + num_test
 
-print(0,num_train)
-print(num_train,lim_eval)
-print(lim_eval,lim_test)
-
-
-print(len(data_im[0:num_train]))
-print(len(data_im[num_train:lim_eval]))
-print(len(data_im[lim_eval:lim_test]))
-
-
-print('length of data_im',len(data_im))
 #%%
 im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
@@ -306,7 +300,7 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_d
 #                                               gamma=0.1)
 
 num_epoch = 10
-
+print('Number of epochs = ',num_epoch)
 #%% Training
 losses = []
 losses_eval = []
@@ -380,9 +374,7 @@ print('Finished Training + Evaluation')
         
 
 #%% Save model
-#os.chdir("/home/michala/Speciale2021/Speciale2021/data/training")
-
-PATH_model = "/home/michala/Speciale2021/Speciale2021/trained_Unet_gpu_test.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/trained_Unet_gpu_test_state.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys.pt"
+PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_state.pt"
 torch.save(model, PATH_model)
 torch.save(model.state_dict(), PATH_state)
