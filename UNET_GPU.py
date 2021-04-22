@@ -338,6 +338,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Find loss
         loss = criterion(output, labels)
+        loss.requres_grad = True
         # Calculate gradients
         loss.backward()
         # Update Weights
