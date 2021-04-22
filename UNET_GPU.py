@@ -334,7 +334,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
 
         # Forward Pass
         output = model(inputs)     
-        output = output["log_softmax"] #.cpu().detach()
+        output = output["log_softmax"].cpu().detach()
         
         # Find loss
         loss = criterion(output, labels)
