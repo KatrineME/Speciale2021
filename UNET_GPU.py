@@ -259,9 +259,9 @@ for i in range(0,num_patients):
 
 #%% BATCH GENERATOR
 
-num_train = 5#0
-num_eval  = 3#0
-num_test  = 2#0
+num_train = 10#0
+num_eval  = 6#0
+num_test  = 4#0
 
 lim_eval  = num_train + num_eval
 lim_test  = lim_eval + num_test
@@ -334,7 +334,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
        
         # Forward Pass
         output = model(inputs)     
-        output = output["log_softmax"].cpu().detach()
+        output = output["log_softmax"]
         
         # Find loss
         loss = criterion(output, labels)
@@ -366,7 +366,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Forward pass
         output = model(inputs)     
-        output = output["log_softmax"].cpu().detach()
+        output = output["log_softmax"]
         # Find loss
         loss = criterion(output, labels)
 
