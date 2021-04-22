@@ -286,9 +286,6 @@ num_test  = num + num_eval
 im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
 
-#im_flat_eval = np.concatenate(data_im[num_train:len(data_im)]).astype(None)
-#gt_flat_eval = np.concatenate(data_gt[num_train:len(data_gt)]).astype(None)
-
 im_flat_eval = np.concatenate(data_im[num_train:num_eval]).astype(None)
 gt_flat_eval = np.concatenate(data_gt[num_train:num_eval]).astype(None)
 
@@ -410,14 +407,13 @@ torch.save(model.state_dict(), PATH_state)
 
 
 #%% Load model
-PATH_model = "C:/Users/katrine/Documents/Universitet/Speciale/trained_Unet_testtest.pt"
-#PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
+PATH_model = "C:/Users/katrine/Documents/Universitet/Speciale/Trained models/trained_Unet_locally.pt"
+#PATH_state = "C:/Users/katrine/Documents/Universitet/Speciale/Trained models/trained_Unet_locallystate.pt"
 
 # Load
 model = torch.load(PATH_model)
 #model.load_state_dict(torch.load(PATH_state))
 model.eval()
-
 
 
 #%% TESTING! 
@@ -743,8 +739,50 @@ for i in range(len(percentiles)):
 risk_m = np.mean(risk_measure, axis=1)
 
 #%%
+plt.figure(dpi=300)
+
+thres_values = np.round([percentiles[50],percentiles[70], percentiles[80], percentiles[90]],8)
+test_slice = 9
+
+plt.suptitle('Comparison of uncertainty threholds', y=0.9)
+
+plt.subplot(2,4,1)
+plt.imshow(im_flat_test[test_slice,0,:,:])
+plt.subplots_adjust(hspace = 0, wspace = 0.6)
+plt.title('Original Im', fontsize=10)
+
+plt.subplot(2,4,2)
+plt.imshow(gt_flat_test[test_slice,:,:])
+plt.title('GT seg.', fontsize=10)
+
+plt.subplot(2,4,3)
+plt.imshow(seg_met[test_slice,:,:])
+plt.title('Predicted seg.', fontsize=10)
+
+plt.subplot(2,4,4)
+plt.imshow(emap[test_slice,:,:])
+plt.title('E-map', fontsize=10)
+plt.colorbar(fraction=0.05)
+
+plt.subplot(2,4,5)
+plt.imshow(aa[50,test_slice,:,:])
+plt.title('Thres: 8.27 e-12', fontsize=10)
+
+plt.subplot(2,4,6)
+plt.imshow(aa[70,test_slice,:,:])
+plt.title('Thres: 7.40 e-07', fontsize=10)
+
+plt.subplot(2,4,7)
+plt.imshow(aa[80,test_slice,:,:])
+plt.title('Thres: 1.90 e-04', fontsize=10)
+
+plt.subplot(2,4,8)
+plt.imshow(aa[90,test_slice,:,:])
+plt.title('Thres: 3.55 e-02', fontsize=10)
+
+#%%
 # Risk-coverage curve
-plt.figure(dpi=600)
+plt.figure(dpi=300)
 plt.suptitle('Risk-Coverage curve', fontsize=16)
 plt.plot(coverage[1:-1],risk_m[1:-1],'b.', label ='Unet-CE (e-map)')
 plt.xlabel('Coverage [%]')
