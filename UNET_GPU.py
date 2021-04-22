@@ -259,9 +259,9 @@ for i in range(0,num_patients):
 
 #%% BATCH GENERATOR
 
-num_train = 50
-num_eval  = 30
-num_test  = 20
+num_train = 10#0
+num_eval  = 6#0
+num_test  = 4#0
 
 lim_eval  = num_train + num_eval
 lim_test  = lim_eval + num_test
@@ -321,29 +321,30 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(im_flat_train)
+        inputs = inputs.cuda()
         labels = Tensor(gt_flat_train)
+        labels = labels.cuda()
         #print('i=',i)
-
         # wrap them in Variable
+        #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
-
         # Clear the gradients
         optimizer.zero_grad()
-
+       
         # Forward Pass
         output = model(inputs)     
         output = output["log_softmax"]
         
         # Find loss
         loss = criterion(output, labels)
+        
         # Calculate gradients
         loss.backward()
         # Update Weights
         optimizer.step()
-        
         # Calculate loss
-        train_loss += loss.item()
+        train_loss += loss.item() #.detach().cpu().numpy()
     losses.append(train_loss/trainloader.shape[0]) # This is normalised by batch size
     train_loss = 0.0
      
@@ -354,7 +355,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(im_flat_eval)
+        inputs = inputs.cuda()
         labels = Tensor(gt_flat_eval)
+        labels = labels.cuda()
         #print('i=',i)
 
         # wrap them in Variable
