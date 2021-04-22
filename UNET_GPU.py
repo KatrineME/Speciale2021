@@ -321,6 +321,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(im_flat_train)
+        inputs = inputs.cuda()
         labels = Tensor(gt_flat_train)
         #print('i=',i)
 
