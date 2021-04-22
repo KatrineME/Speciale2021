@@ -391,6 +391,7 @@ print('Finished Training + Evaluation')
 
 epochs = np.arange(len(losses))
 epochs_eval = np.arange(len(losses_eval))
+
 plt.figure(dpi=200)
 plt.plot(epochs+1, losses, 'b', label='Training Loss')
 plt.plot(epochs_eval+1, losses_eval, 'r', label='Validation Loss')
@@ -402,8 +403,8 @@ plt.title("Loss function")
 plt.show()
 
 #%% Save model
-PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
-PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
+PATH_model = "C:/Users/katrine/Documents/Universitet/Speciale/trained_Unet_locally.pt"
+PATH_state = "C:/Users/katrine/Documents/Universitet/Speciale/trained_Unet_locallystate.pt"
 torch.save(model, PATH_model)
 torch.save(model.state_dict(), PATH_state)
 
@@ -458,8 +459,8 @@ out_metrics = model(Tensor(im_flat_test))
 seg_metrics = out_metrics["softmax"]
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 0
-out_img = np.squeeze(out_image[test_slice,:,:,:].detach().numpy())
+test_slice = 5
+out_img = np.squeeze(seg_metrics[test_slice,:,:,:].detach().numpy())
 
 fig = plt.figure()
 
