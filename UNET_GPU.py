@@ -258,23 +258,34 @@ for i in range(0,num_patients):
     data_gt.append(in_gt.astype(object))
 
 #%% BATCH GENERATOR
-num = 5
 
-num_train = num
-num_eval  = num + num_train 
-num_test  = num + num_eval
+num_train = 50
+num_eval  = 30
+num_test  = 20
+
+lim_eval  = num_train + num_eval
+lim_test  = lim_eval + num_test
+
+print(0,num_train)
+print(num_train,lim_eval)
+print(lim_eval,lim_test)
+
+
+print(len(data_im[0:num_train]))
+print(len(data_im[num_train:lim_eval]))
+print(len(data_im[lim_eval:lim_test]))
+
 
 print('length of data_im',len(data_im))
-
+#%%
 im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
 
+im_flat_eval = np.concatenate(data_im[num_train:lim_eval]).astype(None)
+gt_flat_eval = np.concatenate(data_gt[num_train:lim_eval]).astype(None)
 
-im_flat_eval = np.concatenate(data_im[num_train:num_eval]).astype(None)
-gt_flat_eval = np.concatenate(data_gt[num_train:num_eval]).astype(None)
-
-im_flat_test = np.concatenate(data_im[num_eval:num_test]).astype(None)
-gt_flat_test = np.concatenate(data_gt[num_eval:num_test]).astype(None)
+im_flat_test = np.concatenate(data_im[lim_eval:lim_test]).astype(None)
+gt_flat_test = np.concatenate(data_gt[lim_eval:lim_test]).astype(None)
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
