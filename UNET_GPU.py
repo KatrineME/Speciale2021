@@ -325,33 +325,26 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         labels = Tensor(gt_flat_train)
         labels = labels.cuda()
         #print('i=',i)
-        print('Testing for issues: inputs and labels defined')
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
-        print('Testing for issues: inputs and labels wraped in variable')
         # Clear the gradients
         optimizer.zero_grad()
        
         # Forward Pass
         output = model(inputs)     
         output = output["log_softmax"] #.cpu().detach()
-        print('Testing for issues: forward pass')
         
         # Find loss
         loss = criterion(output, labels)
         
-        print('Testing for issues: find loss')
         # Calculate gradients
         loss.backward()
-        print('Testing for issues: calculate gradients pass')
         # Update Weights
         optimizer.step()
-        print('Testing for issues: update weights')
         # Calculate loss
         train_loss += loss.item() #.detach().cpu().numpy()
-        print('Testing for issues: calculate loss')
     losses.append(train_loss/trainloader.shape[0]) # This is normalised by batch size
     train_loss = 0.0
      
@@ -362,7 +355,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(im_flat_eval)
+        inputs = inputs.cuda()
         labels = Tensor(gt_flat_eval)
+        labels = labels.cuda()
         #print('i=',i)
 
         # wrap them in Variable
