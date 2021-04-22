@@ -277,7 +277,7 @@ for i in range(0,num_patients):
 
 #%% BATCH GENERATOR
 
-num = 1
+num = 5
 
 num_train = num 
 num_eval  = num + num_train 
@@ -317,7 +317,7 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_d
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 3
+num_epoch = 10
 
 #%% Training
 losses = []
@@ -392,9 +392,10 @@ print('Finished Training + Evaluation')
 epochs = np.arange(len(losses))
 epochs_eval = np.arange(len(losses_eval))
 plt.figure(dpi=200)
-plt.plot(epochs, losses, 'b', label='Training Loss')
-plt.plot(epochs_eval, losses_eval, 'r', label='Validation Loss')
-plt.xlabel('Iteration')
+plt.plot(epochs+1, losses, 'b', label='Training Loss')
+plt.plot(epochs_eval+1, losses_eval, 'r', label='Validation Loss')
+plt.xticks(np.arange(1,11, step=1))
+plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
