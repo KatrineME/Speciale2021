@@ -129,11 +129,12 @@ im_dia = np.concatenate(im_dia).astype(None)
 #%%
 plt.suptitle('Comparison of sys/dia data', y=1)
 
-slice = 800
+slice = 
 
 plt.subplot(2,2,1)
 plt.imshow(im_dia[slice,0,:,:])
 plt.title('Im: Diastole', fontsize=10)
+plt.subplots_adjust(hspace = 0.40, wspace = 0)
 plt.subplot(2,2,2)
 plt.imshow(gt_dia[slice,:,:])
 plt.title('GT: Diastole', fontsize=10)

@@ -733,7 +733,7 @@ risk_m = np.mean(risk_measure, axis=1)
 plt.figure(dpi=300)
 
 thres_values = np.round([percentiles[50],percentiles[70], percentiles[80], percentiles[90]],8)
-test_slice = 9
+test_slice = 0
 
 plt.suptitle('Comparison of uncertainty threholds', y=0.9)
 
