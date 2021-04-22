@@ -323,6 +323,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = Tensor(im_flat_train)
         inputs = inputs.cuda()
         labels = Tensor(gt_flat_train)
+        labels = labels.cuda()
         #print('i=',i)
         print('Testing for issues: inputs and labels defined')
         # wrap them in Variable
