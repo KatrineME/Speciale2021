@@ -409,8 +409,8 @@ torch.save(model.state_dict(), PATH_state)
 
 
 #%%
-PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
-PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
+PATH_model = "C:/Users/katrine/Documents/Universitet/Speciale/trained_Unet_testtest.pt"
+#PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
 # Load
 model = torch.load(PATH_model)
@@ -451,6 +451,12 @@ model.eval()
 out_trained = model(in_image)
 out_image = out_trained["softmax"]
 
+#%% METRICS
+
+model.eval()
+out_metrics = model(Tensor(im_flat_test))
+seg_metrics = out_metrics["softmax"]
+
 #%% Plot softmax probabilities for a single slice
 test_slice = 0
 out_img = np.squeeze(out_image[test_slice,:,:,:].detach().numpy())
@@ -478,26 +484,29 @@ plt.show()
 #%% Uncertainty maps (E-maps)   
 import scipy.stats
 
-plt.figure(dpi=200)
-for i in range(0, out_image.shape[0]):
-    plt.suptitle('E-maps', fontsize=16)
-    plt.subplot(3,5,i+1)
-    plt.subplots_adjust(hspace = 0.50, wspace = 0.4)
-    out_img = (out_image[i,:,:].detach().numpy())
+emap = np.zeros((seg_metrics.shape[0],seg_metrics.shape[2],seg_metrics.shape[3]))
+
+#plt.figure(dpi=200)
+for i in range(0, emap.shape[0]):
+    #plt.suptitle('E-maps', fontsize=16)
+    #plt.subplot(3,5,i+1)
+    #plt.subplots_adjust(hspace = 0.50, wspace = 0.4)
+    out_img = (seg_metrics[i,:,:].detach().numpy())
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
-    m_entropy = np.max(entropy2)
-    entropy = entropy2/m_entropy
+    m_entropy   = np.max(entropy2)
+    entropy     = entropy2/m_entropy
+    emap[i,:,:] = entropy
 
-    plt.imshow(entropy) 
-    plt.xticks(fontsize=0, fontweight='light')
-    plt.yticks(fontsize=0, fontweight='light')
-    plt.title('Slice %i' %i, fontsize =7) 
-    cbar = plt.colorbar(fraction=0.045)
-    cbar.ax.tick_params(labelsize=4) 
-    fig.tight_layout()
-    plt.show
+    #plt.imshow(entropy) 
+    #plt.xticks(fontsize=0, fontweight='light')
+    #plt.yticks(fontsize=0, fontweight='light')
+    #plt.title('Slice %i' %i, fontsize =7) 
+    #cbar = plt.colorbar(fraction=0.045)
+    #cbar.ax.tick_params(labelsize=4) 
+    #fig.tight_layout()
+    #plt.show
 
 #%% UNCERTAINTY B-MAPS
 T = 10 # OBS Set up to find optimal
@@ -552,11 +561,7 @@ for i in range(0,T):
     m = b[i,:,:,:,:]-pred_mean
     k[i,:,:,:,:] = m
 
-#d = (1/(T-1)) * sum((k)**2,0)
 b_map     = (1/C) * np.sum(np.sqrt(d),axis=1)
-
-
-print(np.max(b_map))
 
 
 #%% Plot B-maps
@@ -578,16 +583,11 @@ for i in range(0, b_map.shape[0]):
     plt.show
     
 
-#%% METRICS
-
-model.eval()
-out_metrics = model(Tensor(im_flat_test))
-seg_metrics = out_metrics["softmax"]
 #%% Threshold prediction probabilities
 
 seg_met = np.argmax(seg_metrics.detach().numpy(), axis=1)
 
-#%% Create Plot 
+# Create Plot 
 plt.figure(dpi=200)
 plt.suptitle('Comparison of GT and predicted segmentation', fontsize=16 , y=0.8)
 
@@ -618,10 +618,12 @@ plt.show()
 
 #%% calculate metrics
 os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021/")
-from metrics import dc, jc, hd
+from metrics import dc, hd, risk
 
 dice = np.zeros(seg_met.shape[0])
 haus = np.zeros(seg_met.shape[0])
+fpos = np.zeros(seg_met.shape[0])
+fneg = np.zeros(seg_met.shape[0])
 
 for i in range(0,seg_met.shape[0]):
     dice_m  = dc(seg_met[i,:,:],gt_flat_test[i,:,:])  
@@ -629,16 +631,25 @@ for i in range(0,seg_met.shape[0]):
     
     haus_m  = hd(seg_met[i,:,:],gt_flat_test[i,:,:])  
     haus[i] = haus_m
+    
+    fn_m, fp_m = risk(seg_met[i,:,:],gt_flat_test[i,:,:])  
+    fneg[i] = fn_m
+    fpos[i] = fp_m
+        
 
 mean_dice = np.mean(dice)  
 mean_haus = np.mean(haus)
+risk_measure = fpos+fneg
+
+
 print('mean overall dice = ',mean_dice)  
 print('mean overall haus = ',mean_haus)
 
-print('Dice for test image [n] = ',dc(seg_met[n,:,:],gt_flat_test[n,:,:]) )
-print('Hausdorff for test image [n] = ',hd(seg_met[n,:,:],gt_flat_test[n,:,:]) )
+print('Dice for test slice [n]      = ',dc(seg_met[n,:,:],gt_flat_test[n,:,:]) )
+print('Hausdorff for test slice [n] = ',hd(seg_met[n,:,:],gt_flat_test[n,:,:]) )
+print('Risk measure test slice [n]  = ', risk_measure[n])
 
-#%%
+#%% Average Metrics for each structure
 
 seg = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().numpy()
 ref = torch.nn.functional.one_hot(Tensor(gt_flat_test).to(torch.int64), num_classes=4).detach().numpy()
@@ -646,43 +657,86 @@ ref = torch.nn.functional.one_hot(Tensor(gt_flat_test).to(torch.int64), num_clas
 dice_c = np.zeros((seg_met.shape[0],3))
 haus_c = np.zeros((seg_met.shape[0],3))
 
-
+# OBS OBS OBS OBS
 # dim[0] = BG
 # dim[1] = RV
 # dim[2] = MYO
 # dim[3] = LV
 
 for i in range(0,seg_met.shape[0]):
-    dice_rv     = dc(seg[i,:,:,1],ref[i,:,:,1])  
-    dice_c[i,0] = dice_rv
-    dice_myo    = dc(seg[i,:,:,2],ref[i,:,:,2])  
-    dice_c[i,1] = dice_myo
-    dice_lv     = dc(seg[i,:,:,3],ref[i,:,:,3])  
-    dice_c[i,2] = dice_lv
+      
+    dice_c[i,0] = dc(seg[i,:,:,1],ref[i,:,:,1])  # = RV
+    dice_c[i,1] = dc(seg[i,:,:,2],ref[i,:,:,2])  # = MYO
+    dice_c[i,2] = dc(seg[i,:,:,3],ref[i,:,:,3])  # = LV
     
-    #haus_rv     = hd(seg[i,:,:,1],ref[i,:,:,1])  
-    #haus_c[i,0] = haus_rv
-    haus_myo    = hd(seg[i,:,:,2],ref[i,:,:,2])  
-    haus_c[i,1] = haus_myo
-    #haus_lv     = hd(seg[i,:,:,3],ref[i,:,:,3])  
-    #haus_c[i,2] = haus_lv
-
+    # If there is no prediction or annotation then don't calculate Hausdorff distance and
+    # skip to calculation for next class
+    h_count = 0
+    
+    if len(np.unique(ref[i,:,:,1]))!=1 and len(np.unique(seg[i,:,:,1]))!=1:
+        haus_c[i,0]    = hd(seg[i,:,:,1],ref[i,:,:,1])  
+    #    print('haus_rv  for i = ',i)
+        h_count += 1
+    else:
+        pass
+    
+    if len(np.unique(ref[i,:,:,2]))!=1 and len(np.unique(seg[i,:,:,2]))!=1:      
+        haus_c[i,1]    = hd(seg[i,:,:,2],ref[i,:,:,2])  
+    #    print('haus_myo for i = ',i)     
+        h_count += 1
+    else:
+        pass
+    
+    if len(np.unique(ref[i,:,:,3]))!=1 and len(np.unique(seg[i,:,:,3]))!=1:
+        haus_c[i,2]    = hd(seg[i,:,:,3],ref[i,:,:,3])  
+    #    print('haus_lv  for i = ',i)
+        h_count += 1
+    else:
+        pass
+    
+        pass        
+    if h_count!= 3:
+        print('Haus not calculated for all classes for slice: ', i)
+    else:
+        pass 
+    
 mean_dice = np.mean(dice_c, axis=0)  
 mean_haus = np.mean(haus_c, axis=0)
 print('mean dice = ',mean_dice)  
 print('mean haus = ',mean_haus)
 
 
+#%% Coverage measure
 
 
 
 
+#%% Coverage threshold
+from uncertain_thres import get_seg_errors_mask, generate_thresholds
 
+pred = Tensor(seg).permute(0,3,1,2)
 
+err_indices = get_seg_errors_mask(pred, gt_flat_test)
+percentiles = generate_thresholds(pred, gt_flat_test, emap)
 
+uncertain_voxels = np.zeros((101,48,128,128))
+cov_slices = np.zeros((seg.shape[0],len(percentiles)))
 
+for p, thres in enumerate(percentiles):
+    for i in range(0,seg.shape[0]):
+        uncertain_voxels[p,i,:,:] = emap[i,:,:] >= thres
+        cov_slices[i,p] = np.sum(uncertain_voxels[p,i,:,:])
+    coverage = np.mean(cov_slices*1/(128**2)*100,axis=0)
 
+#%%
+# Risk-coverage curve
+plt.figure(dpi=200)
+plt.suptitle('Risk-Coverage curve', fontsize=16)
+plt.plot(coverage,risk_measure,'bo')
+plt.xlabel('Coverage [%]')
+plt.ylabel('Risk (FP+FN)')
 
+#%%
 
 
 

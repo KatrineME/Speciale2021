@@ -356,9 +356,8 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Calculate loss
         train_loss += loss.item()
-        losses.append(train_loss)
-        (epoch + 1, i + 1, train_loss)
-        train_loss = 0.0
+    losses.append(train_loss/trainloader.shape[0]) # This should be normalised by batch size
+    train_loss = 0.0
      
     model.eval()
     print('Epoch eval=',epoch)
@@ -382,9 +381,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
 
         # Calculate loss
         eval_loss += loss.item()
-        losses_eval.append(eval_loss)
-        (epoch + 1, i + 1, eval_loss)
-        eval_loss = 0.0
+    losses_eval.append(eval_loss/trainloader.shape[0])
+        #(epoch + 1, i + 1, eval_loss)
+    eval_loss = 0.0
 
 print('Finished Training + Evaluation')
         
@@ -393,9 +392,10 @@ print('Finished Training + Evaluation')
 epochs = np.arange(len(losses))
 epochs_eval = np.arange(len(losses_eval))
 plt.figure(dpi=200)
-plt.plot(epochs, losses, 'b', label='Training Loss')
-plt.plot(epochs_eval, losses_eval, 'r', label='Validation Loss')
-plt.xlabel('Iteration')
+plt.plot(epochs+1, losses, 'b', label='Training Loss')
+plt.plot(epochs_eval+1, losses_eval, 'r', label='Validation Loss')
+plt.xticks(np.arange(1,11, step=1))
+plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
@@ -408,7 +408,7 @@ torch.save(model, PATH_model)
 torch.save(model.state_dict(), PATH_state)
 
 
-#%%
+#%% Load model
 PATH_model = "C:/Users/katrine/Documents/Universitet/Speciale/trained_Unet_testtest.pt"
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
@@ -706,11 +706,6 @@ print('mean dice = ',mean_dice)
 print('mean haus = ',mean_haus)
 
 
-#%% Coverage measure
-
-
-
-
 #%% Coverage threshold
 from uncertain_thres import get_seg_errors_mask, generate_thresholds
 
@@ -719,37 +714,39 @@ pred = Tensor(seg).permute(0,3,1,2)
 err_indices = get_seg_errors_mask(pred, gt_flat_test)
 percentiles = generate_thresholds(pred, gt_flat_test, emap)
 
-uncertain_voxels = np.zeros((101,48,128,128))
+uncertain_voxels = np.zeros((len(percentiles),48,H,W))
 cov_slices = np.zeros((seg.shape[0],len(percentiles)))
 
 for p, thres in enumerate(percentiles):
     for i in range(0,seg.shape[0]):
         uncertain_voxels[p,i,:,:] = emap[i,:,:] >= thres
         cov_slices[i,p] = np.sum(uncertain_voxels[p,i,:,:])
-    coverage = np.mean(cov_slices*1/(128**2)*100,axis=0)
+    coverage = np.mean(cov_slices*1/(H*W)*100, axis=0)
+
+#%% Risk measure
+
+#thresholding the softmax for each of 4 channels by the percentile values
+prob_thres = np.zeros((len(percentiles),48,4,H,W))
+a = np.zeros((48,4,H,W))
+aa = np.zeros((len(percentiles),48,H,W))
+risk_measure = np.zeros((len(percentiles),48))
+
+for i in range(len(percentiles)):
+    for k in range(0,prob_thres.shape[1]):
+        a[k,:,:,:]  = seg_metrics[k,:,:,:] > percentiles[i]
+        aa[i,:,:,:] = np.argmax(a,axis=1)
+        
+        fn_m, fp_m  = risk(aa[i,k,:,:],gt_flat_test[k,:,:])  
+        
+        risk_measure[i,k] = fp_m + fn_m
+risk_m = np.mean(risk_measure, axis=1)
 
 #%%
 # Risk-coverage curve
-plt.figure(dpi=200)
+plt.figure(dpi=600)
 plt.suptitle('Risk-Coverage curve', fontsize=16)
-plt.plot(coverage,risk_measure,'bo')
+plt.plot(coverage[1:-1],risk_m[1:-1],'b.', label ='Unet-CE (e-map)')
 plt.xlabel('Coverage [%]')
 plt.ylabel('Risk (FP+FN)')
-
-#%%
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

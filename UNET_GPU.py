@@ -10,21 +10,24 @@ Created on Tue Apr 20 15:05:04 2021
 #%% Load packages
 import torch
 import os
-#import cv2
 import nibabel as nib
 import numpy   as np
-#import pandas  as pd
-import matplotlib.pyplot as plt
 import torchvision
 import glob2
-#import time
+import torch.optim as optim
 
-#from skimage.transform import resize
+from torch.autograd  import Variable
 from torch import nn
 from torch import Tensor
 
-#!pip install torch-summary
-#!pip install opencv-python
+if torch.cuda.is_available():
+    # Tensor = torch.cuda.FloatTensor
+    device = 'cuda'
+else:
+    # Tensor = torch.FloatTensor
+    device = 'cpu'
+torch.cuda.manual_seed_all(808)
+
 
 #%% BayesUNet
 # recursive implementation of Unet
@@ -192,23 +195,26 @@ if __name__ == "__main__":
     model = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     model.cuda()
     #torchsummary.summary(model, (1, 128, 128))
-
+    
+#%% Specify directory
+cwd = os.getcwd()
+#os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")   # Local directory katrine
+#os.chdir('/Users/michalablicher/Desktop/training')     # Local directory michala
+os.chdir("/home/michala/training")                      # Server directory michala
 
 #%% Load image  
-cwd = os.getcwd()
-os.chdir("/home/katrine/Speciale2021")
-#os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")
-#os.chdir('/Users/michalablicher/Desktop/training')
+frame_im = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9].nii.gz'))
+dia      = np.linspace(0,len(frame_im)-2,100).astype(int)
 
-frame_dia_im = np.sort(glob2.glob('patient*/**/patient*_frame01.nii.gz'))
+frame_dia_im = frame_im[dia]
 
 num_patients = len(frame_dia_im)
-H = 128
-W = 128
+H    = 128
+W    = 128
 in_c = 1
 
 data_im = []
-centercrop     = torchvision.transforms.CenterCrop((H,W))
+centercrop = torchvision.transforms.CenterCrop((H,W))
 
 for i in range(0,num_patients):
     nimg = nib.load(frame_dia_im[i])
@@ -226,12 +232,13 @@ for i in range(0,num_patients):
     data_im.append(in_image.astype(object))
 
 #%% Load annotations
-frame_dia_gt = np.sort(glob2.glob('patient*/**/patient*_frame01_gt.nii.gz'))
+
+frame_gt = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9]_gt.nii.gz'))
+frame_dia_gt = frame_gt[dia]
 
 num_patients = len(frame_dia_gt)
 H = 128
 W = 128
-
 
 data_gt = [] 
 centercrop     = torchvision.transforms.CenterCrop((H,W))
@@ -251,12 +258,13 @@ for i in range(0,num_patients):
     data_gt.append(in_gt.astype(object))
 
 #%% BATCH GENERATOR
+num = 5
 
-num = 1
-
-num_train = num 
+num_train = num
 num_eval  = num + num_train 
 num_test  = num + num_eval
+
+print('length of data_im',len(data_im))
 
 im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
@@ -270,10 +278,6 @@ gt_flat_test = np.concatenate(data_gt[num_eval:num_test]).astype(None)
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
-
-import torch.optim as optim
-from torch.autograd  import Variable
-#from sklearn.metrics import brier_score_loss
 
 LEARNING_RATE = 0.0001 # 
 criterion    = nn.CrossEntropyLoss() 
@@ -290,7 +294,7 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_d
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 3
+num_epoch = 10
 
 #%% Training
 losses = []
@@ -329,7 +333,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Calculate loss
         train_loss += loss.item()
-    losses.append(train_loss/trainloader.shape[0]) # This should be normalised by batch size
+    losses.append(train_loss/trainloader.shape[0]) # This is normalised by batch size
     train_loss = 0.0
      
     model.eval()
@@ -354,7 +358,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
 
         # Calculate loss
         eval_loss += loss.item()
-    losses_eval.append(eval_loss/trainloader.shape[0])
+    losses_eval.append(eval_loss/trainloader.shape[0]) # This is normalised by batch size
         #(epoch + 1, i + 1, eval_loss)
     eval_loss = 0.0
 
@@ -362,7 +366,9 @@ print('Finished Training + Evaluation')
         
 
 #%% Save model
-PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
-PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
+#os.chdir("/home/michala/Speciale2021/Speciale2021/data/training")
+
+PATH_model = "/home/michala/Speciale2021/Speciale2021/trained_Unet_gpu_test.pt"
+PATH_state = "/home/michala/Speciale2021/Speciale2021/trained_Unet_gpu_test_state.pt"
 torch.save(model, PATH_model)
 torch.save(model.state_dict(), PATH_state)
