@@ -339,8 +339,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         print('Testing for issues: forward pass')
         
         # Find loss
-        loss = criterion(output, labels)
         loss.requres_grad = True
+        loss = criterion(output, labels)
+        
         print('Testing for issues: find loss')
         # Calculate gradients
         loss.backward()
