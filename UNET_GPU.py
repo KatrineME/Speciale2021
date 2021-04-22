@@ -350,7 +350,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         optimizer.step()
         print('Testing for issues: update weights')
         # Calculate loss
-        train_loss += loss.item().detach().cpu().numpy()
+        train_loss += loss.item() #.detach().cpu().numpy()
         print('Testing for issues: calculate loss')
     losses.append(train_loss/trainloader.shape[0]) # This is normalised by batch size
     train_loss = 0.0
