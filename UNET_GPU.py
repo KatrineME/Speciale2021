@@ -326,7 +326,8 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #print('i=',i)
 
         # wrap them in Variable
-        inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
+        #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
+        inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
 
         # Clear the gradients
