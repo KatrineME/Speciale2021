@@ -737,9 +737,10 @@ plt.xlabel('Coverage [%]')
 plt.ylabel('Risk (FP+FN)')
 
 #%%
+from torch.utils.data import DataLoader
 
-
-
+data_loader = torch.utils.data.DataLoader(
+    im_flat_train, batch_size=2, shuffle=True, num_workers=4)
 
 
 
