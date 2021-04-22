@@ -335,11 +335,10 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
        
         # Forward Pass
         output = model(inputs)     
-        output = output["log_softmax"].cpu().detach()
+        output = output["log_softmax"] #.cpu().detach()
         print('Testing for issues: forward pass')
         
         # Find loss
-        loss.requres_grad = True
         loss = criterion(output, labels)
         
         print('Testing for issues: find loss')
