@@ -291,7 +291,7 @@ criterion    = nn.CrossEntropyLoss()
 #criterion     = brier_score_loss()
 
 # weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_decay=1e-4)
+optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_decay=1e-4)
 # torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 
 # and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
@@ -308,7 +308,7 @@ trainloader = im_flat_train
 
 for epoch in range(num_epoch):  # loop over the dataset multiple times
     
-    model.train()
+    unet.train()
     print('Epoch train =',epoch)
     train_loss = 0.0  
     for i, data in enumerate(trainloader, 0):
@@ -342,7 +342,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     losses.append(train_loss/trainloader.shape[0]) # This is normalised by batch size
     train_loss = 0.0
      
-    model.eval()
+    unet.eval()
     print('Epoch eval=',epoch)
     eval_loss = 0.0  
     for i, data in enumerate(trainloader, 0):
