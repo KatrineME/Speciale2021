@@ -192,8 +192,8 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    model = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    model.cuda()
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
+    unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
 #%% Specify directory
@@ -327,7 +327,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         optimizer.zero_grad()
        
         # Forward Pass
-        output = model(inputs)     
+        output = unet(inputs)     
         output = output["log_softmax"]
         
         # Find loss
@@ -359,7 +359,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         labels = labels.long()
         
         # Forward pass
-        output = model(inputs)     
+        output = unet(inputs)     
         output = output["log_softmax"]
         # Find loss
         loss = criterion(output, labels)
@@ -374,7 +374,32 @@ print('Finished Training + Evaluation')
         
 
 #%% Save model
+#PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
+#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
 PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_state.pt"
-torch.save(model, PATH_model)
-torch.save(model.state_dict(), PATH_state)
+torch.save(unet, PATH_model)
+torch.save(unet.state_dict(), PATH_state)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
