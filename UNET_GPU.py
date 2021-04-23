@@ -19,6 +19,7 @@ import torch.optim as optim
 from torch.autograd  import Variable
 from torch import nn
 from torch import Tensor
+import matplotlib.pyplot as plt
 
 if torch.cuda.is_available():
     # Tensor = torch.cuda.FloatTensor
@@ -291,7 +292,7 @@ criterion    = nn.CrossEntropyLoss()
 #criterion     = brier_score_loss()
 
 # weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_decay=1e-4)
+optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_decay=1e-4)
 # torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 
 # and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
@@ -299,7 +300,7 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_d
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 10
+num_epoch = 20
 print('Number of epochs = ',num_epoch)
 #%% Training
 losses = []
@@ -308,7 +309,7 @@ trainloader = im_flat_train
 
 for epoch in range(num_epoch):  # loop over the dataset multiple times
     
-    model.train()
+    unet.train()
     print('Epoch train =',epoch)
     train_loss = 0.0  
     for i, data in enumerate(trainloader, 0):
@@ -342,7 +343,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     losses.append(train_loss/trainloader.shape[0]) # This is normalised by batch size
     train_loss = 0.0
      
-    model.eval()
+    unet.eval()
     print('Epoch eval=',epoch)
     eval_loss = 0.0  
     for i, data in enumerate(trainloader, 0):
@@ -378,9 +379,9 @@ print('Finished Training + Evaluation')
 epochs = np.arange(len(losses))
 epochs_eval = np.arange(len(losses_eval))
 plt.figure(dpi=200)
-plt.plot(epochs, losses, 'b', label='Training Loss')
-plt.plot(epochs_eval, losses_eval, 'r', label='Validation Loss')
-plt.xlabel('Iteration')
+plt.plot(epochs + 1 , losses, 'b', label='Training Loss')
+plt.plot(epochs_eval + 1 , losses_eval, 'r', label='Validation Loss')
+plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
