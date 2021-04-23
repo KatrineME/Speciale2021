@@ -278,8 +278,8 @@ gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
 im_flat_eval = np.concatenate(data_im[num_train:lim_eval]).astype(None)
 gt_flat_eval = np.concatenate(data_gt[num_train:lim_eval]).astype(None)
 
-im_flat_test = np.concatenate(data_im[lim_eval:lim_test]).astype(None)
-gt_flat_test = np.concatenate(data_gt[lim_eval:lim_test]).astype(None)
+#im_flat_test = np.concatenate(data_im[lim_eval:lim_test]).astype(None)
+#gt_flat_test = np.concatenate(data_gt[lim_eval:lim_test]).astype(None)
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
@@ -372,6 +372,19 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
 
 print('Finished Training + Evaluation')
         
+
+#%% Plot loss curves
+
+epochs = np.arange(len(losses))
+epochs_eval = np.arange(len(losses_eval))
+plt.figure(dpi=200)
+plt.plot(epochs, losses, 'b', label='Training Loss')
+plt.plot(epochs_eval, losses_eval, 'r', label='Validation Loss')
+plt.xlabel('Iteration')
+plt.ylabel('Loss')
+plt.legend(loc="upper right")
+plt.title("Loss function")
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_loss.png')
 
 #%% Save model
 #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
