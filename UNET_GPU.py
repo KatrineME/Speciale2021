@@ -19,6 +19,7 @@ import torch.optim as optim
 from torch.autograd  import Variable
 from torch import nn
 from torch import Tensor
+import matplotlib.pyplot as plt
 
 if torch.cuda.is_available():
     # Tensor = torch.cuda.FloatTensor
