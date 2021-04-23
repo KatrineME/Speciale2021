@@ -300,7 +300,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_de
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 10
+num_epoch = 20
 print('Number of epochs = ',num_epoch)
 #%% Training
 losses = []
@@ -379,9 +379,9 @@ print('Finished Training + Evaluation')
 epochs = np.arange(len(losses))
 epochs_eval = np.arange(len(losses_eval))
 plt.figure(dpi=200)
-plt.plot(epochs, losses, 'b', label='Training Loss')
-plt.plot(epochs_eval, losses_eval, 'r', label='Validation Loss')
-plt.xlabel('Iteration')
+plt.plot(epochs + 1 , losses, 'b', label='Training Loss')
+plt.plot(epochs_eval + 1 , losses_eval, 'r', label='Validation Loss')
+plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
