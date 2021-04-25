@@ -265,7 +265,7 @@ for i in range(0,num_patients):
 
 #%% BATCH GENERATOR
 
-num_train = 10#0
+num_train = 8#0
 num_eval  = 3#0
 num_test  = 2#0
 
