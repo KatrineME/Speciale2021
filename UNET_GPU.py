@@ -193,7 +193,7 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.5)
     unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
@@ -265,7 +265,7 @@ for i in range(0,num_patients):
 
 #%% BATCH GENERATOR
 
-num_train = 5#0
+num_train = 7#0
 num_eval  = 3#0
 num_test  = 2#0
 
@@ -300,7 +300,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_de
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 20
+num_epoch = 10
 print('Number of epochs = ',num_epoch)
 #%% Training
 losses = []
