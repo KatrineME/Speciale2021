@@ -678,14 +678,14 @@ def ravd(result, reference):
     return (vol1 - vol2) / float(vol2)
 
 def EF_calculation(target_vol_es, target_vol_ed, spacings):
-    num_of_voxels_es = numpy.count_nonzero(target_vol_es)
-    num_of_voxels_ed = numpy.count_nonzero(target_vol_ed)
+    num_of_voxels_es = target_vol_es #np.count_nonzero(target_vol_es)
+    num_of_voxels_ed = target_vol_ed #np.count_nonzero(target_vol_ed)
 
-    esv = numpy.prod(spacings) * num_of_voxels_es * 1/1000  # convert to milliliter (from mm^3)
-    edv = numpy.prod(spacings) * num_of_voxels_ed * 1/1000
+    esv = np.prod(spacings) * num_of_voxels_es * 1/1000  # convert to milliliter (from mm^3)
+    edv = np.prod(spacings) * num_of_voxels_ed * 1/1000
 
-    ef = (1. - esv/float(edv)) * 100
-    
+    ef = (1. - esv/(edv)) * 100
+    #ef = ((edv-esv)/edv) * 100
     return ef
 
 def volume_correlation(results, references):
