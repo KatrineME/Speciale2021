@@ -782,3 +782,9 @@ plt.xlabel('Coverage [%]')
 plt.ylabel('Risk (FP+FN)')
 
 
+
+#%%
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021/")
+from load_data_gt_im import load_data
+
+im_trial,gt_trial = load_data('K','Systole')
