@@ -685,7 +685,6 @@ def EF_calculation(target_vol_es, target_vol_ed, spacings):
     edv = np.prod(spacings) * num_of_voxels_ed * 1/1000
 
     ef = (1. - esv/(edv)) * 100
-    #ef = ((edv-esv)/edv) * 100
     return ef
 
 def volume_correlation(results, references):

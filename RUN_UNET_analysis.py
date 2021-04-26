@@ -1,34 +1,28 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Apr 20 15:05:04 2021
-
-@author: katrine
-"""
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+Created on Mon Apr 26 11:51:36 2021
 
+@author: michalablicher
+"""
 #%% Load packages
 import torch
 import os
+#import cv2
 import nibabel as nib
 import numpy   as np
+#import pandas  as pd
+import matplotlib.pyplot as plt
 import torchvision
 import glob2
-import torch.optim as optim
+#import time
 
-from torch.autograd  import Variable
+#from skimage.transform import resize
 from torch import nn
 from torch import Tensor
-import matplotlib.pyplot as plt
 
-if torch.cuda.is_available():
-    # Tensor = torch.cuda.FloatTensor
-    device = 'cuda'
-else:
-    # Tensor = torch.FloatTensor
-    device = 'cpu'
-torch.cuda.manual_seed_all(808)
-
+#!pip install torch-summary
+#!pip install opencv-python
 
 #%% BayesUNet
 # recursive implementation of Unet
@@ -193,222 +187,176 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.5)
-    unet.cuda()
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
+    #model.cuda()
     #torchsummary.summary(model, (1, 128, 128))
-    
+
 #%% Specify directory
-cwd = os.getcwd()
-#os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")   # Local directory katrine
-#os.chdir('/Users/michalablicher/Desktop/training')     # Local directory michala
-os.chdir("/home/michala/training")                      # Server directory michala
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
-#%% Load image  
-frame_im = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9].nii.gz'))
-dia      = np.linspace(0,len(frame_im)-2,100).astype(int)
-sys      = np.linspace(1,len(frame_im)-1,100).astype(int)
+from load_data_gt_im import load_data
 
-frame_dia_im = frame_im[dia]
-
-num_patients = len(frame_dia_im)
-H    = 128
-W    = 128
-in_c = 1
-
-data_im = []
-centercrop = torchvision.transforms.CenterCrop((H,W))
-
-for i in range(0,num_patients):
-    nimg = nib.load(frame_dia_im[i]) # OBS -  CHANGE TO OR SYSTOLE AND DIASTOLE 
-    img  = nimg.get_fdata()
-    
-    im_slices      = img.shape[2]
-    centercrop_img = Tensor(np.zeros((H,W,im_slices)))
-    
-    for j in range(0,im_slices):
-        centercrop_img[:,:,j] = centercrop(Tensor(img[:,:,j]))
-   
-    in_image = np.expand_dims(centercrop_img,0)
-    in_image = Tensor(in_image).permute(3,0,1,2).detach().numpy()
-    
-    data_im.append(in_image.astype(object))
-
-#%% Load annotations
-
-frame_gt = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9]_gt.nii.gz'))
-frame_dia_gt = frame_gt[dia]
-frame_sys_gt = frame_gt[sys]
-
-num_patients = len(frame_dia_gt)
-H = 128
-W = 128
-
-data_gt = [] 
-centercrop     = torchvision.transforms.CenterCrop((H,W))
-
-for i in range(0,num_patients):
-    n_gt = nib.load(frame_dia_gt[i]) # OBS -  CHANGE TO OR SYSTOLE AND DIASTOLE  
-    gt  = n_gt.get_fdata()
-    
-    gt_slices      = gt.shape[2]
-    centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
-    
-    for j in range(0,gt_slices):
-        centercrop_gt[:,:,j] = centercrop(Tensor(gt[:,:,j]))
-   
-    in_gt = Tensor(centercrop_gt).permute(2,0,1).detach().numpy()
-    
-    data_gt.append(in_gt.astype(object))
+data_im_es, data_gt_es = load_data('M','Systole')
+data_im_ed, data_gt_ed = load_data('M','Diastole')
 
 #%% BATCH GENERATOR
 
 num_train = 8#0
 num_eval  = 3#0
-num_test  = 2#0
+num_test  = 4#0
 
 lim_eval  = num_train + num_eval
 lim_test  = lim_eval + num_test
 
+#im_flat_test_es = np.concatenate(data_im_es[lim_eval:lim_test]).astype(None)
+#gt_flat_test_es = np.concatenate(data_gt_es[lim_eval:lim_test]).astype(None)
+
+#im_flat_test_ed = np.concatenate(data_im_ed[lim_eval:lim_test]).astype(None)
+#gt_flat_test_ed = np.concatenate(data_gt_ed[lim_eval:lim_test]).astype(None)
+
+#%% Test normal patients
+
+lim_eval = 71
+lim_test = 73
+im_flat_test_es = np.concatenate(data_im_es[lim_eval:lim_test]).astype(None)
+gt_flat_test_es = np.concatenate(data_gt_es[lim_eval:lim_test]).astype(None)
+
+im_flat_test_ed = np.concatenate(data_im_ed[lim_eval:lim_test]).astype(None)
+gt_flat_test_ed = np.concatenate(data_gt_ed[lim_eval:lim_test]).astype(None)
+
+
+#%% Load Model
+#PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
+#PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
+
+PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_20.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_20.pt'
+
+# Load
+unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
+unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
+#model.load_state_dict(torch.load(PATH_state))
+
+unet_es.eval()
+out_trained_es = unet_es(Tensor(im_flat_test_es))
+out_image_es    = out_trained_es["softmax"]
+
 #%%
-im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
-gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
+unet_ed.eval()
+out_trained_ed = unet_ed(Tensor(im_flat_test_ed))
+out_image_ed    = out_trained_ed["softmax"]
 
-im_flat_eval = np.concatenate(data_im[num_train:lim_eval]).astype(None)
-gt_flat_eval = np.concatenate(data_gt[num_train:lim_eval]).astype(None)
+#%%
+seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
 
-#im_flat_test = np.concatenate(data_im[lim_eval:lim_test]).astype(None)
-#gt_flat_test = np.concatenate(data_gt[lim_eval:lim_test]).astype(None)
+seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_flat_test_ed).to(torch.int64), num_classes=4).detach().numpy()
 
-#%% Setting up training loop
-# OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
+#%%
+seg_met_sys = np.argmax(out_image_es.detach().numpy(), axis=1)
 
-LEARNING_RATE = 0.0001 # 
-criterion    = nn.CrossEntropyLoss() 
-#criterion     = nn.BCELoss()
-#criterion     = SoftDice
-#criterion     = brier_score_loss()
+seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().numpy()
+ref_sys = torch.nn.functional.one_hot(Tensor(gt_flat_test_es).to(torch.int64), num_classes=4).detach().numpy()
 
-# weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_decay=1e-4)
-# torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 
-# and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
-#lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-#                                               step_size=3,
-#                                               gamma=0.1)
+#%% Plot softmax probabilities for a single slice
+test_slice = 6
+out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
 
-num_epoch = 20
-print('Number of epochs = ',num_epoch)
-#%% Training
-losses = []
-losses_eval = []
-trainloader = im_flat_train
+fig = plt.figure()
 
-for epoch in range(num_epoch):  # loop over the dataset multiple times
-    
-    unet.train()
-    print('Epoch train =',epoch)
-    train_loss = 0.0  
-    for i, data in enumerate(trainloader, 0):
-        # get the inputs
-        #inputs, labels = data
-        inputs = Tensor(im_flat_train)
-        inputs = inputs.cuda()
-        labels = Tensor(gt_flat_train)
-        labels = labels.cuda()
-        #print('i=',i)
-        # wrap them in Variable
-        #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
-        inputs, labels = Variable(inputs), Variable(labels)
-        labels = labels.long()
-        # Clear the gradients
-        optimizer.zero_grad()
-       
-        # Forward Pass
-        output = unet(inputs)     
-        output = output["log_softmax"]
+class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
+plt.figure(dpi=200, figsize=(15,15))
+for i in range(0,4):
+    plt.suptitle('Softmax prob of test image at slice %i' %test_slice, fontsize=20)
+    plt.subplot(3, 4, i+1)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    plt.imshow(out_img_ed[i,:,:])
+    plt.title(class_title[i], fontsize =16)
+    plt.xticks(
+    rotation=40,
+    fontweight='light',
+    fontsize=7)
+    plt.yticks(
+    horizontalalignment='right',
+    fontweight='light',
+    fontsize=7)
+    plt.subplot(3, 4, i+1+4)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    plt.imshow(seg_dia[test_slice,:,:,i])
+    plt.subplot(3, 4, i+1+8)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    plt.imshow(ref_dia[test_slice,:,:,i])
+plt.show()   
+
+#%% Plot softmax probabilities for a single slice
+test_slice = 6
+out_img_es = np.squeeze(out_image_es[test_slice,:,:,:].detach().numpy())
+
+fig = plt.figure()
+
+class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
+plt.figure(dpi=200, figsize=(15,15))
+for i in range(0,4):
+    plt.suptitle('Softmax prob of test image at slice %i' %test_slice, fontsize=20)
+    plt.subplot(3, 4, i+1)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    plt.imshow(out_img_es[i,:,:])
+    plt.title(class_title[i], fontsize =16)
+    plt.xticks(
+    rotation=40,
+    fontweight='light',
+    fontsize=7)
+    plt.yticks(
+    horizontalalignment='right',
+    fontweight='light',
+    fontsize=7)
+    plt.subplot(3, 4, i+1+4)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    plt.imshow(seg_sys[test_slice,:,:,i])
+    plt.subplot(3, 4, i+1+8)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    plt.imshow(ref_sys[test_slice,:,:,i])
+plt.show()   
+
+#%% Calculate volume for diastolic phase
+test_index = data_gt_ed[lim_eval:lim_test]
+num_test =2
+s = 0
+target_vol_ed = np.zeros(num_test)
+ref_vol_ed = np.zeros(num_test)
+
+for i in range(0,len(test_index)):
+    for j in range(0, test_index[i].shape[0]):
+        target_vol_ed[i] += np.sum(seg_dia[j+s,:,:,3])
+        ref_vol_ed[i]    += np.sum(ref_dia[j+s,:,:,3])
         
-        # Find loss
-        loss = criterion(output, labels)
+    s += test_index[i].shape[0] 
+   
+#%% Calculate volume for systolic phase
+test_index = data_gt_es[lim_eval:lim_test]
+
+s = 0
+target_vol_es = np.zeros(num_test)
+ref_vol_es = np.zeros(num_test)
+
+for i in range(0,len(test_index)):
+    for j in range(0, test_index[i].shape[0]):
+        target_vol_es[i] += np.sum(seg_sys[j+s,:,:,3])
+        ref_vol_es[i]    += np.sum(ref_sys[j+s,:,:,3])
         
-        # Calculate gradients
-        loss.backward()
-        # Update Weights
-        optimizer.step()
-        # Calculate loss
-        train_loss += loss.item() #.detach().cpu().numpy()
-    losses.append(train_loss/trainloader.shape[0]) # This is normalised by batch size
-    train_loss = 0.0
+    s += test_index[i].shape[0] 
      
-    unet.eval()
-    print('Epoch eval=',epoch)
-    eval_loss = 0.0  
-    for i, data in enumerate(trainloader, 0):
-        # get the inputs
-        #inputs, labels = data
-        inputs = Tensor(im_flat_eval)
-        inputs = inputs.cuda()
-        labels = Tensor(gt_flat_eval)
-        labels = labels.cuda()
-        #print('i=',i)
+#%%        
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
-        # wrap them in Variable
-        inputs, labels = Variable(inputs), Variable(labels)
-        labels = labels.long()
-        
-        # Forward pass
-        output = unet(inputs)     
-        output = output["log_softmax"]
-        # Find loss
-        loss = criterion(output, labels)
+from metrics import EF_calculation
 
-        # Calculate loss
-        eval_loss += loss.item()
-    losses_eval.append(eval_loss/trainloader.shape[0]) # This is normalised by batch size
-        #(epoch + 1, i + 1, eval_loss)
-    eval_loss = 0.0
+spacings = [1.4, 1.4, 8]
 
-print('Finished Training + Evaluation')
-        
-
-#%% Plot loss curves
-
-epochs = np.arange(len(losses))
-epochs_eval = np.arange(len(losses_eval))
-plt.figure(dpi=200)
-plt.plot(epochs + 1 , losses, 'b', label='Training Loss')
-plt.plot(epochs_eval + 1 , losses_eval, 'r', label='Validation Loss')
-plt.xticks(np.arange(1,num_epoch+1, step = 1))
-plt.xlabel('Epochs')
-plt.ylabel('Loss')
-plt.legend(loc="upper right")
-plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
-
-
-#%% Plot accuracy curve
-
-
-
-#%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
-torch.save(unet, PATH_model)
-torch.save(unet.state_dict(), PATH_state)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ef_ref    = EF_calculation(ref_vol_es, ref_vol_ed, spacings)
+ef_target = EF_calculation(target_vol_es, target_vol_ed, spacings)
 
 
 
