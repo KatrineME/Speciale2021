@@ -606,7 +606,7 @@ plt.show()
 
 #%% calculate metrics
 os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021/")
-from metrics import dc, hd, risk
+from metrics import dc, hd, risk, EF_calculation
 
 dice = np.zeros(seg_met.shape[0])
 haus = np.zeros(seg_met.shape[0])
