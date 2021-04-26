@@ -22,6 +22,8 @@ def load_data(user,phase):
     from torch import nn
     from torch import Tensor
     import re
+
+
     
     #!pip install torch-summary
     #!pip install opencv-python
@@ -36,6 +38,7 @@ def load_data(user,phase):
     frame_im = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9].nii.gz'))
     frame_gt = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9]_gt.nii.gz'))
     
+
     if phase == 'Diastole':
         phase = np.linspace(0,len(frame_im)-2,100).astype(int)
     else:
@@ -52,7 +55,8 @@ def load_data(user,phase):
     W = 128
     in_c = 1
     
-    im     = []
+    im = []
+    gt = [] 
     centercrop = torchvision.transforms.CenterCrop((H,W))
     
     for i in range(0,num_patients):
@@ -64,24 +68,18 @@ def load_data(user,phase):
         
         for j in range(0,im_slices):
             centercrop_img[:,:,j] = centercrop(Tensor(img[:,:,j]))
+            centercrop_gt[:,:,j] = centercrop(Tensor(anno[:,:,j]))
        
         in_image = np.expand_dims(centercrop_img,0)
         in_image = Tensor(in_image).permute(3,0,1,2).detach().numpy()
         
         im.append(in_image.astype(object))
-    
-        
-    #% Load gt
-    gt = [] 
-    for i in range(0,num_patients):
+
         n_gt = nib.load(frame_gt[i])
-        anno  = n_gt.get_fdata()
+        anno = n_gt.get_fdata()
         
         gt_slices     = anno.shape[2]
         centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
-        
-        for j in range(0,gt_slices):
-            centercrop_gt[:,:,j] = centercrop(Tensor(anno[:,:,j]))
        
         in_gt = Tensor(centercrop_gt).permute(2,0,1).detach().numpy()
         gt.append(in_gt.astype(object))
@@ -103,5 +101,3 @@ def load_data(user,phase):
 
 #gt_dia = np.concatenate(gt_dia).astype(None)
 #im_dia = np.concatenate(im_dia).astype(None)
-
-
