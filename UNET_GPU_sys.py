@@ -272,7 +272,7 @@ for i in range(0,num_patients):
 # Use only healthy patients (NOR)
 
 nor = 60
-num_train = nor + 5#0
+num_train = nor + 8#0
 num_eval  = 3#0
 num_test  = 2#0
 
@@ -303,7 +303,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_de
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 10
+num_epoch = 20
 print('Number of epochs = ',num_epoch)
 #%% Training
 losses = []
