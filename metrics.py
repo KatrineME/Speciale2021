@@ -27,7 +27,7 @@ Created on Tue Apr 13 16:16:01 2021
 # build-in modules
 
 # third-party modules
-import numpy
+import numpy as np
 from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import distance_transform_edt, binary_erosion,\
     generate_binary_structure
@@ -676,6 +676,17 @@ def ravd(result, reference):
         raise RuntimeError('The second supplied array does not contain any binary object.')
     
     return (vol1 - vol2) / float(vol2)
+
+def EF_calculation(target_vol_es, target_vol_ed, spacings):
+    num_of_voxels_es = numpy.count_nonzero(target_vol_es)
+    num_of_voxels_ed = numpy.count_nonzero(target_vol_ed)
+
+    esv = numpy.prod(spacings) * num_of_voxels_es * 1/1000  # convert to milliliter (from mm^3)
+    edv = numpy.prod(spacings) * num_of_voxels_ed * 1/1000
+
+    ef = (1. - esv/float(edv)) * 100
+    
+    return ef
 
 def volume_correlation(results, references):
     r"""
