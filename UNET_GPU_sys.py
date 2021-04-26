@@ -269,10 +269,15 @@ for i in range(0,num_patients):
     data_gt.append(in_gt.astype(object))
 
 #%% BATCH GENERATOR
+# Use only healthy patients (NOR)
 
-num_train = 8#0
+nor = 60
+num_train = nor + 5#0
 num_eval  = 3#0
 num_test  = 2#0
+
+lim_eval  = num_train + num_eval
+lim_test  = lim_eval + num_test
 
 lim_eval  = num_train + num_eval
 lim_test  = lim_eval + num_test
