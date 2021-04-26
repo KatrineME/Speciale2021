@@ -40,6 +40,9 @@ import glob2
 from torch import nn
 from torch import Tensor
 
+import scipy
+
+
 #!pip install torch-summary
 #!pip install opencv-python
 
@@ -209,7 +212,6 @@ if __name__ == "__main__":
     model = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     #model.cuda()
     #torchsummary.summary(model, (1, 128, 128))
-
 
 #%% Load image  
 cwd = os.getcwd()
