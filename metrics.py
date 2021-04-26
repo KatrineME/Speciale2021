@@ -73,13 +73,13 @@ def dc(result, reference):
     -----
     This is a real metric. The binary images can therefore be supplied in any order.
     """
-    result = numpy.atleast_1d(result.astype(numpy.bool))
-    reference = numpy.atleast_1d(reference.astype(numpy.bool))
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
     
-    intersection = numpy.count_nonzero(result & reference)
+    intersection = np.count_nonzero(result & reference)
     
-    size_i1 = numpy.count_nonzero(result)
-    size_i2 = numpy.count_nonzero(reference)
+    size_i1 = np.count_nonzero(result)
+    size_i2 = np.count_nonzero(reference)
     
     try:
         dc = 2. * intersection / float(size_i1 + size_i2)
@@ -113,11 +113,11 @@ def jc(result, reference):
     -----
     This is a real metric. The binary images can therefore be supplied in any order.
     """
-    result = numpy.atleast_1d(result.astype(numpy.bool))
-    reference = numpy.atleast_1d(reference.astype(numpy.bool))
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
     
-    intersection = numpy.count_nonzero(result & reference)
-    union = numpy.count_nonzero(result | reference)
+    intersection = np.count_nonzero(result & reference)
+    union = np.count_nonzero(result | reference)
     
     jc = float(intersection) / float(union)
     
@@ -158,11 +158,11 @@ def precision(result, reference):
     .. [1] http://en.wikipedia.org/wiki/Precision_and_recall
     .. [2] http://en.wikipedia.org/wiki/Confusion_matrix#Table_of_confusion
     """
-    result = numpy.atleast_1d(result.astype(numpy.bool))
-    reference = numpy.atleast_1d(reference.astype(numpy.bool))
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
         
-    tp = numpy.count_nonzero(result & reference)
-    fp = numpy.count_nonzero(result & ~reference)
+    tp = np.count_nonzero(result & reference)
+    fp = np.count_nonzero(result & ~reference)
     
     try:
         precision = tp / float(tp + fp)
@@ -206,11 +206,11 @@ def recall(result, reference):
     .. [1] http://en.wikipedia.org/wiki/Precision_and_recall
     .. [2] http://en.wikipedia.org/wiki/Confusion_matrix#Table_of_confusion
     """
-    result = numpy.atleast_1d(result.astype(numpy.bool))
-    reference = numpy.atleast_1d(reference.astype(numpy.bool))
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
         
-    tp = numpy.count_nonzero(result & reference)
-    fn = numpy.count_nonzero(~result & reference)
+    tp = np.count_nonzero(result & reference)
+    fn = np.count_nonzero(~result & reference)
 
     try:
         recall = tp / float(tp + fn)
@@ -224,11 +224,11 @@ def risk(result, reference):
     Our own function to calcluate risk-coverage curves
     """
     
-    result = numpy.atleast_1d(result.astype(numpy.bool))
-    reference = numpy.atleast_1d(reference.astype(numpy.bool))
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
     
-    fn = numpy.count_nonzero(~result & reference)
-    fp = numpy.count_nonzero(result & ~reference)
+    fn = np.count_nonzero(~result & reference)
+    fp = np.count_nonzero(result & ~reference)
     return fn, fp
     
 
@@ -279,11 +279,11 @@ def specificity(result, reference):
     .. [1] https://en.wikipedia.org/wiki/Sensitivity_and_specificity
     .. [2] http://en.wikipedia.org/wiki/Confusion_matrix#Table_of_confusion
     """
-    result = numpy.atleast_1d(result.astype(numpy.bool))
-    reference = numpy.atleast_1d(reference.astype(numpy.bool))
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
        
-    tn = numpy.count_nonzero(~result & ~reference)
-    fp = numpy.count_nonzero(result & ~reference)
+    tn = np.count_nonzero(~result & ~reference)
+    fp = np.count_nonzero(result & ~reference)
 
     try:
         specificity = tn / float(tn + fp)
@@ -423,7 +423,7 @@ def hd95(result, reference, voxelspacing=None, connectivity=1):
     """
     hd1 = __surface_distances(result, reference, voxelspacing, connectivity)
     hd2 = __surface_distances(reference, result, voxelspacing, connectivity)
-    hd95 = numpy.percentile(numpy.hstack((hd1, hd2)), 95)
+    hd95 = np.percentile(np.hstack((hd1, hd2)), 95)
     return hd95
 
 
@@ -478,7 +478,7 @@ def assd(result, reference, voxelspacing=None, connectivity=1):
     
     The binary images can therefore be supplied in any order.
     """
-    assd = numpy.mean( (asd(result, reference, voxelspacing, connectivity), asd(reference, result, voxelspacing, connectivity)) )
+    assd = np.mean( (asd(result, reference, voxelspacing, connectivity), asd(reference, result, voxelspacing, connectivity)) )
     return assd
 
 def asd(result, reference, voxelspacing=None, connectivity=1):
@@ -635,13 +635,13 @@ def ravd(result, reference):
     --------
     Considering the following inputs
     
-    >>> import numpy
-    >>> arr1 = numpy.asarray([[0,1,0],[1,1,1],[0,1,0]])
+    >>> import np
+    >>> arr1 = np.asarray([[0,1,0],[1,1,1],[0,1,0]])
     >>> arr1
     array([[0, 1, 0],
            [1, 1, 1],
            [0, 1, 0]])
-    >>> arr2 = numpy.asarray([[0,1,0],[1,0,1],[0,1,0]])
+    >>> arr2 = np.asarray([[0,1,0],[1,0,1],[0,1,0]])
     >>> arr2
     array([[0, 1, 0],
            [1, 0, 1],
@@ -660,17 +660,17 @@ def ravd(result, reference):
     It is important to keep in mind that a perfect score of `0` does not mean that the
     binary objects fit exactely, as only the volumes are compared:
     
-    >>> arr1 = numpy.asarray([1,0,0])
-    >>> arr2 = numpy.asarray([0,0,1])
+    >>> arr1 = np.asarray([1,0,0])
+    >>> arr2 = np.asarray([0,0,1])
     >>> ravd(arr1, arr2)
     0.0
     
     """
-    result = numpy.atleast_1d(result.astype(numpy.bool))
-    reference = numpy.atleast_1d(reference.astype(numpy.bool))
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
         
-    vol1 = numpy.count_nonzero(result)
-    vol2 = numpy.count_nonzero(reference)
+    vol1 = np.count_nonzero(result)
+    vol2 = np.count_nonzero(reference)
     
     if 0 == vol2:
         raise RuntimeError('The second supplied array does not contain any binary object.')
@@ -685,7 +685,7 @@ def EF_calculation(target_vol_es, target_vol_ed, spacings):
     edv = np.prod(spacings) * num_of_voxels_ed * 1/1000
 
     ef = (1. - esv/(edv)) * 100
-    return ef
+    return ef, esv, edv
 
 def volume_correlation(results, references):
     r"""
@@ -713,11 +713,11 @@ def volume_correlation(results, references):
         The two-side p value.
         
     """
-    results = numpy.atleast_2d(numpy.array(results).astype(numpy.bool))
-    references = numpy.atleast_2d(numpy.array(references).astype(numpy.bool))
+    results = np.atleast_2d(np.array(results).astype(np.bool))
+    references = np.atleast_2d(np.array(references).astype(np.bool))
     
-    results_volumes = [numpy.count_nonzero(r) for r in results]
-    references_volumes = [numpy.count_nonzero(r) for r in references]
+    results_volumes = [np.count_nonzero(r) for r in results]
+    references_volumes = [np.count_nonzero(r) for r in references]
     
     return pearsonr(results_volumes, references_volumes) # returns (Pearson'
 
@@ -747,11 +747,11 @@ def volume_change_correlation(results, references):
         The two-side p value.
         
     """
-    results = numpy.atleast_2d(numpy.array(results).astype(numpy.bool))
-    references = numpy.atleast_2d(numpy.array(references).astype(numpy.bool))
+    results = np.atleast_2d(np.array(results).astype(np.bool))
+    references = np.atleast_2d(np.array(references).astype(np.bool))
     
-    results_volumes = numpy.asarray([numpy.count_nonzero(r) for r in results])
-    references_volumes = numpy.asarray([numpy.count_nonzero(r) for r in references])
+    results_volumes = np.asarray([np.count_nonzero(r) for r in results])
+    references_volumes = np.asarray([np.count_nonzero(r) for r in references])
     
     results_volumes_changes = results_volumes[1:] - results_volumes[:-1]
     references_volumes_changes = references_volumes[1:] - references_volumes[:-1] 
@@ -809,7 +809,7 @@ def obj_assd(result, reference, voxelspacing=None, connectivity=1):
     
     The binary images can therefore be supplied in any order.
     """
-    assd = numpy.mean( (obj_asd(result, reference, voxelspacing, connectivity), obj_asd(reference, result, voxelspacing, connectivity)) )
+    assd = np.mean( (obj_asd(result, reference, voxelspacing, connectivity), obj_asd(reference, result, voxelspacing, connectivity)) )
     return assd
     
     
@@ -865,8 +865,8 @@ def obj_asd(result, reference, voxelspacing=None, connectivity=1):
         
     Examples
     --------
-    >>> arr1 = numpy.asarray([[1,1,1],[1,1,1],[1,1,1]])
-    >>> arr2 = numpy.asarray([[0,1,0],[0,1,0],[0,1,0]])
+    >>> arr1 = np.asarray([[1,1,1],[1,1,1],[1,1,1]])
+    >>> arr2 = np.asarray([[0,1,0],[0,1,0],[0,1,0]])
     >>> arr1
     array([[1, 1, 1],
            [1, 1, 1],
@@ -890,8 +890,8 @@ def obj_asd(result, reference, voxelspacing=None, connectivity=1):
     
     More examples depicting the notion of object connectedness:
     
-    >>> arr1 = numpy.asarray([[1,0,1],[1,0,0],[0,0,0]])
-    >>> arr2 = numpy.asarray([[1,0,1],[1,0,0],[0,0,1]])
+    >>> arr1 = np.asarray([[1,0,1],[1,0,0],[0,0,0]])
+    >>> arr2 = np.asarray([[1,0,1],[1,0,0],[0,0,1]])
     >>> arr1
     array([[1, 0, 1],
            [1, 0, 0],
@@ -905,8 +905,8 @@ def obj_asd(result, reference, voxelspacing=None, connectivity=1):
     >>> obj_asd(arr2, arr1)
     0.0
     
-    >>> arr1 = numpy.asarray([[1,0,1],[1,0,1],[0,0,1]])
-    >>> arr2 = numpy.asarray([[1,0,1],[1,0,0],[0,0,1]])
+    >>> arr1 = np.asarray([[1,0,1],[1,0,1],[0,0,1]])
+    >>> arr2 = np.asarray([[1,0,1],[1,0,0],[0,0,1]])
     >>> arr1
     array([[1, 0, 1],
            [1, 0, 1],
@@ -925,8 +925,8 @@ def obj_asd(result, reference, voxelspacing=None, connectivity=1):
     objects, while with an increase connectivity of `2`, just one large object is
     detected.  
     
-    >>> arr1 = numpy.asarray([[1,0,0],[0,1,1],[0,1,1]])
-    >>> arr2 = numpy.asarray([[1,0,0],[0,0,0],[0,0,0]])
+    >>> arr1 = np.asarray([[1,0,0],[0,1,1],[0,1,1]])
+    >>> arr2 = np.asarray([[1,0,0],[0,0,0],[0,0,0]])
     >>> arr1
     array([[1, 0, 0],
            [0, 1, 1],
@@ -952,7 +952,7 @@ def obj_asd(result, reference, voxelspacing=None, connectivity=1):
         object1 = labelmap1[window] == lid1
         object2 = labelmap2[window] == lid2
         sds.extend(__surface_distances(object1, object2, voxelspacing, connectivity))
-    asd = numpy.mean(sds)
+    asd = np.mean(sds)
     return asd
     
 def obj_fpr(result, reference, connectivity=1):
@@ -1008,8 +1008,8 @@ def obj_fpr(result, reference, connectivity=1):
     
     Examples
     --------
-    >>> arr2 = numpy.asarray([[1,0,0],[1,0,1],[0,0,1]])
-    >>> arr1 = numpy.asarray([[0,0,1],[1,0,1],[0,0,1]])
+    >>> arr2 = np.asarray([[1,0,0],[1,0,1],[0,0,1]])
+    >>> arr1 = np.asarray([[0,0,1],[1,0,1],[0,0,1]])
     >>> arr2
     array([[1, 0, 0],
            [1, 0, 1],
@@ -1025,8 +1025,8 @@ def obj_fpr(result, reference, connectivity=1):
     
     Example of directedness:
     
-    >>> arr2 = numpy.asarray([1,0,1,0,1])
-    >>> arr1 = numpy.asarray([1,0,1,0,0])
+    >>> arr2 = np.asarray([1,0,1,0,1])
+    >>> arr1 = np.asarray([1,0,1,0,0])
     >>> obj_fpr(arr1, arr2)
     0.0
     >>> obj_fpr(arr2, arr1)
@@ -1034,26 +1034,26 @@ def obj_fpr(result, reference, connectivity=1):
     
     Examples of multiple overlap treatment:
     
-    >>> arr2 = numpy.asarray([1,0,1,0,1,1,1])
-    >>> arr1 = numpy.asarray([1,1,1,0,1,0,1])
+    >>> arr2 = np.asarray([1,0,1,0,1,1,1])
+    >>> arr1 = np.asarray([1,1,1,0,1,0,1])
     >>> obj_fpr(arr1, arr2)
     0.3333333333333333
     >>> obj_fpr(arr2, arr1)
     0.3333333333333333
     
-    >>> arr2 = numpy.asarray([1,0,1,1,1,0,1])
-    >>> arr1 = numpy.asarray([1,1,1,0,1,1,1])
+    >>> arr2 = np.asarray([1,0,1,1,1,0,1])
+    >>> arr1 = np.asarray([1,1,1,0,1,1,1])
     >>> obj_fpr(arr1, arr2)
     0.0
     >>> obj_fpr(arr2, arr1)
     0.3333333333333333
     
-    >>> arr2 = numpy.asarray([[1,0,1,0,0],
+    >>> arr2 = np.asarray([[1,0,1,0,0],
                               [1,0,0,0,0],
                               [1,0,1,1,1],
                               [0,0,0,0,0],
                               [1,0,1,0,0]])
-    >>> arr1 = numpy.asarray([[1,1,1,0,0],
+    >>> arr1 = np.asarray([[1,1,1,0,0],
                               [0,0,0,0,0],
                               [1,1,1,0,1],
                               [0,0,0,0,0],
@@ -1118,8 +1118,8 @@ def obj_tpr(result, reference, connectivity=1):
     
     Examples
     --------
-    >>> arr2 = numpy.asarray([[1,0,0],[1,0,1],[0,0,1]])
-    >>> arr1 = numpy.asarray([[0,0,1],[1,0,1],[0,0,1]])
+    >>> arr2 = np.asarray([[1,0,0],[1,0,1],[0,0,1]])
+    >>> arr1 = np.asarray([[0,0,1],[1,0,1],[0,0,1]])
     >>> arr2
     array([[1, 0, 0],
            [1, 0, 1],
@@ -1135,8 +1135,8 @@ def obj_tpr(result, reference, connectivity=1):
     
     Example of directedness:
     
-    >>> arr2 = numpy.asarray([1,0,1,0,1])
-    >>> arr1 = numpy.asarray([1,0,1,0,0])
+    >>> arr2 = np.asarray([1,0,1,0,1])
+    >>> arr1 = np.asarray([1,0,1,0,0])
     >>> obj_tpr(arr1, arr2)
     0.6666666666666666
     >>> obj_tpr(arr2, arr1)
@@ -1144,26 +1144,26 @@ def obj_tpr(result, reference, connectivity=1):
     
     Examples of multiple overlap treatment:
     
-    >>> arr2 = numpy.asarray([1,0,1,0,1,1,1])
-    >>> arr1 = numpy.asarray([1,1,1,0,1,0,1])
+    >>> arr2 = np.asarray([1,0,1,0,1,1,1])
+    >>> arr1 = np.asarray([1,1,1,0,1,0,1])
     >>> obj_tpr(arr1, arr2)
     0.6666666666666666
     >>> obj_tpr(arr2, arr1)
     0.6666666666666666
     
-    >>> arr2 = numpy.asarray([1,0,1,1,1,0,1])
-    >>> arr1 = numpy.asarray([1,1,1,0,1,1,1])
+    >>> arr2 = np.asarray([1,0,1,1,1,0,1])
+    >>> arr1 = np.asarray([1,1,1,0,1,1,1])
     >>> obj_tpr(arr1, arr2)
     0.6666666666666666
     >>> obj_tpr(arr2, arr1)
     1.0
     
-    >>> arr2 = numpy.asarray([[1,0,1,0,0],
+    >>> arr2 = np.asarray([[1,0,1,0,0],
                               [1,0,0,0,0],
                               [1,0,1,1,1],
                               [0,0,0,0,0],
                               [1,0,1,0,0]])
-    >>> arr1 = numpy.asarray([[1,1,1,0,0],
+    >>> arr1 = np.asarray([[1,1,1,0,0],
                               [0,0,0,0,0],
                               [1,1,1,0,1],
                               [0,0,0,0,0],
@@ -1188,8 +1188,8 @@ def __distinct_binary_object_correspondences(reference, result, connectivity=1):
     
     @return (labelmap1, labelmap2, n_lables1, n_labels2, labelmapping2to1)
     """
-    result = numpy.atleast_1d(result.astype(numpy.bool))
-    reference = numpy.atleast_1d(reference.astype(numpy.bool))
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
     
     # binary structure
     footprint = generate_binary_structure(result.ndim, connectivity)
@@ -1206,7 +1206,7 @@ def __distinct_binary_object_correspondences(reference, result, connectivity=1):
     for l1id, slicer in enumerate(slicers): # iterate over object in labelmap2 and their windows
         l1id += 1 # labelled objects have ids sarting from 1
         bobj = (l1id) == labelmap2[slicer] # find binary object corresponding to the label1 id in the segmentation
-        l2ids = numpy.unique(labelmap1[slicer][bobj]) # extract all unique object identifiers at the corresponding positions in the reference (i.e. the mapping)
+        l2ids = np.unique(labelmap1[slicer][bobj]) # extract all unique object identifiers at the corresponding positions in the reference (i.e. the mapping)
         l2ids = l2ids[0 != l2ids] # remove background identifiers (=0)
         if 1 == len(l2ids): # one-to-one mapping: if target label not already used, add to final list of object-to-object mappings and mark target label as used
             l2id = l2ids[0]
@@ -1236,11 +1236,11 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
     The distances between the surface voxel of binary objects in result and their
     nearest partner surface voxel of a binary object in reference.
     """
-    result = numpy.atleast_1d(result.astype(numpy.bool))
-    reference = numpy.atleast_1d(reference.astype(numpy.bool))
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
     if voxelspacing is not None:
         voxelspacing = _ni_support._normalize_sequence(voxelspacing, result.ndim)
-        voxelspacing = numpy.asarray(voxelspacing, dtype=numpy.float64)
+        voxelspacing = np.asarray(voxelspacing, dtype=np.float64)
         if not voxelspacing.flags.contiguous:
             voxelspacing = voxelspacing.copy()
             
@@ -1248,14 +1248,14 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
     footprint = generate_binary_structure(result.ndim, connectivity)
     
     # test for emptiness
-    if 0 == numpy.count_nonzero(result): 
+    if 0 == np.count_nonzero(result): 
         raise RuntimeError('The first supplied array does not contain any binary object.')
-    if 0 == numpy.count_nonzero(reference): 
+    if 0 == np.count_nonzero(reference): 
         raise RuntimeError('The second supplied array does not contain any binary object.')    
             
     # extract only 1-pixel border line of objects
-    result_border = numpy.logical_xor(result, binary_erosion(result, structure=footprint, iterations=1))
-    reference_border = numpy.logical_xor(reference, binary_erosion(reference, structure=footprint, iterations=1))
+    result_border = np.logical_xor(result, binary_erosion(result, structure=footprint, iterations=1))
+    reference_border = np.logical_xor(reference, binary_erosion(reference, structure=footprint, iterations=1))
     
     # compute average surface distance        
     # Note: scipys distance transform is calculated only inside the borders of the
