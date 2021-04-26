@@ -193,7 +193,7 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.5)
     unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
@@ -211,8 +211,8 @@ sys      = np.linspace(1,len(frame_im)-1,100).astype(int)
 frame_dia_im = frame_im[dia]
 frame_sys_im = frame_im[sys]
 
-#num_patients = len(frame_dia_im)
-num_patients = len(frame_sys_im)
+num_patients = len(frame_dia_im)
+#num_patients = len(frame_sys_im)
 H    = 128
 W    = 128
 in_c = 1
@@ -221,7 +221,7 @@ data_im = []
 centercrop = torchvision.transforms.CenterCrop((H,W))
 
 for i in range(0,num_patients):
-    nimg = nib.load(frame_sys_im[i]) # OBS -  CHANGE TO OR SYSTOLE AND DIASTOLE 
+    nimg = nib.load(frame_dia_im[i]) # OBS -  CHANGE TO OR SYSTOLE AND DIASTOLE 
     img  = nimg.get_fdata()
     
     im_slices      = img.shape[2]
@@ -241,8 +241,8 @@ frame_gt = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9]_gt.nii.gz'))
 frame_dia_gt = frame_gt[dia]
 frame_sys_gt = frame_gt[sys]
 
-#num_patients = len(frame_dia_gt)
-num_patients = len(frame_sys_gt)
+num_patients = len(frame_dia_gt)
+#num_patients = len(frame_sys_gt)
 H = 128
 W = 128
 
@@ -250,7 +250,7 @@ data_gt = []
 centercrop     = torchvision.transforms.CenterCrop((H,W))
 
 for i in range(0,num_patients):
-    n_gt = nib.load(frame_sys_gt[i]) # OBS -  CHANGE TO OR SYSTOLE AND DIASTOLE  
+    n_gt = nib.load(frame_dia_gt[i]) # OBS -  CHANGE TO OR SYSTOLE AND DIASTOLE  
     gt  = n_gt.get_fdata()
     
     gt_slices      = gt.shape[2]
@@ -265,7 +265,7 @@ for i in range(0,num_patients):
 
 #%% BATCH GENERATOR
 
-num_train = 5#0
+num_train = 8#0
 num_eval  = 3#0
 num_test  = 2#0
 
@@ -381,17 +381,18 @@ epochs_eval = np.arange(len(losses_eval))
 plt.figure(dpi=200)
 plt.plot(epochs + 1 , losses, 'b', label='Training Loss')
 plt.plot(epochs_eval + 1 , losses_eval, 'r', label='Validation Loss')
+plt.xticks(np.arange(1,num_epoch+1, step = 1))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_loss.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%% Save model
 #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_state.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
+PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
 torch.save(unet, PATH_model)
 torch.save(unet.state_dict(), PATH_state)
 
