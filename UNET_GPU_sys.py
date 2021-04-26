@@ -279,18 +279,11 @@ num_test  = 2#0
 lim_eval  = num_train + num_eval
 lim_test  = lim_eval + num_test
 
-lim_eval  = num_train + num_eval
-lim_test  = lim_eval + num_test
-
-#%%
-im_flat_train = np.concatenate(data_im[0:num_train]).astype(None)
-gt_flat_train = np.concatenate(data_gt[0:num_train]).astype(None)
+im_flat_train = np.concatenate(data_im[nor:num_train]).astype(None)
+gt_flat_train = np.concatenate(data_gt[nor:num_train]).astype(None)
 
 im_flat_eval = np.concatenate(data_im[num_train:lim_eval]).astype(None)
 gt_flat_eval = np.concatenate(data_gt[num_train:lim_eval]).astype(None)
-
-#im_flat_test = np.concatenate(data_im[lim_eval:lim_test]).astype(None)
-#gt_flat_test = np.concatenate(data_gt[lim_eval:lim_test]).astype(None)
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
@@ -310,7 +303,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_de
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 20
+num_epoch = 10
 print('Number of epochs = ',num_epoch)
 #%% Training
 losses = []
