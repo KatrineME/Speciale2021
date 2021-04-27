@@ -82,10 +82,10 @@ def load_data(user,phase):
         gt.append(in_gt.astype(object))
         
     return im, gt
-#%%
+#%% Command to use function
 
 
-im_trial,gt_trial = load_data('M','Systole')
+# im_trial,gt_trial = load_data('M','Systole')
 
 
 
