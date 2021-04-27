@@ -49,11 +49,9 @@ def load_data(user,phase):
     frame_gt = frame_gt[phase]
     
     #% Load images
-    
     num_patients = len(frame_im)
     H = 128
     W = 128
-    in_c = 1
     
     im = []
     gt = [] 
@@ -63,8 +61,14 @@ def load_data(user,phase):
         nimg = nib.load(frame_im[i])
         img  = nimg.get_fdata()
         
+        n_gt = nib.load(frame_gt[i])
+        anno = n_gt.get_fdata()
+        
         im_slices      = img.shape[2]
         centercrop_img = Tensor(np.zeros((H,W,im_slices)))
+        
+        gt_slices     = anno.shape[2]
+        centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
         
         for j in range(0,im_slices):
             centercrop_img[:,:,j] = centercrop(Tensor(img[:,:,j]))
@@ -72,15 +76,8 @@ def load_data(user,phase):
        
         in_image = np.expand_dims(centercrop_img,0)
         in_image = Tensor(in_image).permute(3,0,1,2).detach().numpy()
-        
         im.append(in_image.astype(object))
 
-        n_gt = nib.load(frame_gt[i])
-        anno = n_gt.get_fdata()
-        
-        gt_slices     = anno.shape[2]
-        centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
-       
         in_gt = Tensor(centercrop_gt).permute(2,0,1).detach().numpy()
         gt.append(in_gt.astype(object))
         
@@ -88,7 +85,7 @@ def load_data(user,phase):
 #%%
 
 
-#im_trial,gt_trial = load_data('M','Systole')
+im_trial,gt_trial = load_data('M','Systole')
 
 
 

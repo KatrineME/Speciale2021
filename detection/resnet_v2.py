@@ -23,19 +23,6 @@ BatchNorm = nn.BatchNorm2d
 DropOut = nn.Dropout2d
 
 #%% Create Detection Network (sResNet)
-webroot = 'https://tigress-web.princeton.edu/~fy/drn/models/'
-
-model_urls = {
-    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
-    'drn-c-26': webroot + 'drn_c_26-ddedf421.pth',
-    'drn-c-42': webroot + 'drn_c_42-9d336e8c.pth',
-    'drn-c-58': webroot + 'drn_c_58-0a53a92c.pth',
-    'drn-d-22': webroot + 'drn_d_22-4bd2f8ea.pth',
-    'drn-d-38': webroot + 'drn_d_38-eebb45f0.pth',
-    'drn-d-54': webroot + 'drn_d_54-0e0534ff.pth',
-    'drn-d-105': webroot + 'drn_d_105-12b40979.pth'
-}
-
 
 def weights_init(m):
     classname = m.__class__.__name__
@@ -259,12 +246,6 @@ class DRN(nn.Module):
         else:
             return x
 
-
-def drn_d_22(pretrained=False, **kwargs):
-    model = DRN(BasicBlock, [1, 1, 2, 2, 2, 2, 1, 1], arch='D', **kwargs)
-    if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['drn-d-22']))
-    return model
 
 
 class DRNDetect(nn.Module):
@@ -517,8 +498,6 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         (epoch + 1, i + 1, train_loss)
         train_loss = 0.0
      
-
-
 print('Finished Training + Evaluation')
         
 #%% Plot loss curves

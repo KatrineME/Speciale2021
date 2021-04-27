@@ -15,22 +15,25 @@ from os import path
 BatchNorm = nn.BatchNorm2d
 DropOut = nn.Dropout2d
 
+import os
+import nibabel as nib
+import torchvision
+import glob2
+import torch.optim as optim
+
+from torch.autograd  import Variable
+from torch import Tensor
+
+if torch.cuda.is_available():
+    # Tensor = torch.cuda.FloatTensor
+    device = 'cuda'
+else:
+    # Tensor = torch.FloatTensor
+    device = 'cpu'
+torch.cuda.manual_seed_all(808)
 
 
 #%% Create Detection Network (sResNet)
-webroot = 'https://tigress-web.princeton.edu/~fy/drn/models/'
-
-model_urls = {
-    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
-    'drn-c-26': webroot + 'drn_c_26-ddedf421.pth',
-    'drn-c-42': webroot + 'drn_c_42-9d336e8c.pth',
-    'drn-c-58': webroot + 'drn_c_58-0a53a92c.pth',
-    'drn-d-22': webroot + 'drn_d_22-4bd2f8ea.pth',
-    'drn-d-38': webroot + 'drn_d_38-eebb45f0.pth',
-    'drn-d-54': webroot + 'drn_d_54-0e0534ff.pth',
-    'drn-d-105': webroot + 'drn_d_105-12b40979.pth'
-}
-
 
 def weights_init(m):
     classname = m.__class__.__name__
@@ -255,13 +258,6 @@ class DRN(nn.Module):
             return x
 
 
-def drn_d_22(pretrained=False, **kwargs):
-    model = DRN(BasicBlock, [1, 1, 2, 2, 2, 2, 1, 1], arch='D', **kwargs)
-    if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['drn-d-22']))
-    return model
-
-
 class DRNDetect(nn.Module):
     def __init__(self, model, classes, pretrained_model=None):
         super(DRNDetect, self).__init__()
@@ -394,6 +390,13 @@ if __name__ == "__main__":
 #%% Prepare data for testing
 # Load new image for testing
 cwd = os.getcwd()
+PATH_model = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys.pt'
+# Load
+#%%
+model = torch.load(PATH_model, map_location=torch.device('cpu'))
+model.eval()
+
+#%%
 #os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training/patient008")
 os.chdir('/Users/michalablicher/Desktop/training/patient051')
 
@@ -432,6 +435,7 @@ for i in range(0, out_image.shape[0]):
     emap[i,:,:] = entropy2
  
 #%% Prepare data for detection network
+test_slice = 3
 test = Tensor(np.expand_dims(in_image[test_slice,:,:,:],0))
 emap_test = Tensor(np.expand_dims(emap[test_slice,:,:],0))
 emap_test_2 = Tensor(np.expand_dims(emap_test[:,:,:],0))
@@ -449,7 +453,7 @@ plt.imshow(test_out[0,1,:,:].detach().numpy())
 
 
 
-#%%%%%%%%%%%%%%#%%%%%%%%%%%%%%
+#%%%%%%%%%%%%%%#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #%% Prepare for GPU - cuda
 use_cuda = True
 if torch.cuda.is_available() and use_cuda:
@@ -810,12 +814,12 @@ dummy_y = test_out_modified.view(1,-1)#(size=(1,256)) #uncertainty
 dummy_seg_labels = torch.randint(0, 1, size=(1, 128 * 128))#, device=device)
 
 # Train with variables
-trainer.train(dummy_x, dummy_y, y_labels_seg=dummy_seg_labels.detach().numpy())
+look = trainer.train(dummy_x, dummy_y, y_labels_seg=dummy_seg_labels.detach().numpy())
 print(trainer.current_training_loss)
 
 #%% Use trainer
 
-get_trainer('resnet', trainer)
+
 
 
 
