@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Apr 27 09:31:22 2021
+
+@author: michalablicher
+"""
 # -*- coding: utf-8 -*-
 """
 Created on Tue Apr 20 11:55:30 2021
@@ -5,7 +12,7 @@ Created on Tue Apr 20 11:55:30 2021
 @author: katrine
 """
 
-def load_data(user,phase):
+def load_data_new(user,phase):
     #% Load packages
     import torch
     import os
