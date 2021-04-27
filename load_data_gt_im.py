@@ -60,12 +60,21 @@ def load_data(user,phase):
     for i in range(0,num_patients):
         nimg = nib.load(frame_im[i])
         img  = nimg.get_fdata()
+
+        n_gt = nib.load(frame_gt[i])
+        anno = n_gt.get_fdata()
         
+        im_slices     = img.shape[2]
+        gt_slices     = anno.shape[2]
+        
+
         n_gt = nib.load(frame_gt[i])
         anno = n_gt.get_fdata()
         
         im_slices      = img.shape[2]
+
         centercrop_img = Tensor(np.zeros((H,W,im_slices)))
+        centercrop_gt  = Tensor(np.zeros((H,W,gt_slices)))
         
         gt_slices     = anno.shape[2]
         centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
@@ -82,17 +91,12 @@ def load_data(user,phase):
         gt.append(in_gt.astype(object))
         
     return im, gt
-#%% Command to use function
 
+#%% Example on how to call function:
+    
+# im_trial,gt_trial = load_data('K','Systole')
 
-# im_trial,gt_trial = load_data('M','Systole')
-
-
-
-#%%
-# OBS OBS OBS OBS OBS
-# Images and gt are now lists and must be concatinated as np.array before plotting
-
+#%% How to concatenate lists of data:
 #gt_sys = np.concatenate(gt_sys).astype(None)
 #im_sys = np.concatenate(im_sys).astype(None)
 
