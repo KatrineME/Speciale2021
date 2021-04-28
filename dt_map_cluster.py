@@ -94,7 +94,7 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_flat_test_es).to(torch.int64), n
 from scipy.ndimage import label
 
 
-seg_error = seg_sys - ref_sys
+seg_error_sys = seg_sys - ref_sys
 
 
 cc_labels = np.zeros((seg_sys.shape))
@@ -104,11 +104,11 @@ cluster_mask = np.zeros((seg_sys.shape))
 cm_size      = np.zeros((seg_sys.shape))
 
 min_size = 10
-new_label_slice = np.zeros_like(seg_sys)
+new_label_slice_sys = np.zeros_like(seg_sys)
 
 for i in range(0, seg_sys.shape[0]):
     for j in range(0, seg_sys.shape[3]):
-        cc_labels[i,:,:,j], n_cluster = label(seg_error[i,:,:,j]) 
+        cc_labels[i,:,:,j], n_cluster = label(seg_error_sys[i,:,:,j]) 
         #print(n_cluster) 
         for k in np.arange(1, n_cluster + 1):
             cluster_mask = cc_labels[i,:,:,j] == k
@@ -117,9 +117,9 @@ for i in range(0, seg_sys.shape[0]):
             #print(cm_size)
             
             if cm_size >= min_size:
-                new_label_slice[cc_labels == k] = 1
+                new_label_slice_sys[cc_labels == k] = 1
             else: 
-                new_label_slice[cc_labels == k] = 0
+               new_label_slice_sys[cc_labels == k] = 0
 
 #%% Show Results from clustering 
 show_slice = 65
@@ -129,23 +129,71 @@ plt.subplot(1,4,1)
 plt.imshow(seg_sys[show_slice,:,:,show_class])
 plt.title('Segmentation')
 plt.subplot(1,4,2)
-plt.imshow(seg_error[show_slice,:,:,show_class])
+plt.imshow(seg_error_sys[show_slice,:,:,show_class])
 plt.title('Error')
 plt.subplot(1,4,3)
-plt.imshow(new_label_slice[show_slice,:,:,show_class])
+plt.imshow(new_label_slice_sys[show_slice,:,:,show_class])
 plt.title('Cluster min 10')
 plt.subplot(1,4,4)
 plt.imshow(ref_sys[show_slice,:,:,show_class])
 plt.title('Reference')
 
 
+#%% Cluster filter - Diastolic phase
+
+from scipy.ndimage import label
 
 
+seg_error_dia = seg_dia - ref_dia
+
+cc_labels = np.zeros((seg_error_dia.shape))
+n_cluster = np.zeros((seg_error_dia.shape[0]))
+
+cluster_mask = np.zeros((seg_error_dia.shape))
+cm_size      = np.zeros((seg_error_dia.shape))
+
+min_size = 10
+new_label_slice_dia = np.zeros_like(seg_error_dia)
+
+n_cluster_1 = np.zeros((seg_error_dia.shape[0],seg_error_dia.shape[3]))
+
+for i in range(0, seg_error_dia.shape[0]):
+    for j in range(0, seg_error_dia.shape[3]):
+        cc_labels[i,:,:,j], n_cluster = label(seg_error_dia[i,:,:,j]) 
+        n_cluster_1[i,j] = n_cluster
+        for k in np.arange(1, n_cluster + 1):
+            cluster_mask = cc_labels[i,:,:,j] == k
+            
+            cm_size = np.count_nonzero(cluster_mask)
+            #print(cm_size)
+            
+            if cm_size >= min_size:
+                new_label_slice_dia[cc_labels == k] = 1
+            else: 
+               new_label_slice_dia[cc_labels == k] = 0
+
+#%% Show Results from clustering 
+show_slice = 0
+show_class = 2
+plt.figure(dpi=2000)
+plt.subplot(1,4,1)
+plt.imshow(seg_dia[show_slice,:,:,show_class])
+plt.title('Segmentation')
+plt.subplot(1,4,2)
+plt.imshow(seg_error_dia[show_slice,:,:,show_class])
+plt.title('Error')
+plt.subplot(1,4,3)
+plt.imshow(new_label_slice_dia[show_slice,:,:,show_class])
+plt.title('Cluster min 10')
+plt.subplot(1,4,4)
+plt.imshow(ref_dia[show_slice,:,:,show_class])
+plt.title('Reference')
 
 
+plt.figure(dpi=2000)
+plt.imshow(cc_labels[show_slice,:,:,show_class])
 
-
-
+print((n_cluster_1[show_slice,show_class]))
 
 
 
