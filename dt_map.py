@@ -121,3 +121,51 @@ for i in range(0,4):
     plt.imshow(dt_es[test_slice,:,:,i])
     plt.title(class_title[i], fontsize =16)
 plt.show()   
+
+
+#%% Define as function
+
+def dist_trans(gt_oh, error_margin_inside, error_margin_outside):
+    
+    # Preallocate
+    dt = np.zeros((gt_oh.shape))  
+    ref_border       = np.zeros((gt_oh.shape))
+    inside_obj_mask  = np.zeros_like(gt_oh).astype(np.bool)
+    outside_obj_mask = np.zeros_like(gt_oh).astype(np.bool)
+
+    for i in range(0, gt_oh.shape[0]):
+        for j in range(0, gt_oh.shape[3]):
+            
+            # Find voxels inside object
+            inside_voxels_indices = binary_erosion(gt_oh[i,:,:,j], iterations=1)
+
+            # Find border voxels
+            ref_border[i,:,:,j]   = np.logical_xor(gt_oh[i,:,:,j], inside_voxels_indices)
+            
+            ref_border = ref_border_es.astype(bool)
+            
+            # Calculated euclidean distance to object for all voxels
+            dt[i,:,:,j] = distance_transform_edt(~ref_border[i,:,:,j])
+            
+            # save object masks
+            inside_obj_mask[i, inside_voxels_indices_es, j] = 1               
+            outside_obj_mask[i,:,:,j] = np.logical_and(~inside_obj_mask[i,:,:,j], ~ref_border[i,:,:,j])
+            
+            # surface border distance is always ZERO
+            dt[ref_border] = 0
+            
+            # inside structure: we subtract a fixed margin
+            dt[i,inside_obj_mask[i,:,:,j],j]  = dt[i, inside_obj_mask[i,:,:,j],j] - error_margin_inside
+            
+            # outside of target: structure we subtract a fixed margin.
+            dt[i,outside_obj_mask[i,:,:,j],j] = dt[i, outside_obj_mask[i,:,:,j],j] - error_margin_outside
+            
+            # Transform maps
+            dt[dt < 0] = 0
+        print(i)
+            
+    return dt
+
+#%% Test of function
+
+dt_es = dist_trans(gt_es_oh, 2,3)
