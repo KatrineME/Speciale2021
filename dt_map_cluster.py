@@ -32,7 +32,7 @@ from torch import Tensor
 
 #%% Specify directory
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im import load_data
 
@@ -61,7 +61,7 @@ gt_flat_test_ed = np.concatenate(data_gt_ed[lim_eval:lim_test]).astype(None)
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
 PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_nor20.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_nor.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_nor_20e.pt'
 
 # Load
 unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
@@ -72,7 +72,7 @@ unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 unet_es.eval()
 out_trained_es = unet_es(Tensor(im_flat_test_es))
 out_image_es    = out_trained_es["softmax"]
-
+#%%
 unet_ed.eval()
 out_trained_ed = unet_ed(Tensor(im_flat_test_ed))
 out_image_ed    = out_trained_ed["softmax"]
@@ -199,44 +199,50 @@ print((n_cluster_1[show_slice,show_class]))
 #%% Function
 
 def cluster_min(seg, ref, min_cluster_size):
- seg_error_dia = abs(seg_dia - ref_dia)
- cc_labels = np.zeros((seg_error_dia.shape))
- n_cluster = np.zeros((seg_error_dia.shape[0]))
-
- cluster_mask = np.zeros((seg_error_dia.shape))
- cm_size      = np.zeros((seg_error_dia.shape))
-
- min_size = 10
- new_label_slice = np.zeros_like(seg_error_dia)
-
- n_cluster_1 = np.zeros((seg_error_dia.shape[0],seg_error_dia.shape[3]))
- cm_size_1 = np.zeros((seg_error_dia.shape[0],seg_error_dia.shape[3]))
- for i in range(0, seg_error_dia.shape[0]):
-    for j in range(0, seg_error_dia.shape[3]):
-        cc_labels[i,:,:,j], n_cluster = label(seg_error_dia[i,:,:,j]) 
-        n_cluster_1[i,j] = n_cluster
-        for k in np.arange(1, n_cluster + 1):
-            cluster_mask = cc_labels[i,:,:,j] == k
-            
-            cm_size = np.count_nonzero(cluster_mask)
-            cm_size_1[i,j] = cm_size
-            #print(cm_size)
-            
-            if cm_size >= min_size:
-                new_label_slice[i,cc_labels[i,:,:,j]== k ,j] = 1
-            #else: 
-            #   new_label_slice_dia[cc_labels[i,:,:,j] == k] = 0
- 
-    return new_label_slice
-
-
+     from scipy.ndimage import label
+     seg_error = abs(seg - ref)
+     cc_labels = np.zeros((seg_error.shape))
+     n_cluster = np.zeros((seg_error.shape[0]))
+    
+     cluster_mask = np.zeros((seg_error.shape))
+     cm_size      = np.zeros((seg_error.shape))
+    
+     min_size = 10
+     new_label_slice = np.zeros_like(seg_error)
+    
+     n_cluster_1 = np.zeros((seg_error.shape[0],seg_error.shape[3]))
+     cm_size_1 = np.zeros((seg_error.shape[0],seg_error.shape[3]))
+     for i in range(0, seg_error.shape[0]):
+        for j in range(0, seg_error.shape[3]):
+            cc_labels[i,:,:,j], n_cluster = label(seg_error[i,:,:,j]) 
+            n_cluster_1[i,j] = n_cluster
+            for k in np.arange(1, n_cluster + 1):
+                cluster_mask = cc_labels[i,:,:,j] == k
+                
+                cm_size = np.count_nonzero(cluster_mask)
+                cm_size_1[i,j] = cm_size
+                #print(cm_size)
+                
+                if cm_size >= min_size:
+                    new_label_slice[i,cc_labels[i,:,:,j]== k ,j] = 1
+                #else: 
+                #   new_label_slice_dia[cc_labels[i,:,:,j] == k] = 0
+     return new_label_slice
 
 
+#%% Use function on dia or systolic
+dia_new_label = cluster_min(seg_dia, ref_dia, 10)
+sys_new_label = cluster_min(seg_sys, ref_sys, 10)
 
+show_slice = 7
+show_class = 2
+plt.figure(dpi=2000)
+plt.imshow(dia_new_label[show_slice,:,:,show_class])
+plt.title('Diastolic: Cluster min 10')
 
-
-
-
+plt.figure(dpi=2000)
+plt.imshow(sys_new_label[show_slice,:,:,show_class])
+plt.title('Systolic: Cluster min 10')
 
 
 
