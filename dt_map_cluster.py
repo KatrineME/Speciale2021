@@ -174,7 +174,7 @@ for i in range(0, seg_error_dia.shape[0]):
 
 #%% Show Results from clustering 
 show_slice = 7
-show_class = 1
+show_class = 2
 plt.figure(dpi=2000)
 plt.subplot(1,5,1)
 plt.imshow(seg_dia[show_slice,:,:,show_class])
@@ -192,10 +192,11 @@ plt.subplot(1,5,5)
 plt.imshow(new_label_slice_dia[show_slice,:,:,show_class])
 plt.title('Cluster min 10')
 
-
 print((cm_size_1[show_slice,show_class]))
 print((n_cluster_1[show_slice,show_class]))
 
+
+#%%
 
 
 
