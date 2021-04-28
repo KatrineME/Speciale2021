@@ -196,7 +196,49 @@ print((cm_size_1[show_slice,show_class]))
 print((n_cluster_1[show_slice,show_class]))
 
 
-#%%
+#%% Function
+
+def cluster_min(seg, ref, min_cluster_size):
+ seg_error_dia = abs(seg_dia - ref_dia)
+ cc_labels = np.zeros((seg_error_dia.shape))
+ n_cluster = np.zeros((seg_error_dia.shape[0]))
+
+ cluster_mask = np.zeros((seg_error_dia.shape))
+ cm_size      = np.zeros((seg_error_dia.shape))
+
+ min_size = 10
+ new_label_slice = np.zeros_like(seg_error_dia)
+
+ n_cluster_1 = np.zeros((seg_error_dia.shape[0],seg_error_dia.shape[3]))
+ cm_size_1 = np.zeros((seg_error_dia.shape[0],seg_error_dia.shape[3]))
+ for i in range(0, seg_error_dia.shape[0]):
+    for j in range(0, seg_error_dia.shape[3]):
+        cc_labels[i,:,:,j], n_cluster = label(seg_error_dia[i,:,:,j]) 
+        n_cluster_1[i,j] = n_cluster
+        for k in np.arange(1, n_cluster + 1):
+            cluster_mask = cc_labels[i,:,:,j] == k
+            
+            cm_size = np.count_nonzero(cluster_mask)
+            cm_size_1[i,j] = cm_size
+            #print(cm_size)
+            
+            if cm_size >= min_size:
+                new_label_slice[i,cc_labels[i,:,:,j]== k ,j] = 1
+            #else: 
+            #   new_label_slice_dia[cc_labels[i,:,:,j] == k] = 0
+ 
+    return new_label_slice
+
+
+
+
+
+
+
+
+
+
+
 
 
 
