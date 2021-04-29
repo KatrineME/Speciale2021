@@ -9,6 +9,8 @@ import torch.nn as nn
 import math
 import os
 import numpy as np
+import torch.optim as optim
+from torch.autograd  import Variable
 import matplotlib.pyplot as plt
 from torch import Tensor
 import torch.utils.model_zoo as model_zoo
@@ -369,7 +371,7 @@ data_im_ed, data_gt_ed = load_data('K','Diastole')
 nor = 60
 num_train = nor + 5#0
 num_eval  = 3#0
-num_test  = 2#0
+num_test  = 5#0
 
 lim_eval  = num_train + num_eval
 lim_test  = lim_eval + num_test
@@ -398,7 +400,7 @@ out_image_es   = out_trained_es["softmax"]
 
 unet_ed.eval()
 out_trained_ed = unet_ed(Tensor(im_flat_test_ed))
-out_image_ed    = out_trained_ed["softmax"]
+out_image_ed   = out_trained_ed["softmax"]
 
 #%%
 seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
@@ -429,7 +431,6 @@ for i in range(0, emap.shape[0]):
 
 emap = np.expand_dims(emap, axis=1)
 #%% Plot
-
 image = 3
 
 plt.suptitle('Input and output of ResNet')
@@ -443,27 +444,115 @@ plt.subplot(2,3,3)
 plt.imshow(emap[image,0,:,:])
 
 #% Wrap all inputs together
-
 im     = Tensor(im_flat_test_ed)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_dia, axis=1))
-#seg    = Tensor(seg_dia).permute(0,3,1,2)
 
-inputs = torch.cat((im,umap,seg), dim=1)
+input_concat = torch.cat((im,umap,seg), dim=1)
 
-
-#%
-out = model(inputs)
+out    = model(input_concat)
 output = out['softmax'].detach().numpy()
-
 
 plt.subplot(2,3,4)
 plt.imshow(output[image,0,:,:])
 plt.subplot(2,3,5)
 plt.imshow(output[image,1,:,:])
 
+#%% Setting up training loop
+# OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
+
+LEARNING_RATE = 0.0001 # 
+criterion     = nn.CrossEntropyLoss() 
+#criterion     = nn.BCELoss()
+#criterion     = SoftDice
+#criterion     = brier_score_loss()
+
+# weight_decay is equal to L2 regularizationst
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_decay=1e-4)
+# torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+
+# and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
+#lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
+#                                               step_size=3,
+#                                               gamma=0.1)
+
+num_epoch = 3
+print('Number of epochs = ',num_epoch)
 
 
+T = np.expand_dims(T_j, axis=1)
+T = T[0:38,:,:]
 
 
+#%% Training
+losses = []
+losses_eval = []
 
+
+trainloader = input_concat
+
+for epoch in range(num_epoch):  # loop over the dataset multiple times
+    
+    model.train()
+    print('Epoch train =',epoch)
+    train_loss = 0.0  
+    for i, data in enumerate(trainloader, 0):
+        # get the inputs
+        #inputs, labels = data
+        inputs = input_concat
+        #inputs = inputs.cuda()
+        labels = Tensor(T)
+        #labels = labels.cuda()
+        print('i=',i)
+        
+        # wrap them in Variable
+        #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
+        inputs, labels = Variable(inputs), Variable(labels)
+        labels = torch.argmax(labels, dim=1)
+        labels = labels.long()
+        # Clear the gradients
+        optimizer.zero_grad()
+       
+        # Forward Pass
+        output = model(inputs)     
+        output = output["log_softmax"]
+        
+        # Find loss
+        loss = criterion(output, labels)
+        
+        # Calculate gradients
+        loss.backward()
+        # Update Weights
+        optimizer.step()
+        # Calculate loss
+        train_loss += loss.item() #.detach().cpu().numpy()
+    losses.append(train_loss/trainloader.shape[0]) # This is normalised by batch size
+    train_loss = 0.0
+     
+    
+print('Finished Training + Evaluation')
+
+#%% Plot loss curve
+epochs = np.arange(len(losses))
+epochs_eval = np.arange(len(losses_eval))
+plt.figure(dpi=200)
+plt.plot(epochs + 1 , losses, 'b', label='Training Loss')
+plt.plot(epochs_eval + 1 , losses_eval, 'r', label='Validation Loss')
+plt.xticks(np.arange(1,num_epoch+1, step = 1))
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend(loc="upper right")
+plt.title("Loss function")
+#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss_20.png')
+
+#%%
+
+out_test    = model(input_concat)
+output_test = out_test['softmax'].detach().numpy()
+
+image = 30
+
+plt.subplot(1,2,1)
+plt.imshow(output_test[image,0,:,:])
+plt.subplot(1,2,2)
+plt.imshow(output_test[image,1,:,:])

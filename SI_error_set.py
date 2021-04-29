@@ -166,3 +166,10 @@ T_j = np.sum(T_j, axis = 3)
 #%% Plot a final patch
 plt.imshow(T_j[6,:,:])
 plt.title('Binary Tj label')
+
+
+#%% Save variable
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+from numpy import savetxt
+savetxt('patches.csv', T_j, delimiter=',')
+
