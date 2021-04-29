@@ -30,6 +30,8 @@ def load_data(user,phase):
     
     if user == 'K':
         os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")
+    elif user == 'GPU':
+        os.chdir("/home/michala/training")                      # Server directory michala
     else:
         os.chdir('/Users/michalablicher/Desktop/training')
     
