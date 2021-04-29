@@ -120,8 +120,8 @@ for i in range(0, seg_sys.shape[0]):
                 new_label_slice_sys[i,cc_labels[i,:,:,j]== k ,j] = 1
 
 #%% Show Results from clustering 
-show_slice = 65
-show_class = 2
+show_slice = 8
+show_class = 1
 plt.figure(dpi=2000)
 plt.subplot(1,4,1)
 plt.imshow(seg_sys[show_slice,:,:,show_class])
@@ -174,26 +174,27 @@ for i in range(0, seg_error_dia.shape[0]):
 
 #%% Show Results from clustering 
 show_slice = 7
-show_class = 2
-plt.figure(dpi=2000)
-plt.subplot(1,5,1)
-plt.imshow(seg_dia[show_slice,:,:,show_class])
-plt.title('Segmentation')
-plt.subplot(1,5,2)
-plt.imshow(ref_dia[show_slice,:,:,show_class])
-plt.title('Reference')
-plt.subplot(1,5,3)
-plt.imshow(seg_error_dia[show_slice,:,:,show_class])
-plt.title('Error')
-plt.subplot(1,5,4)
-plt.imshow(cc_labels[show_slice,:,:,show_class])
-plt.title('n_cluster')
-plt.subplot(1,5,5)
-plt.imshow(new_label_slice_dia[show_slice,:,:,show_class])
-plt.title('Cluster min 10')
+show_class = 1
+alpha = 0.5
+for i in range(1,4):
+    plt.figure(dpi=2000)
+    plt.subplot(2,2,1)
+    plt.imshow(seg_dia[show_slice,:,:,i])
+    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
+    plt.title('Segmentation')
+    plt.subplot(2,2,2)
+    plt.imshow(ref_dia[show_slice,:,:,i])
+    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
+    plt.title('Reference')
+    plt.subplot(2,2,3)
+    plt.imshow(seg_error_dia[show_slice,:,:,i])
+    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
+    plt.title('Error')
+    plt.subplot(2,2,4)
+    plt.imshow(new_label_slice_dia[show_slice,:,:,i])
+    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
+    plt.title('Cluster min 10')
 
-print((cm_size_1[show_slice,show_class]))
-print((n_cluster_1[show_slice,show_class]))
 
 
 #%% Function

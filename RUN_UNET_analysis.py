@@ -192,13 +192,13 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (1, 128, 128))
 
 #%% Specify directory
-os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im import load_data
 
-data_im_es, data_gt_es = load_data('K','Systole')
-data_im_ed, data_gt_ed = load_data('K','Diastole')
+data_im_es, data_gt_es = load_data('M','Systole')
+data_im_ed, data_gt_ed = load_data('M','Diastole')
 
 #%% BATCH GENERATOR
 
