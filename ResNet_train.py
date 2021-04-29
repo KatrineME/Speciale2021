@@ -545,7 +545,7 @@ plt.legend(loc="upper right")
 plt.title("Loss function")
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss_20.png')
 
-#%%
+#%% Visualize output from detection network
 
 out_test    = model(input_concat)
 output_test = out_test['softmax'].detach().numpy()
@@ -554,5 +554,22 @@ image = 30
 
 plt.subplot(1,2,1)
 plt.imshow(output_test[image,0,:,:])
+plt.title('Prob. of no seg. failure')
+plt.colorbar(fraction=0.05)
+plt.subplots_adjust(hspace = 0.05, wspace = 0.4)
+
 plt.subplot(1,2,2)
 plt.imshow(output_test[image,1,:,:])
+plt.title('Prob. of seg. failure')
+plt.colorbar(fraction=0.05)
+
+#%% Upsample
+
+test_im = Tensor(np.expand_dims(output_test[30:32,1,:,:],axis=0))
+up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
+
+up_im = up(test_im)
+print(np.unique(up_im))
+
+plt.imshow(up_im[0,1,:,:])
+plt.imshow(im_flat_test_ed[31,0,:,:], alpha= 0.3)
