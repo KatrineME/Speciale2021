@@ -95,7 +95,6 @@ for i in range(0, gt_es_oh.shape[0]):
         # Transform maps
         dt_es[dt_es < 0] = 0
         dt_ed[dt_ed < 0] = 0
-    print('hvaaaasa')
 
 """
 OBS: distance transform maps can't be computed for slices whitout GT annotation. This is the case for some apical and basal slices.

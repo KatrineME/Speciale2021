@@ -163,7 +163,6 @@ T_j = T_j[:,:,:,1:]
 # Summing all tissue channels together
 T_j = np.sum(T_j, axis = 3)
 
-
 #%% Plot a final patch
 plt.imshow(T_j[6,:,:])
 plt.title('Binary Tj label')
