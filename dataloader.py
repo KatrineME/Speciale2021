@@ -304,7 +304,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         optimizer.step()
         # Calculate loss
         train_loss += loss.item() #.detach().cpu().numpy()
-    losses.append(train_loss/train_dataloader.shape[0]) # This is normalised by batch size
+    losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     train_loss = 0.0
     
     unet.eval()
@@ -331,7 +331,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
 
         # Calculate loss
         eval_loss += loss.item()
-    losses_eval.append(eval_loss/eval_dataloader.shape[0]) # This is normalised by batch size
+    losses_eval.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
         #(epoch + 1, i + 1, eval_loss)
     eval_loss = 0.0
 
