@@ -216,9 +216,9 @@ data_im_ed, data_gt_ed = load_data('GPU','Diastole')
 #%% Load Data
 num = 5
 
-num_train = 20#num 
-num_eval  = num + num_train 
-num_test  = num + num_eval
+num_train = 50 #num 
+num_eval  = 20 + num_train #num + num_train 
+num_test  = 30 + num_eval #num + num_eval
 
 im_flat_train = np.concatenate(data_im_ed[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt_ed[0:num_train]).astype(None)
@@ -237,7 +237,7 @@ data_train_n = data_train.permute(1,0,2,3)
 data_eval = Tensor((np.squeeze(im_flat_eval), gt_flat_eval))
 data_eval_n = data_eval.permute(1,0,2,3)
 
-batch_size = 6
+batch_size = 20
 train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 eval_dataloader = DataLoader(data_eval_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
@@ -283,7 +283,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
         labels = labels.cuda()
-        #print('i=',i)
+        print('i=',i)
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
