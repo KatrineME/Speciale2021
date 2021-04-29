@@ -88,7 +88,7 @@ cluster_size = 10
 dia_new_label = cluster_min(seg_dia, gt_ed_oh, cluster_size)
 sys_new_label = cluster_min(seg_sys, gt_es_oh, cluster_size)
 
-#%%
+#%% Apply both cluster size and dt map 
 roi_target_map = np.zeros((dt_es.shape))
 
 for i in range(0, dt_es.shape[0]):
@@ -96,8 +96,8 @@ for i in range(0, dt_es.shape[0]):
         roi_target_map[i,:,:,j] = np.logical_and(dt_es[i,:,:,j], sys_new_label[i,:,:,j])
 
 
-#%%
-test_slice = 14
+#%% plot all results
+test_slice = 1
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
 plt.figure(dpi=200)
 
@@ -105,14 +105,65 @@ roi_mask = roi_target_map
 roi_mask[roi_mask == 0]     = np.nan
 
 for i in range (0,4):
-    plt.subplot(1,4,i+1)
+    plt.subplot(3,4,i+1)
     plt.imshow(dt_es[test_slice,:,:,i])
-    plt.imshow(sys_new_label[test_slice,:,:,i], alpha = 0.5)
-    plt.imshow(roi_target_map[test_slice,:,:,i])
+    plt.imshow(im_es_flat[test_slice,0,:,:], alpha =0.2)
     plt.title(class_title[i], fontsize =10)
+    plt.subplots_adjust(hspace = 0.4, wspace = 0.5)
     plt.xticks([])
     plt.yticks([])
+    
+    if i == 0:
+        plt.ylabel('Distance transform', fontsize=7)
+    
+    plt.subplot(3,4,i+1+4)
+    plt.imshow(sys_new_label[test_slice,:,:,i])
+    plt.imshow(im_es_flat[test_slice,0,:,:], alpha =0.3)
+    plt.xticks([])
+    plt.yticks([])
+    
+    if i == 0:
+        plt.ylabel('Filtered cluster', fontsize=7)
+    
+    plt.subplot(3,4,i+1+8)
+    plt.imshow(roi_target_map[test_slice,:,:,i])
+    plt.imshow(im_es_flat[test_slice,0,:,:], alpha =0.3)
+    plt.xticks([])
+    plt.yticks([])
+    
+    if i == 0:
+        plt.ylabel('Resulting SI set', fontsize = 7)
+        
+#%% Sample patches
+patch_size = 8
+patch_grid = int(roi_target_map.shape[1]/patch_size)
 
 
+# Preallocate
+_temp  = np.zeros((patch_grid,patch_grid))
+lin    = np.linspace(0,roi_target_map.shape[1]-patch_size,patch_grid).astype(int)
+_ctemp = np.zeros((patch_grid,patch_grid,roi_target_map.shape[3]))
+T_j    = np.zeros((roi_target_map.shape[0],patch_grid,patch_grid,roi_target_map.shape[3]))
 
 
+for j in range (0,roi_target_map.shape[0]):
+    for c in range(0,4):
+        for pp in range(0,16):
+            for p, i in enumerate(lin):
+                _temp[pp,p] = np.count_nonzero(~np.isnan(roi_target_map[j,lin[pp]:lin[pp]+8 , i:i+8, c]))
+        _ctemp[:,:,c] = _temp
+    T_j[j,:,:,:] = _ctemp
+
+# Binarize
+T_j[T_j >= 1 ] = 1
+
+# BACKGROUND SEG FAILURES ARE REMOVED
+T_j = T_j[:,:,:,1:] 
+
+# Summing all tissue channels together
+T_j = np.sum(T_j, axis = 3)
+
+
+#%% Plot a final patch
+plt.imshow(T_j[6,:,:])
+plt.title('Binary Tj label')
