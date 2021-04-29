@@ -27,8 +27,6 @@ from scipy.ndimage.morphology import distance_transform_edt, binary_erosion
 from torch import nn
 from torch import Tensor
 
-#!pip install torch-summary
-#!pip install opencv-python
 
 #%% Specify directory
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
@@ -57,11 +55,11 @@ gt_flat_test_ed = np.concatenate(data_gt_ed[lim_eval:lim_test]).astype(None)
 
 
 #%% Load Model
-#PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
-#PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
+#PATH_model = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
+#PATH_state = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.p"
 
-PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_nor20.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_nor_20e.pt'
+#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_nor20.pt'
+#PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_nor_20e.pt'
 
 # Load
 unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))

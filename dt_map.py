@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from   scipy.ndimage.morphology import distance_transform_edt, binary_erosion
 from   torch import Tensor
 
+
 #%% Specify directory
 os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -94,7 +95,6 @@ for i in range(0, gt_es_oh.shape[0]):
         # Transform maps
         dt_es[dt_es < 0] = 0
         dt_ed[dt_ed < 0] = 0
-    print(i)
 
 """
 OBS: distance transform maps can't be computed for slices whitout GT annotation. This is the case for some apical and basal slices.
@@ -122,7 +122,6 @@ for i in range(0,4):
     plt.title(class_title[i], fontsize =16)
 plt.show()   
 
-
 #%% Define as function
 
 def dist_trans(gt_oh, error_margin_inside, error_margin_outside):
@@ -142,13 +141,13 @@ def dist_trans(gt_oh, error_margin_inside, error_margin_outside):
             # Find border voxels
             ref_border[i,:,:,j]   = np.logical_xor(gt_oh[i,:,:,j], inside_voxels_indices)
             
-            ref_border = ref_border_es.astype(bool)
+            ref_border = ref_border.astype(bool)
             
             # Calculated euclidean distance to object for all voxels
             dt[i,:,:,j] = distance_transform_edt(~ref_border[i,:,:,j])
             
             # save object masks
-            inside_obj_mask[i, inside_voxels_indices_es, j] = 1               
+            inside_obj_mask[i, inside_voxels_indices, j] = 1               
             outside_obj_mask[i,:,:,j] = np.logical_and(~inside_obj_mask[i,:,:,j], ~ref_border[i,:,:,j])
             
             # surface border distance is always ZERO
@@ -162,7 +161,6 @@ def dist_trans(gt_oh, error_margin_inside, error_margin_outside):
             
             # Transform maps
             dt[dt < 0] = 0
-        print(i)
             
     return dt
 
