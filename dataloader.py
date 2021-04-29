@@ -216,7 +216,7 @@ data_im_ed, data_gt_ed = load_data('GPU','Diastole')
 #%% Load Data
 num = 5
 
-num_train = 4#num 
+num_train = 20#num 
 num_eval  = num + num_train 
 num_test  = num + num_eval
 
@@ -265,7 +265,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_de
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
 #                                               step_size=3,
 #                                               gamma=0.1)
-num_epoch = 2
+num_epoch = 10
 #%% Training
 losses = []
 losses_eval = []
