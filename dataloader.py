@@ -193,7 +193,7 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.5)
-    #unet.cuda()
+    unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
 #%% Specify directory
