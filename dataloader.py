@@ -329,7 +329,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         labels = eval_data[:,1,:,:]
         labels = labels.cuda()
-        print('i=',i)
+        #print('i=',i)
 
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
@@ -340,9 +340,11 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         # Find loss
         loss = criterion(output, labels)
+        print('loss = ', loss)
         
         # Calculate loss
         eval_loss.append(loss.item())
+        print('eval_loss = ', eval_loss)
         
     #losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     eval_losses.append(np.mean(eval_loss))
