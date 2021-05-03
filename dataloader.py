@@ -193,7 +193,7 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.5)
-    unet.cuda()
+    #unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
 #%% Specify directory
@@ -215,9 +215,9 @@ data_im_ed, data_gt_ed = load_data('GPU','Diastole')
 #%% Load Data
 num = 5
 
-num_train = 50 #num 
-num_eval  = 20 + num_train #num + num_train 
-num_test  = 30 + num_eval #num + num_eval
+num_train = 50 #50 #num 
+num_eval  = 20 + num_train#0 + num_train #num + num_train 
+num_test  = 30 + num_eval#0 + num_eval #num + num_eval
 
 im_flat_train = np.concatenate(data_im_ed[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt_ed[0:num_train]).astype(None)
@@ -236,22 +236,26 @@ data_train_n = data_train.permute(1,0,2,3)
 data_eval = Tensor((np.squeeze(im_flat_eval), gt_flat_eval))
 data_eval_n = data_eval.permute(1,0,2,3)
 
-batch_size = 32
+batch_size = 10
 train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 eval_dataloader = DataLoader(data_eval_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
 #im_train , lab_train = next(iter(train_dataloader))
 #im_eval , lab_eval   = next(iter(eval_dataloader))
 
- 
+#%% 
 print("The shape of the tr data loader", len(train_dataloader),
       " should equal to number of images // batch_size:",len(data_train_n) // batch_size)
+
+
+print("The shape of the tr data loader", len(eval_dataloader),
+      " should equal to number of images // batch_size:",len(data_eval_n) // batch_size)
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
 
 LEARNING_RATE = 0.0001 # 
-criterion    = nn.CrossEntropyLoss() 
+criterion    = nn.CrossEntropyLoss()
 #criterion     = nn.BCELoss()
 #criterion     = SoftDice
 #criterion     = brier_score_loss()
@@ -267,27 +271,30 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_de
 num_epoch = 20
 #%% Training
 losses = []
-losses_eval = []
-#train_dataloader = 
+train_losses = []
+eval_losses  = []
+batch_loss   = []
+eval_loss    = []
 
 for epoch in range(num_epoch):  # loop over the dataset multiple times
     
     unet.train()
     print('Epoch train =',epoch)
-    train_loss = 0.0  
+    #0.0  
     for i, (train_data) in enumerate(train_dataloader):
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
-        inputs = inputs.cuda()
+        #inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
-        labels = labels.cuda()
+        #labels = labels.cuda()
         print('i=',i)
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
         # Clear the gradients
+        
         optimizer.zero_grad()
        
         # Forward Pass
@@ -296,26 +303,29 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Find loss
         loss = criterion(output, labels)
-        
+
         # Calculate gradients
         loss.backward()
         # Update Weights
         optimizer.step()
         # Calculate loss
-        train_loss += loss.item() #.detach().cpu().numpy()
-    losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
-    train_loss = 0.0
+        #train_loss += loss.item() #.detach().cpu().numpy()
+        batch_loss.append(loss.item())
+        
+    #losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
+    train_losses.append(np.mean(batch_loss))
+    batch_loss = []#0.0
     
     unet.eval()
     print('Epoch eval=',epoch)
-    eval_loss = 0.0  
+     
     for i, (eval_data) in enumerate(eval_dataloader):
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
-        inputs = inputs.cuda()
+        #inputs = inputs.cuda()
         labels = eval_data[:,1,:,:]
-        labels = labels.cuda()
+        #labels = labels.cuda()
         #print('i=',i)
 
         # wrap them in Variable
@@ -327,29 +337,30 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         # Find loss
         loss = criterion(output, labels)
-
+        
         # Calculate loss
-        eval_loss += loss.item()
-    losses_eval.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
-        #(epoch + 1, i + 1, eval_loss)
-    eval_loss = 0.0
+        eval_loss.append(loss.item())
+        
+    #losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
+    eval_losses.append(np.mean(eval_loss))
+    eval_loss = [] #0.0
 
 print('Finished Training + Evaluation')
         
 
 #%% Plot loss curves
 
-epochs = np.arange(len(losses))
-epochs_eval = np.arange(len(losses_eval))
+epochs = np.arange(len(train_losses))
+epochs_eval = np.arange(len(eval_losses))
 plt.figure(dpi=200)
-plt.plot(epochs + 1 , losses, 'b', label='Training Loss')
-plt.plot(epochs_eval + 1 , losses_eval, 'r', label='Validation Loss')
+plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
+plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
 plt.xticks(np.arange(1,num_epoch+1, step = 1))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_loss_batch.png')
+#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_loss_batch.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
