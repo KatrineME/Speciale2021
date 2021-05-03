@@ -236,7 +236,7 @@ data_train_n = data_train.permute(1,0,2,3)
 data_eval = Tensor((np.squeeze(im_flat_eval), gt_flat_eval))
 data_eval_n = data_eval.permute(1,0,2,3)
 
-batch_size = 60
+batch_size = 10
 train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 eval_dataloader = DataLoader(data_eval_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
@@ -268,7 +268,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_de
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
 #                                               step_size=3,
 #                                               gamma=0.1)
-num_epoch = 10
+num_epoch = 20
 #%% Training
 losses = []
 train_losses = []
@@ -288,7 +288,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
         labels = labels.cuda()
-        print('i=',i)
+        #print('i=',i)
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
@@ -317,6 +317,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
     #losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     train_losses.append(np.mean(batch_loss))
+    print('train_losses = ', train_losses)
     batch_loss = []#0.0
     
     unet.eval()
@@ -348,6 +349,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
     #losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     eval_losses.append(np.mean(eval_loss))
+    print('train_losses = ', eval_losses)
     eval_loss = [] #0.0
 
 print('Finished Training + Evaluation')
