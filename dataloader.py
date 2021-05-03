@@ -192,7 +192,7 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.5)
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
@@ -209,15 +209,15 @@ os.chdir("/home/michala/training")                      # Server directory micha
 
 from load_data_gt_im import load_data
 
-data_im_es, data_gt_es = load_data('GPU','Systole')
-data_im_ed, data_gt_ed = load_data('GPU','Diastole')
+data_im_es, data_gt_es = load_data('M','Systole')
+data_im_ed, data_gt_ed = load_data('M','Diastole')
 
 #%% Load Data
 num = 5
 
-num_train = 60 #50 #num 
+num_train = 50#60 #50 #num 
 num_eval  = 20 + num_train#0 + num_train #num + num_train 
-num_test  = 20 + num_eval#0 + num_eval #num + num_eval
+num_test  = 30 + num_eval#0 + num_eval #num + num_eval
 
 im_flat_train = np.concatenate(data_im_ed[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt_ed[0:num_train]).astype(None)
@@ -251,6 +251,7 @@ print("The shape of the data loader", len(train_dataloader),
 print("The shape of the data loader", len(eval_dataloader),
       " should equal to number of images // batch_size:",len(data_eval_n), "//", batch_size, "=",len(data_eval_n) // batch_size )
 
+
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
 
@@ -268,7 +269,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_de
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
 #                                               step_size=3,
 #                                               gamma=0.1)
-num_epoch = 20
+num_epoch = 10
 #%% Training
 losses = []
 train_losses = []
@@ -288,15 +289,12 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
         labels = labels.cuda()
-        #print('i=',i)
+        print('i=',i)
         # wrap them in Variable
-        #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
-        #print('inputs shape = ', inputs.shape)
-        #print('labels shape = ', labels.shape)
         labels = labels.long()
-        # Clear the gradients
         
+        # Clear the gradients
         optimizer.zero_grad()
        
         # Forward Pass
@@ -307,16 +305,19 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Find loss
         loss = criterion(output, labels)
         #print('loss = ', loss)
+        
         # Calculate gradients
         loss.backward()
+        
         # Update Weights
         optimizer.step()
+
         # Calculate loss
-        #train_loss += loss.item() #.detach().cpu().numpy()
-        batch_loss.append(loss.item())
+        train_loss += loss.item() #.detach().cpu().numpy()
+        #batch_loss.append(loss.item())
         
-    #losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
-    train_losses.append(np.mean(batch_loss))
+    train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
+    #train_losses.append(np.mean(batch_loss))
     print('train_losses = ', train_losses)
     batch_loss = []#0.0
     
@@ -344,11 +345,12 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #print('loss = ', loss)
         
         # Calculate loss
-        eval_loss.append(loss.item())
+        #eval_loss.append(loss.item())
+        eval_loss += loss.item() #.detach().cpu().numpy()
         #print('eval_loss = ', eval_loss)
         
-    #losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
-    eval_losses.append(np.mean(eval_loss))
+    eval_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
+    #eval_losses.append(np.mean(eval_loss))
     print('train_losses = ', eval_losses)
     eval_loss = [] #0.0
 
@@ -367,7 +369,7 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_loss_batch.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_loss_batch.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
