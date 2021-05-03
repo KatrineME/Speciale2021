@@ -209,8 +209,8 @@ os.chdir("/home/michala/training")                      # Server directory micha
 
 from load_data_gt_im import load_data
 
-data_im_es, data_gt_es = load_data('M','Systole')
-data_im_ed, data_gt_ed = load_data('M','Diastole')
+data_im_es, data_gt_es = load_data('GPU','Systole')
+data_im_ed, data_gt_ed = load_data('GPU','Diastole')
 
 #%% Load Data
 num = 5
