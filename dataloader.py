@@ -244,12 +244,12 @@ eval_dataloader = DataLoader(data_eval_n, batch_size=batch_size, shuffle=True, d
 #im_eval , lab_eval   = next(iter(eval_dataloader))
 
 #%% 
-print("The shape of the tr data loader", len(train_dataloader),
-      " should equal to number of images // batch_size:",len(data_train_n) // batch_size)
+print("The shape of the data loader", len(train_dataloader),
+      " should equal to number of images // batch_size:", len(data_train_n),"//", batch_size, "=",len(data_train_n) // batch_size)
 
 
-print("The shape of the tr data loader", len(eval_dataloader),
-      " should equal to number of images // batch_size:",len(data_eval_n) // batch_size)
+print("The shape of the data loader", len(eval_dataloader),
+      " should equal to number of images // batch_size:",len(data_eval_n), "//", batch_size, "=",len(data_eval_n) // batch_size )
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
@@ -285,9 +285,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
-        #inputs = inputs.cuda()
+        inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
-        #labels = labels.cuda()
+        labels = labels.cuda()
         print('i=',i)
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
@@ -323,10 +323,10 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
-        #inputs = inputs.cuda()
+        inputs = inputs.cuda()
         labels = eval_data[:,1,:,:]
-        #labels = labels.cuda()
-        #print('i=',i)
+        labels = labels.cuda()
+        print('i=',i)
 
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
