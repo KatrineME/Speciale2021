@@ -292,6 +292,8 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
+        print('inputs shape = ', inputs.shape)
+        print('labels shape = ', labels.shape)
         labels = labels.long()
         # Clear the gradients
         
@@ -300,10 +302,11 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Forward Pass
         output = unet(inputs)     
         output = output["log_softmax"]
+        print('output shape = ', output.shape)
         
         # Find loss
         loss = criterion(output, labels)
-
+        print('loss = ', loss)
         # Calculate gradients
         loss.backward()
         # Update Weights
