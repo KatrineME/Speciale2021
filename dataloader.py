@@ -203,7 +203,6 @@ cwd = os.getcwd()
 os.chdir("/home/michala/training")                      # Server directory michala
 
 
-
 #%% Specify directory
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -237,7 +236,7 @@ data_train_n = data_train.permute(1,0,2,3)
 data_eval = Tensor((np.squeeze(im_flat_eval), gt_flat_eval))
 data_eval_n = data_eval.permute(1,0,2,3)
 
-batch_size = 20
+batch_size = 32
 train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 eval_dataloader = DataLoader(data_eval_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
@@ -265,7 +264,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_de
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
 #                                               step_size=3,
 #                                               gamma=0.1)
-num_epoch = 10
+num_epoch = 20
 #%% Training
 losses = []
 losses_eval = []
@@ -350,7 +349,7 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss_batch.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_loss_batch.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
