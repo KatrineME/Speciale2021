@@ -236,7 +236,7 @@ data_train_n = data_train.permute(1,0,2,3)
 data_eval = Tensor((np.squeeze(im_flat_eval), gt_flat_eval))
 data_eval_n = data_eval.permute(1,0,2,3)
 
-batch_size = 32
+batch_size = 78
 train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 eval_dataloader = DataLoader(data_eval_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
@@ -292,8 +292,8 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
-        print('inputs shape = ', inputs.shape)
-        print('labels shape = ', labels.shape)
+        #print('inputs shape = ', inputs.shape)
+        #print('labels shape = ', labels.shape)
         labels = labels.long()
         # Clear the gradients
         
@@ -302,11 +302,11 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Forward Pass
         output = unet(inputs)     
         output = output["log_softmax"]
-        print('output shape = ', output.shape)
+        #print('output shape = ', output.shape)
         
         # Find loss
         loss = criterion(output, labels)
-        print('loss = ', loss)
+        #print('loss = ', loss)
         # Calculate gradients
         loss.backward()
         # Update Weights
@@ -340,11 +340,11 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         # Find loss
         loss = criterion(output, labels)
-        print('loss = ', loss)
+        #print('loss = ', loss)
         
         # Calculate loss
         eval_loss.append(loss.item())
-        print('eval_loss = ', eval_loss)
+        #print('eval_loss = ', eval_loss)
         
     #losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     eval_losses.append(np.mean(eval_loss))
