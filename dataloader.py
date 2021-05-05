@@ -216,17 +216,17 @@ data_im_ed, data_gt_ed = load_data('GPU','Diastole')
 num = 5
 
 num_train = 50#60 #50 #num 
-num_eval  = 20 + num_train#0 + num_train #num + num_train 
-num_test  = 30 + num_eval#0 + num_eval #num + num_eval
+num_eval  = 30 + num_train#0 + num_train #num + num_train 
+num_test  = 20 + num_eval#0 + num_eval #num + num_eval
 
-im_flat_train = np.concatenate(data_im_ed[0:num_train]).astype(None)
-gt_flat_train = np.concatenate(data_gt_ed[0:num_train]).astype(None)
+im_flat_train = np.concatenate(data_im_es[0:num_train]).astype(None)
+gt_flat_train = np.concatenate(data_gt_es[0:num_train]).astype(None)
 
-im_flat_eval = np.concatenate(data_im_ed[num_train:num_eval]).astype(None)
-gt_flat_eval = np.concatenate(data_gt_ed[num_train:num_eval]).astype(None)
+im_flat_eval = np.concatenate(data_im_es[num_train:num_eval]).astype(None)
+gt_flat_eval = np.concatenate(data_gt_es[num_train:num_eval]).astype(None)
 
-im_flat_test = np.concatenate(data_im_ed[num_eval:num_test]).astype(None)
-gt_flat_test = np.concatenate(data_gt_ed[num_eval:num_test]).astype(None)
+im_flat_test = np.concatenate(data_im_es[num_eval:num_test]).astype(None)
+gt_flat_test = np.concatenate(data_gt_es[num_eval:num_test]).astype(None)
 
 #%%
 
@@ -368,7 +368,7 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_loss_batch_100.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_loss_batch_100.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
@@ -376,7 +376,7 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_loss_batch_
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_batch_100.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_batch_100.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"

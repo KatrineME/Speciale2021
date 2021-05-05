@@ -58,8 +58,8 @@ gt_flat_test_ed = np.concatenate(data_gt_ed[lim_eval:lim_test]).astype(None)
 #PATH_model = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
 #PATH_state = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.p"
 
-#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_nor20.pt'
-#PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_nor_20e.pt'
+PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_nor20.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_nor_20e.pt'
 
 # Load
 unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
@@ -118,7 +118,7 @@ for i in range(0, seg_sys.shape[0]):
                 new_label_slice_sys[i,cc_labels[i,:,:,j]== k ,j] = 1
 
 #%% Show Results from clustering 
-show_slice = 8
+show_slice = 7
 show_class = 1
 plt.figure(dpi=2000)
 plt.subplot(1,4,1)
@@ -133,6 +133,59 @@ plt.title('Cluster min 10')
 plt.subplot(1,4,4)
 plt.imshow(ref_sys[show_slice,:,:,show_class])
 plt.title('Reference')
+
+
+#%% Show Results from clustering 
+show_slice = 2
+show_class = 1
+alpha = 0.5
+for i in range(1,2):
+    plt.figure(dpi=2000)
+    plt.subplot(2,2,1)
+    plt.subplots_adjust(hspace = 0.35)
+    plt.imshow(seg_sys[show_slice,:,:,i])
+    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
+    plt.title('Segmentation', fontsize =10)
+    plt.xticks(
+    fontweight='light',
+    fontsize=7)
+    plt.yticks(
+    fontweight='light',
+    fontsize=7)
+    plt.subplot(2,2,2)
+    plt.subplots_adjust(hspace = 0.35, wspace = 0)
+    plt.imshow(ref_sys[show_slice,:,:,i])
+    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
+    plt.title('Reference', fontsize =10)
+    plt.xticks(
+    fontweight='light',
+    fontsize=7)
+    plt.yticks(
+    fontweight='light',
+    fontsize=7)
+    plt.subplot(2,2,3)
+    plt.subplots_adjust(hspace = 0.35, wspace = 0)
+    plt.imshow(seg_error_sys[show_slice,:,:,i])
+    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
+    plt.title('Difference', fontsize =10)
+    plt.xticks(
+    fontweight='light',
+    fontsize=7)
+    plt.yticks(
+    fontweight='light',
+    fontsize=7)
+    plt.subplot(2,2,4)
+    plt.subplots_adjust(hspace = 0.35, wspace = 0)
+    plt.imshow(new_label_slice_sys[show_slice,:,:,i])
+    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
+    plt.title('Cluster min 10', fontsize =10)
+    plt.xticks(
+    fontweight='light',
+    fontsize=7)
+    plt.yticks(
+    fontweight='light',
+    fontsize=7)
+
 
 
 #%% Cluster filter - Diastolic phase
@@ -174,24 +227,52 @@ for i in range(0, seg_error_dia.shape[0]):
 show_slice = 7
 show_class = 1
 alpha = 0.5
-for i in range(1,4):
+for i in range(1,2):
     plt.figure(dpi=2000)
     plt.subplot(2,2,1)
+    plt.subplots_adjust(hspace = 0.35)
     plt.imshow(seg_dia[show_slice,:,:,i])
-    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
-    plt.title('Segmentation')
+    plt.imshow(im_flat_test_ed[show_slice,0,:,:],alpha=alpha)
+    plt.title('Segmentation', fontsize =10)
+    plt.xticks(
+    fontweight='light',
+    fontsize=7)
+    plt.yticks(
+    fontweight='light',
+    fontsize=7)
     plt.subplot(2,2,2)
+    plt.subplots_adjust(hspace = 0.35, wspace = 0)
     plt.imshow(ref_dia[show_slice,:,:,i])
-    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
-    plt.title('Reference')
+    plt.imshow(im_flat_test_ed[show_slice,0,:,:],alpha=alpha)
+    plt.title('Reference', fontsize =10)
+    plt.xticks(
+    fontweight='light',
+    fontsize=7)
+    plt.yticks(
+    fontweight='light',
+    fontsize=7)
     plt.subplot(2,2,3)
+    plt.subplots_adjust(hspace = 0.35, wspace = 0)
     plt.imshow(seg_error_dia[show_slice,:,:,i])
-    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
-    plt.title('Error')
+    plt.imshow(im_flat_test_ed[show_slice,0,:,:],alpha=alpha)
+    plt.title('Difference', fontsize =10)
+    plt.xticks(
+    fontweight='light',
+    fontsize=7)
+    plt.yticks(
+    fontweight='light',
+    fontsize=7)
     plt.subplot(2,2,4)
+    plt.subplots_adjust(hspace = 0.35, wspace = 0)
     plt.imshow(new_label_slice_dia[show_slice,:,:,i])
-    plt.imshow(im_flat_test_es[show_slice,0,:,:],alpha=alpha)
-    plt.title('Cluster min 10')
+    plt.imshow(im_flat_test_ed[show_slice,0,:,:],alpha=alpha)
+    plt.title('Cluster min 10', fontsize =10)
+    plt.xticks(
+    fontweight='light',
+    fontsize=7)
+    plt.yticks(
+    fontweight='light',
+    fontsize=7)
 
 
 
