@@ -215,9 +215,9 @@ data_im_ed, data_gt_ed = load_data('GPU','Diastole')
 #%% Load Data
 num = 5
 
-num_train = 50#60 #50 #num 
-num_eval  = 30 + num_train#0 + num_train #num + num_train 
-num_test  = 20 + num_eval#0 + num_eval #num + num_eval
+num_train = 80#60 #50 #num 
+num_eval  = 10 + num_train#0 + num_train #num + num_train 
+num_test  = 10 + num_eval#0 + num_eval #num + num_eval
 
 im_flat_train = np.concatenate(data_im_es[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt_es[0:num_train]).astype(None)
@@ -269,12 +269,10 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
 #                                               step_size=3,
 #                                               gamma=0.1)
-num_epoch = 50
+num_epoch = 80
 #%% Training
-losses = []
 train_losses = []
 eval_losses  = []
-batch_loss   = []
 eval_loss    = 0.0
 train_loss   = 0.0 #[]
 
@@ -315,7 +313,6 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
 
         # Calculate loss
         train_loss += loss.item() #.detach().cpu().numpy()
-        #batch_loss.append(loss.item())
         
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     #train_losses.append(np.mean(batch_loss))
@@ -342,14 +339,12 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         # Find loss
         loss = criterion(output, labels)
-        #print('loss = ', loss)
         
         # Calculate loss
         #eval_loss.append(loss.item())
         eval_loss += loss.item() #.detach().cpu().numpy()
-        #print('eval_loss = ', eval_loss)
         
-    eval_losses.append(eval_loss/train_data.shape[0]) # This is normalised by batch size
+    eval_losses.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
     #eval_losses.append(np.mean(eval_loss))
     eval_loss = 0.0
 
@@ -368,7 +363,7 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_loss_batch_100.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_loss_big_batch_100.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
@@ -376,7 +371,7 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_loss_ba
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_batch_100.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big_batch_100.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"

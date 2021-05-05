@@ -205,7 +205,7 @@ data_im_ed, data_gt_ed = load_data('M','Diastole')
 #%% Test normal patients
 num_train = 50#60 #50 #num 
 num_eval  = 30 + num_train#0 + num_train #num + num_train 
-num_test  = 20 + num_eval#0 + num_eval #num + num_eval
+num_test  = 15 + num_eval#0 + num_eval #num + num_eval
 
 im_flat_test_es = np.concatenate(data_im_es[num_eval:num_test]).astype(None)
 gt_flat_test_es = np.concatenate(data_gt_es[num_eval:num_test]).astype(None)
@@ -244,19 +244,19 @@ for i, (test_ed_data) in enumerate(test_ed_dataloader):
 #PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
-PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_nor20.pt'
+PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_batch_100.pt'
 PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_batch_100.pt'
 
 # Load
 unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
-#%%
+#%% unet es
 unet_es.eval()
 out_trained_es = unet_es(Tensor(im_flat_test_es))
 out_image_es    = out_trained_es["softmax"]
 
-#%%
+#%% unet ed
 unet_ed.eval()
 out_trained_ed = unet_ed(Tensor(im_flat_test_ed))
 out_image_ed    = out_trained_ed["softmax"]
@@ -275,7 +275,7 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_flat_test_es).to(torch.int64), n
 
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 6
+test_slice = 95
 out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
 
 fig = plt.figure()
