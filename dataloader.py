@@ -262,14 +262,14 @@ criterion    = nn.CrossEntropyLoss()
 #criterion     = brier_score_loss()
 
 # weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_decay=1e-4)
+optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 # torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 
 # and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
 #                                               step_size=3,
 #                                               gamma=0.1)
-num_epoch = 20
+num_epoch = 50
 #%% Training
 losses = []
 train_losses = []
@@ -290,7 +290,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
         labels = labels.cuda()
-        print('i=',i)
+        #print('i=',i)
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
@@ -319,7 +319,6 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     #train_losses.append(np.mean(batch_loss))
-    print('train_losses = ', train_losses)
     train_loss = 0.0 #[]
     
     unet.eval()
@@ -352,7 +351,6 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
     eval_losses.append(eval_loss/train_data.shape[0]) # This is normalised by batch size
     #eval_losses.append(np.mean(eval_loss))
-    print('train_losses = ', eval_losses)
     eval_loss = 0.0
 
 print('Finished Training + Evaluation')
@@ -370,7 +368,7 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_loss_batch.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_loss_batch_100.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
@@ -378,7 +376,7 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_loss_batch.
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE__dia_batch.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_batch_100.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
