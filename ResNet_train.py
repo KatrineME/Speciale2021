@@ -371,7 +371,7 @@ data_im_ed, data_gt_ed = load_data('K','Diastole')
 nor = 60
 num_train = nor + 5#0
 num_eval  = 3#0
-num_test  = 5#0
+num_test  = 10#0
 
 lim_eval  = num_train + num_eval
 lim_test  = lim_eval + num_test
@@ -402,7 +402,7 @@ unet_ed.eval()
 out_trained_ed = unet_ed(Tensor(im_flat_test_ed))
 out_image_ed   = out_trained_ed["softmax"]
 
-#%%
+#%% One hot encoding
 seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
@@ -431,14 +431,17 @@ for i in range(0, emap.shape[0]):
 
 emap = np.expand_dims(emap, axis=1)
 #%% Plot
-image = 3
+image = 7
 
-plt.suptitle('Input and output of ResNet')
+plt.figure(dpi=2000)
+plt.suptitle('Input and output of ResNet before training')
 plt.subplot(2,3,1)
 plt.imshow(im_flat_test_ed[image,0,:,:])
+plt.ylabel('Input', fontsize=12)
 
 plt.subplot(2,3,2)
 plt.imshow(seg_met_dia[image,:,:])
+plt.subplots_adjust(hspace = 0.05, wspace = 0.4)
 
 plt.subplot(2,3,3)
 plt.imshow(emap[image,0,:,:])
@@ -455,6 +458,7 @@ output = out['softmax'].detach().numpy()
 
 plt.subplot(2,3,4)
 plt.imshow(output[image,0,:,:])
+plt.ylabel('output', fontsize=12)
 plt.subplot(2,3,5)
 plt.imshow(output[image,1,:,:])
 
@@ -479,29 +483,34 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_d
 num_epoch = 3
 print('Number of epochs = ',num_epoch)
 
-
+#%% Prep data
 T = np.expand_dims(T_j, axis=1)
-T = T[0:38,:,:]
+T = T[0:input_concat.shape[0],:,:]
 
+input_concat_train = input_concat[0:30,:,:,:]
+input_concat_eval = input_concat[30:,:,:,:]
+
+T_train = T[0:30,:,:,:]
+T_eval = T[30:,:,:,:]
 
 #%% Training
 losses = []
 losses_eval = []
 
 
-trainloader = input_concat
+trainloader = input_concat_train
 
 for epoch in range(num_epoch):  # loop over the dataset multiple times
     
     model.train()
     print('Epoch train =',epoch)
-    train_loss = 0.0  
+    train_loss = []
     for i, data in enumerate(trainloader, 0):
         # get the inputs
         #inputs, labels = data
-        inputs = input_concat
+        inputs = input_concat_train
         #inputs = inputs.cuda()
-        labels = Tensor(T)
+        labels = Tensor(T_train)
         #labels = labels.cuda()
         print('i=',i)
         
@@ -525,16 +534,53 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Update Weights
         optimizer.step()
         # Calculate loss
-        train_loss += loss.item() #.detach().cpu().numpy()
-    losses.append(train_loss/trainloader.shape[0]) # This is normalised by batch size
-    train_loss = 0.0
-     
+        train_loss.append(loss.item()) #.detach().cpu().numpy()
+        
+    losses.append(np.mean(train_loss)) # This is normalised by batch size
+    train_loss = []
+
+    model.eval()
+    batch_eval_loss = []
+    for i, data in enumerate(input_concat_eval, 0):
+        # get the inputs
+        #inputs, labels = data
+        inputs = input_concat_eval
+        #inputs = inputs.cuda()
+        labels = Tensor(T_eval)
+        #labels = labels.cuda()
+        print('i=',i)
+        
+        # wrap them in Variable
+        #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
+        inputs, labels = Variable(inputs), Variable(labels)
+        labels = torch.argmax(labels, dim=1)
+        labels = labels.long()
+        # Clear the gradients
+        optimizer.zero_grad()
+       
+        # Forward Pass
+        output = model(inputs)     
+        output = output["log_softmax"]
+        
+        # Find loss
+        loss_eval = criterion(output, labels)
+        
+        # Calculate gradients
+        loss_eval.backward()
+        # Update Weights
+        optimizer.step()
+        # Calculate loss
+        batch_eval_loss.append(loss_eval.item())#.detach().cpu().numpy()
+        
+    losses_eval.append(np.mean(batch_eval_loss)) # This is normalised by batch size
+    batch_eval_loss = []
     
 print('Finished Training + Evaluation')
 
 #%% Plot loss curve
 epochs = np.arange(len(losses))
 epochs_eval = np.arange(len(losses_eval))
+
 plt.figure(dpi=200)
 plt.plot(epochs + 1 , losses, 'b', label='Training Loss')
 plt.plot(epochs_eval + 1 , losses_eval, 'r', label='Validation Loss')
