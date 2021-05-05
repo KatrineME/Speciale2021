@@ -220,7 +220,7 @@ lim_test  = lim_eval + num_test
 nor = 60
 num_train = nor + 5#0
 num_eval  = 3#0
-num_test  = 2#0
+num_test  = 10#0
 
 lim_eval  = num_train + num_eval
 lim_test  = lim_eval + num_test
@@ -237,18 +237,18 @@ gt_flat_test_ed = np.concatenate(data_gt_ed[lim_eval:lim_test]).astype(None)
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
 PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_nor20.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_nor.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_batch_new.pt'
 
 # Load
 unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
-#model.load_state_dict(torch.load(PATH_state))
 
+#%%
 unet_es.eval()
 out_trained_es = unet_es(Tensor(im_flat_test_es))
 out_image_es    = out_trained_es["softmax"]
 
-#%%
+
 unet_ed.eval()
 out_trained_ed = unet_ed(Tensor(im_flat_test_ed))
 out_image_ed    = out_trained_ed["softmax"]
@@ -259,7 +259,7 @@ seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_flat_test_ed).to(torch.int64), num_classes=4).detach().numpy()
 
-#%%
+
 seg_met_sys = np.argmax(out_image_es.detach().numpy(), axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().numpy()
@@ -267,7 +267,7 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_flat_test_es).to(torch.int64), n
 
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 4
+test_slice = 7
 out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
 
 fig = plt.figure()
@@ -275,9 +275,9 @@ fig = plt.figure()
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
 plt.figure(dpi=200, figsize=(15,15))
 for i in range(0,4):
-    plt.suptitle('Diastolic: Softmax prob of test image at slice %i' %test_slice, fontsize=20)
+    plt.suptitle('Diastolic phase: test image at slice %i' %test_slice, fontsize=20)
     plt.subplot(3, 4, i+1)
-    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(out_img_ed[i,:,:])
     plt.title(class_title[i], fontsize =16)
     plt.xticks(
@@ -288,12 +288,20 @@ for i in range(0,4):
     horizontalalignment='right',
     fontweight='light',
     fontsize=7)
+   
+    if i == 0:
+        plt.ylabel('Softmax probability', fontsize=14)
+        
     plt.subplot(3, 4, i+1+4)
-    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(seg_dia[test_slice,:,:,i])
-    plt.subplot(3, 4, i+1+8)
-    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    if i == 0:
+        plt.ylabel('Argmax', fontsize=14)
+    plt.subplot(3, 4, i+1+8)     
+    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(ref_dia[test_slice,:,:,i])
+    if i == 0:
+        plt.ylabel('Reference', fontsize=14)
 plt.show()   
 
 #%% Plot softmax probabilities for a single slice

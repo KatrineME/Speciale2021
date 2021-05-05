@@ -192,7 +192,7 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.5)
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
@@ -201,7 +201,6 @@ cwd = os.getcwd()
 #os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")   # Local directory katrine
 #os.chdir('/Users/michalablicher/Desktop/training')     # Local directory michala
 os.chdir("/home/michala/training")                      # Server directory michala
-
 
 
 #%% Specify directory
@@ -216,9 +215,9 @@ data_im_ed, data_gt_ed = load_data('GPU','Diastole')
 #%% Load Data
 num = 5
 
-num_train = 50 #num 
-num_eval  = 20 + num_train #num + num_train 
-num_test  = 30 + num_eval #num + num_eval
+num_train = 50#60 #50 #num 
+num_eval  = 20 + num_train#0 + num_train #num + num_train 
+num_test  = 30 + num_eval#0 + num_eval #num + num_eval
 
 im_flat_train = np.concatenate(data_im_ed[0:num_train]).astype(None)
 gt_flat_train = np.concatenate(data_gt_ed[0:num_train]).astype(None)
@@ -244,38 +243,46 @@ eval_dataloader = DataLoader(data_eval_n, batch_size=batch_size, shuffle=True, d
 #im_train , lab_train = next(iter(train_dataloader))
 #im_eval , lab_eval   = next(iter(eval_dataloader))
 
- 
-print("The shape of the tr data loader", len(train_dataloader),
-      " should equal to number of images // batch_size:",len(data_train_n) // batch_size)
+
+print("The shape of the data loader", len(train_dataloader),
+      " should equal to number of images // batch_size:", len(data_train_n),"//", batch_size, "=",len(data_train_n) // batch_size)
+
+
+print("The shape of the data loader", len(eval_dataloader),
+      " should equal to number of images // batch_size:",len(data_eval_n), "//", batch_size, "=",len(data_eval_n) // batch_size )
+
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
 
 LEARNING_RATE = 0.0001 # 
-criterion    = nn.CrossEntropyLoss() 
+criterion    = nn.CrossEntropyLoss()
 #criterion     = nn.BCELoss()
 #criterion     = SoftDice
 #criterion     = brier_score_loss()
 
 # weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_decay=1e-4)
+optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 # torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 
 # and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
 #                                               step_size=3,
 #                                               gamma=0.1)
-num_epoch = 10
+num_epoch = 50
 #%% Training
 losses = []
-losses_eval = []
-#train_dataloader = 
+train_losses = []
+eval_losses  = []
+batch_loss   = []
+eval_loss    = 0.0
+train_loss   = 0.0 #[]
 
 for epoch in range(num_epoch):  # loop over the dataset multiple times
     
     unet.train()
     print('Epoch train =',epoch)
-    train_loss = 0.0  
+    #0.0  
     for i, (train_data) in enumerate(train_dataloader):
         # get the inputs
         #inputs, labels = data
@@ -283,33 +290,40 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
         labels = labels.cuda()
-        print('i=',i)
+        #print('i=',i)
         # wrap them in Variable
-        #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
+        
         # Clear the gradients
         optimizer.zero_grad()
        
         # Forward Pass
         output = unet(inputs)     
         output = output["log_softmax"]
+        #print('output shape = ', output.shape)
         
         # Find loss
         loss = criterion(output, labels)
+        #print('loss = ', loss)
         
         # Calculate gradients
         loss.backward()
+        
         # Update Weights
         optimizer.step()
+
         # Calculate loss
         train_loss += loss.item() #.detach().cpu().numpy()
-    losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
-    train_loss = 0.0
+        #batch_loss.append(loss.item())
+        
+    train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
+    #train_losses.append(np.mean(batch_loss))
+    train_loss = 0.0 #[]
     
     unet.eval()
     print('Epoch eval=',epoch)
-    eval_loss = 0.0  
+     
     for i, (eval_data) in enumerate(eval_dataloader):
         # get the inputs
         #inputs, labels = data
@@ -328,11 +342,15 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         # Find loss
         loss = criterion(output, labels)
-
+        #print('loss = ', loss)
+        
         # Calculate loss
-        eval_loss += loss.item()
-    losses_eval.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
-        #(epoch + 1, i + 1, eval_loss)
+        #eval_loss.append(loss.item())
+        eval_loss += loss.item() #.detach().cpu().numpy()
+        #print('eval_loss = ', eval_loss)
+        
+    eval_losses.append(eval_loss/train_data.shape[0]) # This is normalised by batch size
+    #eval_losses.append(np.mean(eval_loss))
     eval_loss = 0.0
 
 print('Finished Training + Evaluation')
@@ -340,17 +358,17 @@ print('Finished Training + Evaluation')
 
 #%% Plot loss curves
 
-epochs = np.arange(len(losses))
-epochs_eval = np.arange(len(losses_eval))
+epochs = np.arange(len(train_losses))
+epochs_eval = np.arange(len(eval_losses))
 plt.figure(dpi=200)
-plt.plot(epochs + 1 , losses, 'b', label='Training Loss')
-plt.plot(epochs_eval + 1 , losses_eval, 'r', label='Validation Loss')
+plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
+plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
 plt.xticks(np.arange(1,num_epoch+1, step = 1))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss_batch.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_loss_batch_100.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
@@ -358,8 +376,8 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss_ba
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_batch_100.pt"
+PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
