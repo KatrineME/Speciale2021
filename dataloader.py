@@ -275,8 +275,8 @@ losses = []
 train_losses = []
 eval_losses  = []
 batch_loss   = []
-eval_loss    = []
-train_loss   = []
+eval_loss    = 0.0
+train_loss   = 0.0 #[]
 
 for epoch in range(num_epoch):  # loop over the dataset multiple times
     
@@ -320,7 +320,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     #train_losses.append(np.mean(batch_loss))
     print('train_losses = ', train_losses)
-    train_loss = []#0.0
+    train_loss = 0.0 #[]
     
     unet.eval()
     print('Epoch eval=',epoch)
@@ -353,7 +353,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     eval_losses.append(eval_loss/train_data.shape[0]) # This is normalised by batch size
     #eval_losses.append(np.mean(eval_loss))
     print('train_losses = ', eval_losses)
-    eval_loss = [] #0.0
+    eval_loss = 0.0
 
 print('Finished Training + Evaluation')
         
