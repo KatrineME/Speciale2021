@@ -103,11 +103,14 @@ for i in range(0, dt_ed.shape[0]):
 #%% plot all results
 test_slice = 7
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
-plt.figure(dpi=2000)
+plt.figure(dpi=200)
 
 for i in range (0,4):
     plt.subplot(3,4,i+1)
     plt.imshow(dt_ed[test_slice,:,:,i])
+    cbar = plt.colorbar(fraction=0.06)
+    cbar.ax.locator_params(nbins=5)
+    cbar.ax.tick_params(labelsize=5)
     plt.imshow(im_ed_flat[test_slice,0,:,:], alpha =0.2)
     plt.title(class_title[i], fontsize =10)
     plt.subplots_adjust(hspace = 0.4, wspace = 0.5)
