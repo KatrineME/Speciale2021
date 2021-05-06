@@ -269,7 +269,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
 #                                               step_size=3,
 #                                               gamma=0.1)
-num_epoch = 80
+num_epoch = 100
 #%% Training
 train_losses = []
 eval_losses  = []
@@ -358,7 +358,7 @@ epochs_eval = np.arange(len(eval_losses))
 plt.figure(dpi=200)
 plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
 plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
-plt.xticks(np.arange(1,num_epoch+1, step = 1))
+plt.xticks(np.arange(1,num_epoch+1, step = 10))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")

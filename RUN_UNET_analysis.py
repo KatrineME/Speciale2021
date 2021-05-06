@@ -202,10 +202,9 @@ data_im_ed, data_gt_ed = load_data('M','Diastole')
 
 #%% BATCH GENERATOR
 
-#%% Test normal patients
 num_train = 50#60 #50 #num 
 num_eval  = 30 + num_train#0 + num_train #num + num_train 
-num_test  = 15 + num_eval#0 + num_eval #num + num_eval
+num_test  = 10 + num_eval#0 + num_eval #num + num_eval
 
 im_flat_test_es = np.concatenate(data_im_es[num_eval:num_test]).astype(None)
 gt_flat_test_es = np.concatenate(data_gt_es[num_eval:num_test]).astype(None)
@@ -244,7 +243,7 @@ for i, (test_ed_data) in enumerate(test_ed_dataloader):
 #PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
-PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_batch_100.pt'
+PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100.pt'
 PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_batch_100.pt'
 
 # Load
@@ -267,7 +266,7 @@ seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_flat_test_ed).to(torch.int64), num_classes=4).detach().numpy()
 
-#%%
+
 seg_met_sys = np.argmax(out_image_es.detach().numpy(), axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().numpy()
@@ -275,8 +274,9 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_flat_test_es).to(torch.int64), n
 
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 95
+test_slice = 70
 out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
+alpha = 0.4
 
 fig = plt.figure()
 
@@ -287,6 +287,7 @@ for i in range(0,4):
     plt.subplot(3, 4, i+1)
     plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(out_img_ed[i,:,:])
+    plt.imshow(im_flat_test_ed[test_slice,0,:,:],alpha=alpha)
     plt.title(class_title[i], fontsize =16)
     plt.xticks(
     rotation=40,
@@ -303,28 +304,31 @@ for i in range(0,4):
     plt.subplot(3, 4, i+1+4)
     plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(seg_dia[test_slice,:,:,i])
+    plt.imshow(im_flat_test_ed[test_slice,0,:,:],alpha=alpha)
     if i == 0:
         plt.ylabel('Argmax', fontsize=14)
     plt.subplot(3, 4, i+1+8)     
     plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(ref_dia[test_slice,:,:,i])
+    plt.imshow(im_flat_test_ed[test_slice,0,:,:],alpha=alpha)
     if i == 0:
         plt.ylabel('Reference', fontsize=14)
 plt.show()   
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 4
+test_slice = 69
 out_img_es = np.squeeze(out_image_es[test_slice,:,:,:].detach().numpy())
 
 fig = plt.figure()
-
+alpha = 0.4
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
 plt.figure(dpi=200, figsize=(15,15))
 for i in range(0,4):
-    plt.suptitle('Systolic: Softmax prob of test image at slice %i' %test_slice, fontsize=20)
+    plt.suptitle('Systolic phase: test image at slice %i' %test_slice, fontsize=20)
     plt.subplot(3, 4, i+1)
-    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(out_img_es[i,:,:])
+    plt.imshow(im_flat_test_es[test_slice,0,:,:],alpha=alpha)
     plt.title(class_title[i], fontsize =16)
     plt.xticks(
     rotation=40,
@@ -334,20 +338,31 @@ for i in range(0,4):
     horizontalalignment='right',
     fontweight='light',
     fontsize=7)
+    if i == 0:
+        plt.ylabel('Softmax probability', fontsize=14)
+        
     plt.subplot(3, 4, i+1+4)
-    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(seg_sys[test_slice,:,:,i])
+    plt.imshow(im_flat_test_es[test_slice,0,:,:],alpha=alpha)
+    if i == 0:
+        plt.ylabel('Argmax', fontsize=14)
     plt.subplot(3, 4, i+1+8)
-    plt.subplots_adjust(hspace = 0.05, wspace = 0)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(ref_sys[test_slice,:,:,i])
+    plt.imshow(im_flat_test_es[test_slice,0,:,:],alpha=alpha)
+    if i == 0:
+        plt.ylabel('Reference', fontsize=14)
 #plt.show()   
 
 #%% Calculate volume for diastolic phase
-test_index = data_gt_ed[lim_eval:lim_test]
+#test_index = data_gt_ed[num_eval:num_test]
+
+test_index = data_gt_ed[num_eval:num_test]
 
 s = 0
-target_vol_ed = np.zeros(num_test)
-ref_vol_ed = np.zeros(num_test)
+target_vol_ed = np.zeros(len(test_index))
+ref_vol_ed    = np.zeros(len(test_index))
 
 for i in range(0,len(test_index)):
     for j in range(0, test_index[i].shape[0]):
@@ -357,11 +372,11 @@ for i in range(0,len(test_index)):
     s += test_index[i].shape[0] 
    
 #%% Calculate volume for systolic phase
-test_index = data_gt_es[lim_eval:lim_test]
+test_index = data_gt_es[num_eval:num_test]
 
 s = 0
-target_vol_es = np.zeros(num_test)
-ref_vol_es = np.zeros(num_test)
+target_vol_es = np.zeros(len(test_index))
+ref_vol_es = np.zeros(len(test_index))
 
 for i in range(0,len(test_index)):
     for j in range(0, test_index[i].shape[0]):
@@ -379,6 +394,11 @@ spacings = [1.4, 1.4, 8]
 
 ef_ref    = EF_calculation(ref_vol_es, ref_vol_ed, spacings)
 ef_target = EF_calculation(target_vol_es, target_vol_ed, spacings)
+
+
+
+ef_m_ref = np.mean(ef_ref[0])
+ef_m_tar = np.mean(ef_target[0])
 
 print('ef  = ', ef_ref[0]) 
 print('esv = ', ef_ref[1]) 
@@ -565,5 +585,12 @@ mean_sensitivity = np.mean(sensitivity_sys, axis=0)
 mean_specificity = np.mean(specificity_sys, axis=0)
 print('mean sensitivity = ',mean_sensitivity)  
 print('mean specificity = ',mean_specificity)
+
+
+
+
+
+
+
 
 
