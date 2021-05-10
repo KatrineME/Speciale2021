@@ -387,7 +387,7 @@ data_im_ed, data_gt_ed = load_data('GPU','Diastole')
 nor = 60
 num_train = nor + 5#0
 num_eval  = 3#0
-num_test  = 10#0
+num_test  = 2#0
 
 lim_eval  = num_train + num_eval
 lim_test  = lim_eval + num_test
