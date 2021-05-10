@@ -567,11 +567,11 @@ if __name__ == "__main__":
 #PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
 
-PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
+#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100.pt'
+#PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
 
-#PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big_batch_100.pt'
-#PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_big_batch_100.pt'
+PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big_batch_100.pt'
+PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_big_batch_100.pt'
 
 # Load
 unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
