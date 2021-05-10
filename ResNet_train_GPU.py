@@ -574,12 +574,16 @@ PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big
 PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_big_batch_100.pt'
 
 # Load
-unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
-unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
+unet_es = torch.load(PATH_model_es, map_location=torch.device('cuda'))
+unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cuda'))
+
+im_flat_test_es = im_flat_test_es.cuda()
 
 unet_es.eval()
 out_trained_es = unet_es(Tensor(im_flat_test_es))
 out_image_es   = out_trained_es["softmax"]
+
+im_flat_test_ed = im_flat_test_ed.cuda()
 
 unet_ed.eval()
 out_trained_ed = unet_ed(Tensor(im_flat_test_ed))
