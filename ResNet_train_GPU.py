@@ -387,7 +387,7 @@ data_im_ed, data_gt_ed = load_data('GPU','Diastole')
 nor = 60
 num_train = nor + 5#0
 num_eval  = 3#0
-num_test  = 2#0
+num_test  = 10#0
 
 lim_eval  = num_train + num_eval
 lim_test  = lim_eval + num_test
@@ -567,26 +567,26 @@ if __name__ == "__main__":
 #PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
 
-#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100.pt'
-#PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
+PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
 
-PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big_batch_100.pt'
-PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_big_batch_100.pt'
+#PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big_batch_100.pt'
+#PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_big_batch_100.pt'
 
 # Load
-unet_es = torch.load(PATH_model_es, map_location=torch.device('cuda'))
-unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cuda'))
+unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
+unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
-im_flat_test_es = (Tensor(im_flat_test_es)).cuda()
+#im_flat_test_es = im_flat_test_es.cuda()
 
 unet_es.eval()
-out_trained_es = unet_es((im_flat_test_es))
+out_trained_es = unet_es(Tensor(im_flat_test_es))
 out_image_es   = out_trained_es["softmax"]
 
-im_flat_test_ed = (Tensor(im_flat_test_ed)).cuda()
+#im_flat_test_ed = im_flat_test_ed.cuda()
 
 unet_ed.eval()
-out_trained_ed = unet_ed((im_flat_test_ed))
+out_trained_ed = unet_ed(Tensor(im_flat_test_ed))
 out_image_ed   = out_trained_ed["softmax"]
 
 #%% One hot encoding
