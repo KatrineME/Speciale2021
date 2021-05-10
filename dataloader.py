@@ -236,7 +236,7 @@ data_train_n = data_train.permute(1,0,2,3)
 data_eval = Tensor((np.squeeze(im_flat_eval), gt_flat_eval))
 data_eval_n = data_eval.permute(1,0,2,3)
 
-batch_size = 40
+batch_size = 64
 train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 eval_dataloader = DataLoader(data_eval_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
