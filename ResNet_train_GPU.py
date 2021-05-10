@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon May 10 12:52:25 2021
+
+@author: michalablicher
+"""
 # -*- coding: utf-8 -*-
 """
 Created on Thu Apr 29 13:24:53 2021
@@ -16,6 +23,14 @@ from torch import Tensor
 import torch.utils.model_zoo as model_zoo
 BatchNorm = nn.BatchNorm2d
 DropOut = nn.Dropout2d
+
+if torch.cuda.is_available():
+    # Tensor = torch.cuda.FloatTensor
+    device = 'cuda'
+else:
+    # Tensor = torch.FloatTensor
+    device = 'cpu'
+torch.cuda.manual_seed_all(808)
 
 
 
@@ -354,17 +369,18 @@ if __name__ == "__main__":
     n_classes  = 2
     model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.3)
     #model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    #model.cuda()
+    model.cuda()
     torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir("/home/michala/training") 
 
 from load_data_gt_im import load_data
 
-data_im_es, data_gt_es = load_data('M','Systole')
-data_im_ed, data_gt_ed = load_data('M','Diastole')
+data_im_es, data_gt_es = load_data('GPU','Systole')
+data_im_ed, data_gt_ed = load_data('GPU','Diastole')
 
 #%% Test normal patients
 
@@ -551,12 +567,15 @@ if __name__ == "__main__":
 #PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
 
-PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
+#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100.pt'
+#PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
+
+PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big_batch_100.pt'
+PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_big_batch_100_2.pt'
 
 # Load
-unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
-unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
+unet_es = torch.load(PATH_model_es, map_location=torch.device('cuda'))
+unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cuda'))
 
 unet_es.eval()
 out_trained_es = unet_es(Tensor(im_flat_test_es))
@@ -595,21 +614,6 @@ for i in range(0, emap.shape[0]):
 
 emap = np.expand_dims(emap, axis=1)
 #%% Plot
-image = 7
-
-plt.figure(dpi=2000)
-plt.suptitle('Input and output of ResNet before training')
-plt.subplot(2,3,1)
-plt.imshow(im_flat_test_ed[image,0,:,:])
-plt.ylabel('Input', fontsize=12)
-
-plt.subplot(2,3,2)
-plt.imshow(seg_met_dia[image,:,:])
-plt.subplots_adjust(hspace = 0.05, wspace = 0.4)
-
-plt.subplot(2,3,3)
-plt.imshow(emap[image,0,:,:])
-
 #% Wrap all inputs together
 im     = Tensor(im_flat_test_ed)
 umap   = Tensor(emap)
@@ -619,12 +623,6 @@ input_concat = torch.cat((im,umap,seg), dim=1)
 
 out    = model(input_concat)
 output = out['softmax'].detach().numpy()
-
-plt.subplot(2,3,4)
-plt.imshow(output[image,0,:,:])
-plt.ylabel('output', fontsize=12)
-plt.subplot(2,3,5)
-plt.imshow(output[image,1,:,:])
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
@@ -644,14 +642,15 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_d
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 3
+num_epoch = 10
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
-from SI_error_set_func import SI_set
+#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
+from SI_func_mic import SI_set
 
-T_j = SI_set('M', 'dia', lim_eval,lim_test)
+T_j = SI_set('GPU', 'dia', lim_eval,lim_test)
 
 
 #%% Prep data
@@ -682,9 +681,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = input_concat_train
-        #inputs = inputs.cuda()
+        inputs = inputs.cuda()
         labels = Tensor(T_train)
-        #labels = labels.cuda()
+        labels = labels.cuda()
         print('i=',i)
         
         # wrap them in Variable
@@ -719,9 +718,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = input_concat_eval
-        #inputs = inputs.cuda()
+        inputs = inputs.cuda()
         labels = Tensor(T_eval)
-        #labels = labels.cuda()
+        labels = labels.cuda()
         print('i=',i)
         
         # wrap them in Variable
@@ -752,8 +751,8 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
 print('Finished Training + Evaluation')
 
 #%% Plot loss curve
-epochs = np.arange(len(losses))
-epochs_eval = np.arange(len(losses_eval))
+epochs = np.arange(len(train_losses))
+epochs_eval = np.arange(len(eval_losses))
 
 plt.figure(dpi=200)
 plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
@@ -764,7 +763,7 @@ plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss_20.png')
-
+"""
 #%% Visualize output from detection network
 
 out_test    = model(input_concat)
@@ -794,3 +793,6 @@ print(np.unique(up_im))
 
 plt.imshow(up_im[0,1,:,:])
 plt.imshow(im_flat_test_ed[31,0,:,:], alpha= 0.3)
+
+"""
+print('Finished')
