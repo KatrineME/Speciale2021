@@ -226,13 +226,12 @@ def SI_set(user, phase, start, stop):
         #import torchsummary
         unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     #%% Load model
-    print('hej')
     if user == 'K':
         PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
         PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
     elif user == 'GPU':
-        PATH_model_es ="/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_nor20.pt"  
-        PATH_model_ed = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_nor_20e.pt"                    # Server directory michala
+        PATH_model_es = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big_batch_100.pt"  
+        PATH_model_ed = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_big_batch_100.pt"                    # Server directory michala
     else:
         PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100.pt'
         PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
