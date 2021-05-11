@@ -209,17 +209,17 @@ os.chdir("/home/michala/training")                      # Server directory micha
 
 from load_data_gt_im_sub import load_data_sub
 
-data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('M','Systole','DCM')
-data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('M','Systole','HCM')
-data_im_es_MINF, data_gt_es_MINF = load_data_sub('M','Systole','MINF')
-data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('M','Systole','NOR')
-data_im_es_RV,   data_gt_es_RV   = load_data_sub('M','Systole','RV')
+data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
+data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('GPU','Systole','HCM')
+data_im_es_MINF, data_gt_es_MINF = load_data_sub('GPU','Systole','MINF')
+data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('GPU','Systole','NOR')
+data_im_es_RV,   data_gt_es_RV   = load_data_sub('GPU','Systole','RV')
 
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('M','Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('M','Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('M','Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('M','Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('M','Diastole','RV')
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU','Diastole','DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU','Diastole','HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU','Diastole','MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU','Diastole','NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU','Diastole','RV')
 
 
 
