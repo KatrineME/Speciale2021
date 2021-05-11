@@ -202,7 +202,7 @@ data_im_ed, data_gt_ed = load_data('M','Diastole')
 
 #%% BATCH GENERATOR
 
-num_train = 50#60 #50 #num 
+num_train = 60#60 #50 #num 
 num_eval  = 30 + num_train#0 + num_train #num + num_train 
 num_test  = 10 + num_eval#0 + num_eval #num + num_eval
 
@@ -213,38 +213,12 @@ im_flat_test_ed = np.concatenate(data_im_ed[num_eval:num_test]).astype(None)
 gt_flat_test_ed = np.concatenate(data_gt_ed[num_eval:num_test]).astype(None)
 
 
-#%%
-"""
-from torch.utils.data import DataLoader
-
-data_test_ed = Tensor((np.squeeze(im_flat_test_ed), gt_flat_test_es))
-data_test_ed_n = data_test_ed.permute(1,0,2,3)
-
-data_test_es = Tensor((np.squeeze(im_flat_test_es), gt_flat_test_es))
-data_test_es_n = data_test_es.permute(1,0,2,3)
-
-batch_size = 20
-test_ed_dataloader = DataLoader(data_test_ed_n, batch_size=batch_size, shuffle=True, drop_last=True)
-test_es_dataloader = DataLoader(data_test_es_n, batch_size=batch_size, shuffle=True, drop_last=True)
-
-for i, (test_ed_data) in enumerate(test_ed_dataloader):
-        # get the inputs
-        #inputs, labels = data
-        inputs_ed = Tensor(np.expand_dims(test_ed_data[:,0,:,:], axis = 1))
-        labels_ed = test_ed_data[:,1,:,:]
-        
-        unet_ed.eval()
-        out_trained_ed = unet_ed(Tensor(inputs_ed))
-        out_image_ed    = out_trained_ed["softmax"]
-
-"""
-
 #%% Load Model
 #PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
-PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_batch_100.pt'
+PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100_2.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
 
 # Load
 unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
@@ -266,7 +240,6 @@ seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_flat_test_ed).to(torch.int64), num_classes=4).detach().numpy()
 
-
 seg_met_sys = np.argmax(out_image_es.detach().numpy(), axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().numpy()
@@ -274,7 +247,7 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_flat_test_es).to(torch.int64), n
 
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 70
+test_slice = 64
 out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
 alpha = 0.4
 
@@ -316,7 +289,7 @@ for i in range(0,4):
 plt.show()   
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 69
+test_slice = 100
 out_img_es = np.squeeze(out_image_es[test_slice,:,:,:].detach().numpy())
 
 fig = plt.figure()
@@ -394,7 +367,6 @@ spacings = [1.4, 1.4, 8]
 
 ef_ref    = EF_calculation(ref_vol_es, ref_vol_ed, spacings)
 ef_target = EF_calculation(target_vol_es, target_vol_ed, spacings)
-
 
 
 ef_m_ref = np.mean(ef_ref[0])
@@ -477,6 +449,18 @@ mean_prec = np.mean(precision_dia, axis=0)
 print('mean recall = ',mean_rec)  
 print('mean precision = ',mean_prec)
 
+#%%
+if len(np.unique(ref_dia[i,:,:,1]))!=1 and len(np.unique(seg_dia[i,:,:,1]))!=1:
+        haus_dia[i,0]    = hd(seg_dia[i,:,:,1],ref_dia[i,:,:,1])  
+        h_count += 1
+    else:
+        pass
+
+
+F1_dia = 2 * ((precision_dia * recall_dia) / (precision_dia + recall_dia))
+#%%
+mean_F1_dia = np.mean(F1_dia, axis=0) 
+print('mean F1 = ',mean_F1_dia)  
 
 #%% Calculate sensitivity + specificity
 sensitivity_dia    = np.zeros((seg_met_dia.shape[0],3))

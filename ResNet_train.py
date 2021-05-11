@@ -781,10 +781,11 @@ plt.title("Loss function")
 
 #%% Visualize output from detection network
 
-out_test    = model(input_concat)
+out_test    = model(input_concat_eval)
 output_test = out_test['softmax'].detach().numpy()
 
-image = 30
+#%%
+image = 16
 
 plt.figure(dpi=200)
 plt.subplot(1,2,1)
@@ -799,12 +800,23 @@ plt.title('Prob. of seg. failure')
 plt.colorbar(fraction=0.05)
 
 #%% Upsample
+upper_image = image - 1
+lower_image = image + 1
 
-test_im = Tensor(np.expand_dims(output_test[30:32,1,:,:],axis=0))
+#test_im = Tensor(np.expand_dims(output_test[lower_image:upper_image,1,:,:],axis=0))
+test_im = Tensor(np.expand_dims(output_test[13:15,1,:,:],axis=0))
+
 up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
 
 up_im = up(test_im)
 print(np.unique(up_im))
 
+plt.figure(dpi=200)
+plt.subplot(1,2,1)
+plt.imshow(input_concat[image,2,:,:])
+plt.imshow(im_flat_test_ed[image,0,:,:], alpha= 0.3)
+plt.subplot(1,2,2)
 plt.imshow(up_im[0,1,:,:])
-plt.imshow(im_flat_test_ed[31,0,:,:], alpha= 0.3)
+plt.imshow(im_flat_test_ed[image,0,:,:], alpha= 0.3)
+
+
