@@ -192,7 +192,7 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.5)
     unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
@@ -215,8 +215,8 @@ data_im_ed, data_gt_ed = load_data('GPU','Diastole')
 #%% Load Data
 num = 5
 
-num_train = 80#60 #50 #num 
-num_eval  = 10 + num_train#0 + num_train #num + num_train 
+num_train = 88#60 #50 #num 
+num_eval  = 2 + num_train#0 + num_train #num + num_train 
 num_test  = 10 + num_eval#0 + num_eval #num + num_eval
 
 im_flat_train = np.concatenate(data_im_es[0:num_train]).astype(None)
@@ -269,7 +269,9 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
 #                                               step_size=3,
 #                                               gamma=0.1)
+
 num_epoch = 100
+
 #%% Training
 train_losses = []
 eval_losses  = []

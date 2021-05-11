@@ -369,7 +369,7 @@ if __name__ == "__main__":
     n_classes  = 2
     model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.3)
     #model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    model.cuda()
+    #model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
@@ -567,11 +567,11 @@ if __name__ == "__main__":
 #PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
 
-#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100.pt'
-#PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
+PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100_2.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
 
-PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big_batch_100.pt'
-PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_big_batch_100.pt'
+#PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big_batch_100.pt'
+#PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_big_batch_100.pt'
 
 # Load
 unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
@@ -650,11 +650,11 @@ num_epoch = 10
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
-os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
+os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+#os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 from SI_func_mic import SI_set
 
-T_j = SI_set('GPU', 'dia', lim_eval,lim_test)
+T_j = SI_set('M', 'dia', lim_eval,lim_test)
 
 
 #%% Prep data
@@ -665,9 +665,33 @@ train_amount = 50
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
 
-T_train = T[0:train_amount,:,:,:]
+T_train = Tensor(T[0:train_amount,:,:,:])
 T_eval  = T[train_amount:,:,:,:]
 
+#%%
+"""
+from torch.utils.data import DataLoader
+
+k = (input_concat_train, T_train)
+batch_size = 20
+train_dataloader = DataLoader((input_concat_train, T_train), batch_size=batch_size, shuffle=True, drop_last=True)
+
+eval_dataloader = DataLoader((input_concat_eval, T_eval), batch_size=batch_size, shuffle=True, drop_last=True)
+
+#im_train , lab_train = next(iter(train_dataloader))
+#im_eval , lab_eval   = next(iter(eval_dataloader))
+
+
+print("The shape of the data loader", len(train_dataloader),
+      " should equal to number of images // batch_size:", len(input_concat_train),"//", batch_size, "=",len(input_concat_train) // batch_size)
+
+
+print("The shape of the data loader", len(eval_dataloader),
+      " should equal to number of images // batch_size:",len(input_concat_eval), "//", batch_size, "=",len(input_concat_eval) // batch_size )
+
+#%%
+torch.stack(list(k), dim=0)
+"""
 #%% Training
 train_losses = []
 eval_losses  = []
@@ -685,9 +709,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = input_concat_train
-        inputs = inputs.cuda()
+        #inputs = inputs.cuda()
         labels = Tensor(T_train)
-        labels = labels.cuda()
+        #labels = labels.cuda()
         print('i=',i)
         
         # wrap them in Variable
@@ -722,9 +746,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = input_concat_eval
-        inputs = inputs.cuda()
+        #inputs = inputs.cuda()
         labels = Tensor(T_eval)
-        labels = labels.cuda()
+        #labels = labels.cuda()
         print('i=',i)
         
         # wrap them in Variable
