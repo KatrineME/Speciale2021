@@ -222,48 +222,47 @@ data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU','Diastole','NOR')
 data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU','Diastole','RV')
 
 
-
 #%% BATCH GENERATOR
 num_train_sub = 16 
 num_eval_sub = num_train_sub + 2
 num_test_sub = num_eval_sub + 2
 
-im_train_sub = np.concatenate((np.concatenate(data_im_es_DCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_es_HCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_es_MINF[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_es_NOR[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_es_RV[0:num_train_sub]).astype(None)))
+im_train_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[0:num_train_sub]).astype(None)))
 
-gt_train_sub = np.concatenate((np.concatenate(data_gt_es_DCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_es_HCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_es_MINF[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_es_NOR[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_es_RV[0:num_train_sub]).astype(None)))
+gt_train_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
 
-im_eval_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_im_es_HCM[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_im_es_MINF[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_im_es_NOR[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_im_es_RV[num_train_sub:num_eval_sub]).astype(None)))
+im_eval_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_train_sub:num_eval_sub]).astype(None)))
 
-gt_eval_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_gt_es_HCM[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_gt_es_MINF[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_gt_es_NOR[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_gt_es_RV[num_train_sub:num_eval_sub]).astype(None)))
+gt_eval_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_train_sub:num_eval_sub]).astype(None)))
 
 
-im_test_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+im_test_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
 
-gt_test_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
 
 
 #%%
@@ -403,7 +402,7 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_loss.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_loss.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
@@ -411,7 +410,7 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_los
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
