@@ -192,7 +192,7 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.5)
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
@@ -207,36 +207,74 @@ os.chdir("/home/michala/training")                      # Server directory micha
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
-from load_data_gt_im import load_data
+from load_data_gt_im_sub import load_data_sub
 
-data_im_es, data_gt_es = load_data('GPU','Systole')
-data_im_ed, data_gt_ed = load_data('GPU','Diastole')
+data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
+data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('GPU','Systole','HCM')
+data_im_es_MINF, data_gt_es_MINF = load_data_sub('GPU','Systole','MINF')
+data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('GPU','Systole','NOR')
+data_im_es_RV,   data_gt_es_RV   = load_data_sub('GPU','Systole','RV')
 
-#%% Load Data
-num = 5
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU','Diastole','DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU','Diastole','HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU','Diastole','MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU','Diastole','NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU','Diastole','RV')
 
-num_train = 88#60 #50 #num 
-num_eval  = 2 + num_train#0 + num_train #num + num_train 
-num_test  = 10 + num_eval#0 + num_eval #num + num_eval
 
-im_flat_train = np.concatenate(data_im_es[0:num_train]).astype(None)
-gt_flat_train = np.concatenate(data_gt_es[0:num_train]).astype(None)
 
-im_flat_eval = np.concatenate(data_im_es[num_train:num_eval]).astype(None)
-gt_flat_eval = np.concatenate(data_gt_es[num_train:num_eval]).astype(None)
+#%% BATCH GENERATOR
+num_train_sub = 16 
+num_eval_sub = num_train_sub + 2
+num_test_sub = num_eval_sub + 2
 
-im_flat_test = np.concatenate(data_im_es[num_eval:num_test]).astype(None)
-gt_flat_test = np.concatenate(data_gt_es[num_eval:num_test]).astype(None)
+im_train_sub = np.concatenate((np.concatenate(data_im_es_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_es_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_es_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_es_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_es_RV[0:num_train_sub]).astype(None)))
+
+gt_train_sub = np.concatenate((np.concatenate(data_gt_es_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_es_RV[0:num_train_sub]).astype(None)))
+
+im_eval_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_train_sub:num_eval_sub]).astype(None)))
+
+gt_eval_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_train_sub:num_eval_sub]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_train_sub:num_eval_sub]).astype(None)))
+
+
+im_test_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+gt_test_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+
 
 #%%
 
-data_train = Tensor((np.squeeze(im_flat_train), gt_flat_train))
+data_train = Tensor((np.squeeze(im_train_sub), gt_train_sub))
 data_train_n = data_train.permute(1,0,2,3)
 
-data_eval = Tensor((np.squeeze(im_flat_eval), gt_flat_eval))
+data_eval = Tensor((np.squeeze(im_eval_sub), gt_eval_sub))
 data_eval_n = data_eval.permute(1,0,2,3)
 
-batch_size = 64
+batch_size = 40
 train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 eval_dataloader = DataLoader(data_eval_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
@@ -365,7 +403,7 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_loss_big_batch_100.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_loss.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
@@ -373,7 +411,7 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_loss_bi
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big_batch_100_2.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
