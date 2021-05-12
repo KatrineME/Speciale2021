@@ -419,8 +419,8 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU','Diastole','RV')
 
 #%% BATCH GENERATOR
 num_train_sub = 16 
-num_eval_sub  = num_train_sub + 1
-num_test_sub  = num_eval_sub + 1
+num_eval_sub  = num_train_sub + 2
+num_test_sub  = num_eval_sub + 2
 
 
 im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
@@ -710,7 +710,7 @@ os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021")
 from SI_func_mic import SI_set
 
 lim_eval = 1
-lim_test = 2
+lim_test = 1
 T_j = SI_set('GPU', 'dia')
 
 
