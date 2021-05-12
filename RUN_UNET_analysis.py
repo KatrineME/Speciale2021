@@ -192,6 +192,7 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (1, 128, 128))
 
 #%% Specify directory
+"""
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
@@ -200,25 +201,65 @@ from load_data_gt_im import load_data
 data_im_es, data_gt_es = load_data('M','Systole')
 data_im_ed, data_gt_ed = load_data('M','Diastole')
 
+"""
+#%%
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+
+from load_data_gt_im_sub import load_data_sub
+
+data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('M','Systole','DCM')
+data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('M','Systole','HCM')
+data_im_es_MINF, data_gt_es_MINF = load_data_sub('M','Systole','MINF')
+data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('M','Systole','NOR')
+data_im_es_RV,   data_gt_es_RV   = load_data_sub('M','Systole','RV')
+
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('M','Diastole','DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('M','Diastole','HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('M','Diastole','MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('M','Diastole','NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('M','Diastole','RV')
+
+
+
 #%% BATCH GENERATOR
+num_train_sub = 16 
+num_eval_sub = num_train_sub + 2
+num_test_sub = num_eval_sub + 2
 
-num_train = 60#60 #50 #num 
-num_eval  = 30 + num_train#0 + num_train #num + num_train 
-num_test  = 10 + num_eval#0 + num_eval #num + num_eval
 
-im_flat_test_es = np.concatenate(data_im_es[num_eval:num_test]).astype(None)
-gt_flat_test_es = np.concatenate(data_gt_es[num_eval:num_test]).astype(None)
+im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
-im_flat_test_ed = np.concatenate(data_im_ed[num_eval:num_test]).astype(None)
-gt_flat_test_ed = np.concatenate(data_gt_ed[num_eval:num_test]).astype(None)
+gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+
+im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
 
 
 #%% Load Model
 #PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
-PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100_2.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
+PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 # Load
 unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
@@ -226,28 +267,28 @@ unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #%% unet es
 unet_es.eval()
-out_trained_es = unet_es(Tensor(im_flat_test_es))
+out_trained_es = unet_es(Tensor(im_test_es_sub))
 out_image_es    = out_trained_es["softmax"]
 
 #%% unet ed
 unet_ed.eval()
-out_trained_ed = unet_ed(Tensor(im_flat_test_ed))
+out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
 out_image_ed    = out_trained_ed["softmax"]
 
 #%%
 seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
-ref_dia = torch.nn.functional.one_hot(Tensor(gt_flat_test_ed).to(torch.int64), num_classes=4).detach().numpy()
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().numpy()
 
 seg_met_sys = np.argmax(out_image_es.detach().numpy(), axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().numpy()
-ref_sys = torch.nn.functional.one_hot(Tensor(gt_flat_test_es).to(torch.int64), num_classes=4).detach().numpy()
+ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().numpy()
 
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 64
+test_slice = 6
 out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
 alpha = 0.4
 
@@ -260,7 +301,7 @@ for i in range(0,4):
     plt.subplot(3, 4, i+1)
     plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(out_img_ed[i,:,:])
-    plt.imshow(im_flat_test_ed[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
     plt.title(class_title[i], fontsize =16)
     plt.xticks(
     rotation=40,
@@ -277,19 +318,19 @@ for i in range(0,4):
     plt.subplot(3, 4, i+1+4)
     plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(seg_dia[test_slice,:,:,i])
-    plt.imshow(im_flat_test_ed[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
     if i == 0:
         plt.ylabel('Argmax', fontsize=14)
     plt.subplot(3, 4, i+1+8)     
     plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(ref_dia[test_slice,:,:,i])
-    plt.imshow(im_flat_test_ed[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
     if i == 0:
         plt.ylabel('Reference', fontsize=14)
 plt.show()   
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 100
+test_slice = 24
 out_img_es = np.squeeze(out_image_es[test_slice,:,:,:].detach().numpy())
 
 fig = plt.figure()
@@ -301,7 +342,7 @@ for i in range(0,4):
     plt.subplot(3, 4, i+1)
     plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(out_img_es[i,:,:])
-    plt.imshow(im_flat_test_es[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     plt.title(class_title[i], fontsize =16)
     plt.xticks(
     rotation=40,
@@ -317,13 +358,13 @@ for i in range(0,4):
     plt.subplot(3, 4, i+1+4)
     plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(seg_sys[test_slice,:,:,i])
-    plt.imshow(im_flat_test_es[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     if i == 0:
         plt.ylabel('Argmax', fontsize=14)
     plt.subplot(3, 4, i+1+8)
     plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
     plt.imshow(ref_sys[test_slice,:,:,i])
-    plt.imshow(im_flat_test_es[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     if i == 0:
         plt.ylabel('Reference', fontsize=14)
 #plt.show()   
@@ -362,7 +403,7 @@ for i in range(0,len(test_index)):
 os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from metrics import EF_calculation, dc, hd, jc, precision, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
-
+#%%
 spacings = [1.4, 1.4, 8]
 
 ef_ref    = EF_calculation(ref_vol_es, ref_vol_ed, spacings)
@@ -449,17 +490,10 @@ mean_prec = np.mean(precision_dia, axis=0)
 print('mean recall = ',mean_rec)  
 print('mean precision = ',mean_prec)
 
-#%%
-if len(np.unique(ref_dia[i,:,:,1]))!=1 and len(np.unique(seg_dia[i,:,:,1]))!=1:
-        haus_dia[i,0]    = hd(seg_dia[i,:,:,1],ref_dia[i,:,:,1])  
-        h_count += 1
-    else:
-        pass
+#%% F1 score
+F1_dia = 2 * ((precision_dia * recall_dia) / (precision_dia + recall_dia))    
+mean_F1_dia = np.nanmean(F1_dia, axis=0) 
 
-
-F1_dia = 2 * ((precision_dia * recall_dia) / (precision_dia + recall_dia))
-#%%
-mean_F1_dia = np.mean(F1_dia, axis=0) 
 print('mean F1 = ',mean_F1_dia)  
 
 #%% Calculate sensitivity + specificity
@@ -551,6 +585,11 @@ mean_prec = np.mean(precision_sys, axis=0)
 print('mean recall = ',mean_rec)  
 print('mean precision = ',mean_prec)
 
+#%% F1 score
+F1_sys = 2 * ((precision_sys * recall_sys) / (precision_sys + recall_sys))    
+mean_F1_sys = np.nanmean(F1_sys, axis=0) 
+
+print('mean F1 = ',mean_F1_sys)  
 
 #%% Calculate sensitivity + specificity
 sensitivity_sys    = np.zeros((seg_met_sys.shape[0],3))

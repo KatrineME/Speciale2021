@@ -237,8 +237,8 @@ def SI_set(user, phase, start, stop):
         PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
         PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
     elif user == 'GPU':
-        PATH_model_es = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_nor20.pt"  
-        PATH_model_ed = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_nor_20e.pt"                    # Server directory michala
+        PATH_model_es = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt.pt"  
+        PATH_model_ed = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt.pt"                    # Server directory michala
     else:
         PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100_2.pt'
         PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
@@ -252,7 +252,7 @@ def SI_set(user, phase, start, stop):
     
     # SYSTOLIC
     unet.eval()
-    output_unet= unet(Tensor(im_flat_train_es))
+    output_unet= unet(Tensor(im_flat_train_es).cuda())
     output_unet= output_unet["softmax"]
     
     #output_unet_es_eval = unet_es(Tensor(im_flat_eval_es))
@@ -273,10 +273,10 @@ def SI_set(user, phase, start, stop):
     #output_unet_ed_test = output_unet_ed_test["softmax"]
     
     #%% Onehot encode class channels
-    gt_es_oh_train = torch.nn.functional.one_hot(Tensor(gt_flat_train_es).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
+    gt_es_oh_train = torch.nn.functional.one_hot(Tensor(gt_flat_train_es).to(torch.int64), num_classes=4).detach().cpu().numpy().astype(np.bool)
     
     # Argmax
-    seg_met_sys_train = np.argmax(output_unet.detach().numpy(), axis=1)
+    seg_met_sys_train = np.argmax(output_unet.detach().cpu().numpy(), axis=1)
     #seg_met_dia_train = np.argmax(output_unet_ed_train.detach().numpy(), axis=1)
     
     #seg_met_sys_eval = np.argmax(output_unet_es_eval.detach().numpy(), axis=1)
@@ -286,7 +286,7 @@ def SI_set(user, phase, start, stop):
     #seg_met_dia_test = np.argmax(output_unet_ed_test.detach().numpy(), axis=1)
     
     #One hot encoding
-    seg_sys_train = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys_train), num_classes=4).detach().numpy()
+    seg_sys_train = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys_train), num_classes=4).detach().cpu().numpy()
     #seg_dia_train = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia_train), num_classes=4).detach().numpy()
     
     #seg_sys_eval = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys_eval), num_classes=4).detach().numpy()
