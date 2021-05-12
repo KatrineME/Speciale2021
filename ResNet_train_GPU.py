@@ -701,7 +701,7 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_d
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 10
+num_epoch = 1
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
@@ -727,7 +727,6 @@ T_train = Tensor(T[0:train_amount,:,:,:])
 T_eval  = T[train_amount:,:,:,:]
 
 
-"""
 #%% Training
 train_losses = []
 eval_losses  = []
@@ -828,7 +827,6 @@ plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
 plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
-"""
 
 """
 #%% Visualize output from detection network
@@ -861,10 +859,8 @@ print(np.unique(up_im))
 plt.imshow(up_im[0,1,:,:])
 plt.imshow(im_flat_test_ed[31,0,:,:], alpha= 0.3)
 
-"""
 
 #%% Save model
-"""
 PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt"
 
