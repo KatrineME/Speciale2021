@@ -55,36 +55,36 @@ def SI_set(user, phase):
     
 
 #%% BATCH GENERATOR
-num_train_sub = 16 
-num_eval_sub = num_train_sub + 2
-num_test_sub = num_eval_sub + 2
-
-
-im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_RV[num_eval_sub:num_test_sub]).astype(None)))
-
-gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
-
-"""
-im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-
-gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-"""
+    num_train_sub = 16 
+    num_eval_sub = num_train_sub + 2
+    num_test_sub = num_eval_sub + 2
+    
+    
+    im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+    
+    gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+    
+    """
+    im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+    
+    gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+    """
 
 #%% BayesUNet
     # recursive implementation of Unet
@@ -266,6 +266,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
         unet = torch.load(PATH_model_es, map_location=torch.device(device))
     else:
         unet = torch.load(PATH_model_ed, map_location=torch.device(device))
+        
     #%% Running  models 
     
     # SYSTOLIC
