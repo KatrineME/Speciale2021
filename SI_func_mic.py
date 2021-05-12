@@ -250,6 +250,8 @@ def SI_set(user, phase):
     if __name__ == "__main__":
         #import torchsummary
         unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
+        
+        print('Unet')
     #%% Load model
     if user == 'K':
         PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
@@ -268,10 +270,10 @@ def SI_set(user, phase):
         unet = torch.load(PATH_model_ed, map_location=torch.device(device))
         
     #%% Running  models 
-    
+    print('systolic')
     # SYSTOLIC
     unet.eval()
-    output_unet= unet(Tensor(im_test_es_sub).cuda())
+    output_unet= unet(Tensor(im_test_es_sub))
     output_unet= output_unet["softmax"]
     
     #output_unet_es_eval = unet_es(Tensor(im_flat_eval_es))

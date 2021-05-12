@@ -675,6 +675,9 @@ print('Number of epochs = ',num_epoch)
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
 #os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
+
+pwd
+#%%
 from SI_func_mic import SI_set
 
 lim_eval = 1
@@ -718,9 +721,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = input_concat_train
-        inputs = inputs.cuda()
+        #inputs = inputs.cuda()
         labels = Tensor(T_train)
-        labels = labels.cuda()
+        #labels = labels.cuda()
         #print('i=',i)
         
         # wrap them in Variable

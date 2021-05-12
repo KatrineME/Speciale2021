@@ -76,7 +76,6 @@ def load_data_sub(user, phase, diagnose):
     
     
     for i in sub:
-        #print(i)
         nimg = nib.load(frame_im[i])
         img  = nimg.get_fdata()
     
