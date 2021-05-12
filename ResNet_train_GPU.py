@@ -662,7 +662,7 @@ emap = np.zeros((out_image_ed.shape[0],out_image_ed.shape[2],out_image_ed.shape[
 
 for i in range(0, emap.shape[0]):
 
-    out_img = (out_image_ed[i,:,:].detach().numpy())
+    out_img = (out_image_ed[i,:,:].detach().cpu().numpy())
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
@@ -680,7 +680,7 @@ seg    = Tensor(np.expand_dims(seg_met_dia, axis=1))
 input_concat = torch.cat((im,umap,seg), dim=1)
 
 out    = model(input_concat)
-output = out['softmax'].detach().numpy()
+output = out['softmax'].detach().cpu().numpy()
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
