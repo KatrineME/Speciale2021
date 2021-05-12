@@ -722,6 +722,7 @@ train_amount = 40
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
 
+print('look', input_concat_eval.shape)
 T_train = Tensor(T[0:train_amount,:,:,:])
 T_eval  = T[train_amount:,:,:,:]
 
@@ -809,6 +810,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     eval_losses.append(eval_loss/data_eval.shape[0]) # This is normalised by batch size
     eval_loss = 0.0
     
+
 print('Finished Training + Evaluation')
 
 #%% Plot loss curve
