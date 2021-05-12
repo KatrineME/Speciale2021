@@ -722,7 +722,7 @@ train_amount = 34
 
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
-print('input', input_concat)
+print('input', input_concat.shape)
 
 
 print('train shape', input_concat_train.shape)
