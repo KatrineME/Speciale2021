@@ -701,7 +701,7 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_d
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 1
+num_epoch = 20
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
