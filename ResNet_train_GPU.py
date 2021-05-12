@@ -717,7 +717,7 @@ T_j = SI_set('GPU', 'dia')
 #%% Prep data
 T = np.expand_dims(T_j, axis=1)
 
-train_amount = 50
+train_amount = 40
 
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
