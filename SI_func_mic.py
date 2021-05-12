@@ -56,7 +56,7 @@ def SI_set(user, phase):
 
 #%% BATCH GENERATOR
     num_train_sub = 16 
-    num_eval_sub = num_train_sub + 2
+    num_eval_sub = num_train_sub + 1
     num_test_sub = num_eval_sub + 1
     
     
