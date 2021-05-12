@@ -870,5 +870,5 @@ PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt"
 torch.save(unet, PATH_model)
 torch.save(unet.state_dict(), PATH_state)
 
-
+"""
 
