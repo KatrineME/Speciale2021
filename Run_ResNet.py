@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon May 10 12:52:25 2021
+Created on Wed May 12 14:22:17 2021
 
 @author: michalablicher
 """
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 29 13:24:53 2021
 
-@author: katrine
-"""
 import torch
 import torch.nn as nn
 import math
@@ -31,6 +26,7 @@ else:
     # Tensor = torch.FloatTensor
     device = 'cpu'
 torch.cuda.manual_seed_all(808)
+
 
 
 def weights_init(m):
@@ -368,25 +364,25 @@ if __name__ == "__main__":
     n_classes  = 2
     model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.3)
     #model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    model.cuda()
+    #model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
-os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021/") 
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im_sub import load_data_sub
+user = 'M' 
+data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
+data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
+data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
+data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,'Systole','NOR')
+data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,'Systole','RV')
 
-data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
-data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('GPU','Systole','HCM')
-data_im_es_MINF, data_gt_es_MINF = load_data_sub('GPU','Systole','MINF')
-data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('GPU','Systole','NOR')
-data_im_es_RV,   data_gt_es_RV   = load_data_sub('GPU','Systole','RV')
-
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU','Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU','Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU','Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU','Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU','Diastole','RV')
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
@@ -587,40 +583,41 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    unet.cuda()
+    #unet.cuda()
     
 #%% Load Model
 #PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
 
-#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100_2.pt'
+PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
 #PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
 
-PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
+#PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt'
+#PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 # Load
-unet_es = torch.load(PATH_model_es, map_location=torch.device('cuda'))
-unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cuda'))
+unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
+#unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
 
 unet_es.eval()
-out_trained_es = unet_es(Tensor(im_test_es_sub).cuda())
+out_trained_es = unet_es(Tensor(im_test_es_sub))
 out_image_es   = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
-
+"""
 unet_ed.eval()
-out_trained_ed = unet_ed(Tensor(im_test_ed_sub).cuda())
+out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
 out_image_ed   = out_trained_ed["softmax"]
+
 
 #%% One hot encoding
 seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
-
+"""
 seg_met_sys = np.argmax(out_image_es.detach().cpu().numpy(), axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
@@ -630,11 +627,11 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), nu
 #%% E-map
 import scipy.stats
 
-emap = np.zeros((out_image_ed.shape[0],out_image_ed.shape[2],out_image_ed.shape[3]))
+emap = np.zeros((out_image_es.shape[0],out_image_es.shape[2],out_image_es.shape[3]))
 
 for i in range(0, emap.shape[0]):
 
-    out_img = (out_image_ed[i,:,:].detach().cpu().numpy())
+    out_img = (out_image_es[i,:,:].detach().cpu().numpy())
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
@@ -643,38 +640,21 @@ for i in range(0, emap.shape[0]):
     emap[i,:,:] = entropy
 
 emap = np.expand_dims(emap, axis=1)
+
+
 #%% Plot
 #% Wrap all inputs together
-im     = Tensor(im_test_ed_sub)
+im     = Tensor(im_test_es_sub)
 umap   = Tensor(emap)
-seg    = Tensor(np.expand_dims(seg_met_dia, axis=1))
+seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
 
 input_concat = torch.cat((im,umap,seg), dim=1)
 
 
-out    = model(input_concat.cuda())
+out    = model(input_concat)
 output = out['softmax'].detach().cpu().numpy()
 
-#%% Setting up training loop
-# OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
 
-LEARNING_RATE = 0.0001 # 
-criterion     = nn.CrossEntropyLoss() 
-#criterion     = nn.BCELoss()
-#criterion     = SoftDice
-#criterion     = brier_score_loss()
-
-# weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_decay=1e-4)
-# torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
-
-# and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
-#lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-#                                               step_size=3,
-#                                               gamma=0.1)
-
-num_epoch = 20
-print('Number of epochs = ',num_epoch)
 #%% Load T_j
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
@@ -683,150 +663,31 @@ from SI_func_mic import SI_set
 
 lim_eval = 1
 lim_test = 1
-T_j = SI_set('GPU', 'dia')
+T_j = SI_set('M', 'dia')
 
 
 #%% Prep data
 T = np.expand_dims(T_j, axis=1)
 
-print('T', T.shape)
-train_amount = 34
+train_amount = 40
 
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
-print('input', input_concat.shape)
 
-
-print('train shape', input_concat_train.shape)
-print('eval shape', input_concat_eval.shape)
 T_train = Tensor(T[0:train_amount,:,:,:])
 T_eval  = T[train_amount:,:,:,:]
 
-print('T_train', T_train.shape)
-print('T_eval', T_eval.shape)
-
-#%% Training
-train_losses = []
-eval_losses  = []
-eval_loss    = 0.0
-train_loss   = 0.0
-
-
-trainloader = input_concat_train
-
-for epoch in range(num_epoch):  # loop over the dataset multiple times
-    
-    model.train()
-    print('Epoch train =',epoch)
-    for i, data_train in enumerate(trainloader, 0):
-        # get the inputs
-        #inputs, labels = data
-        inputs = input_concat_train
-        inputs = inputs.cuda()
-        labels = Tensor(T_train)
-        labels = labels.cuda()
-        #print('i=',i)
-        
-        # wrap them in Variable
-        #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
-        inputs, labels = Variable(inputs), Variable(labels)
-        labels = torch.argmax(labels, dim=1)
-        labels = labels.long()
-        # Clear the gradients
-        optimizer.zero_grad()
-       
-        # Forward Pass
-        output = model(inputs)     
-        output = output["log_softmax"]
-        
-        # Find loss
-        loss = criterion(output, labels)
-        
-        # Calculate gradients
-        loss.backward()
-        # Update Weights
-        optimizer.step()
-        
-        # Calculate loss
-        train_loss += loss.item()
-        #train_loss.append(loss.item()) #.detach().cpu().numpy()
-        
-    train_losses.append(train_loss/data_train.shape[0]) # This is normalised by batch size
-    train_loss = 0.0
-
-    model.eval()
-    for i, data_eval in enumerate(input_concat_eval, 0):
-        # get the inputs
-        #inputs, labels = data
-        inputs = input_concat_eval
-        inputs = inputs.cuda()
-        labels = Tensor(T_eval)
-        labels = labels.cuda()
-        print('i=',i)
-        
-        # wrap them in Variable
-        #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
-        inputs, labels = Variable(inputs), Variable(labels)
-        labels = torch.argmax(labels, dim=1)
-        labels = labels.long()
-        # Clear the gradients
-        optimizer.zero_grad()
-       
-        # Forward Pass
-        output = model(inputs)     
-        output = output["log_softmax"]
-        
-        # Find loss
-        loss = criterion(output, labels)
-        
-        # Calculate gradients
-        loss.backward()
-        # Update Weights
-        optimizer.step()
-        # Calculate loss
-        eval_loss += loss.item()#.detach().cpu().numpy()
-        
-    eval_losses.append(eval_loss/data_eval.shape[0]) # This is normalised by batch size
-    eval_loss = 0.0
-    
-
-print('Finished Training + Evaluation')
-
-#%% Plot loss curve
-epochs = np.arange(len(train_losses))
-epochs_eval = np.arange(len(eval_losses))
-
-plt.figure(dpi=200)
-plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
-plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
-plt.xticks(np.arange(1,num_epoch+1, step = 1))
-plt.xlabel('Epochs')
-plt.ylabel('Loss')
-plt.legend(loc="upper right")
-plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
-
-
-#%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt"
-
-#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
-#PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
-
-torch.save(unet, PATH_model)
-torch.save(unet.state_dict(), PATH_state)
 
 #%% Visualize output from detection network
 PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt'
 
 # Load
-unet_es = torch.load(PATH_model_es, map_location=torch.device('cuda'))
+unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 
 out_test    = model(input_concat)
 output_test = out_test['softmax'].detach().numpy()
 
-image = 30
+image = 10
 
 plt.figure(dpi=200)
 plt.subplot(1,2,1)
@@ -849,7 +710,7 @@ up_im = up(test_im)
 print(np.unique(up_im))
 
 plt.imshow(up_im[0,1,:,:])
-plt.imshow(im_flat_test_ed[31,0,:,:], alpha= 0.3)
+plt.imshow(im_test_es_sub[31,0,:,:], alpha= 0.3)
 
 
 
