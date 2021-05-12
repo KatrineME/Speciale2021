@@ -404,17 +404,17 @@ os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021/")
 
 from load_data_gt_im_sub import load_data_sub
 
-data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('M','Systole','DCM')
-data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('M','Systole','HCM')
-data_im_es_MINF, data_gt_es_MINF = load_data_sub('M','Systole','MINF')
-data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('M','Systole','NOR')
-data_im_es_RV,   data_gt_es_RV   = load_data_sub('M','Systole','RV')
+data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
+data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('GPU','Systole','HCM')
+data_im_es_MINF, data_gt_es_MINF = load_data_sub('GPU','Systole','MINF')
+data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('GPU','Systole','NOR')
+data_im_es_RV,   data_gt_es_RV   = load_data_sub('GPU','Systole','RV')
 
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('M','Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('M','Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('M','Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('M','Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('M','Diastole','RV')
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU','Diastole','DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU','Diastole','HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU','Diastole','MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU','Diastole','NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU','Diastole','RV')
 
 
 #%% BATCH GENERATOR
@@ -633,25 +633,25 @@ unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cuda'))
 #im_flat_test_es = im_flat_test_es.cuda()
 
 unet_es.eval()
-out_trained_es = unet_es(Tensor(im_flat_test_es))
+out_trained_es = unet_es(Tensor(im_test_es_sub))
 out_image_es   = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 
 unet_ed.eval()
-out_trained_ed = unet_ed(Tensor(im_flat_test_ed))
+out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
 out_image_ed   = out_trained_ed["softmax"]
 
 #%% One hot encoding
 seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
-ref_dia = torch.nn.functional.one_hot(Tensor(gt_flat_test_ed).to(torch.int64), num_classes=4).detach().numpy()
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().numpy()
 
 seg_met_sys = np.argmax(out_image_es.detach().numpy(), axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().numpy()
-ref_sys = torch.nn.functional.one_hot(Tensor(gt_flat_test_es).to(torch.int64), num_classes=4).detach().numpy()
+ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().numpy()
 
 
 #%% E-map
@@ -672,7 +672,7 @@ for i in range(0, emap.shape[0]):
 emap = np.expand_dims(emap, axis=1)
 #%% Plot
 #% Wrap all inputs together
-im     = Tensor(im_flat_test_ed)
+im     = Tensor(im_test_ed_sub)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_dia, axis=1))
 
@@ -707,7 +707,7 @@ print('Number of epochs = ',num_epoch)
 os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 from SI_func_mic import SI_set
 
-T_j = SI_set('M', 'dia', lim_eval,lim_test)
+T_j = SI_set('GPU', 'dia', lim_eval,lim_test)
 
 
 #%% Prep data
