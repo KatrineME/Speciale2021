@@ -722,10 +722,13 @@ train_amount = 34
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
 
-print('look', input_concat_eval.shape)
+print('train shape', input_concat_train.shape)
+print('eval shape', input_concat_eval.shape)
 T_train = Tensor(T[0:train_amount,:,:,:])
 T_eval  = T[train_amount:,:,:,:]
 
+print('T_train', T_train.shape)
+print('T_eval', T_eval.shape)
 
 #%% Training
 train_losses = []
@@ -747,7 +750,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         labels = Tensor(T_train)
         labels = labels.cuda()
-        print('i=',i)
+        #print('i=',i)
         
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
