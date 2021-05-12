@@ -33,7 +33,7 @@ def SI_set(user, phase, start, stop):
     if user == 'K':
         os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
     elif user == 'GPU':
-        os.chdir("/home/michala/Speciale/Speciale2021/Speciale2021")                      # Server directory michala
+        os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021")                      # Server directory michala
     else:
         os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
     
