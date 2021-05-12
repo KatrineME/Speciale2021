@@ -738,7 +738,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     
     model.train()
     print('Epoch train =',epoch)
-    for i, data in enumerate(trainloader, 0):
+    for i, data_train in enumerate(trainloader, 0):
         # get the inputs
         #inputs, labels = data
         inputs = input_concat_train
@@ -771,7 +771,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         train_loss += loss.item()
         #train_loss.append(loss.item()) #.detach().cpu().numpy()
         
-    train_losses.append(train_loss/data.shape[0]) # This is normalised by batch size
+    train_losses.append(train_loss/data_train.shape[0]) # This is normalised by batch size
     train_loss = 0.0
 
     model.eval()
