@@ -709,6 +709,8 @@ print('Number of epochs = ',num_epoch)
 os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 from SI_func_mic import SI_set
 
+lim_eval = 10
+lim_test = 20
 T_j = SI_set('GPU', 'dia', lim_eval,lim_test)
 
 
