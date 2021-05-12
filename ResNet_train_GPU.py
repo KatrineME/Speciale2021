@@ -679,7 +679,8 @@ seg    = Tensor(np.expand_dims(seg_met_dia, axis=1))
 
 input_concat = torch.cat((im,umap,seg), dim=1)
 
-out    = model(input_concat)
+
+out    = model(input_concat.cuda())
 output = out['softmax'].detach().cpu().numpy()
 
 #%% Setting up training loop
