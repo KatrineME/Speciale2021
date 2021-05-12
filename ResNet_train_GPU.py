@@ -419,8 +419,8 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU','Diastole','RV')
 
 #%% BATCH GENERATOR
 num_train_sub = 16 
-num_eval_sub = num_train_sub + 2
-num_test_sub = num_eval_sub + 2
+num_eval_sub  = num_train_sub + 2
+num_test_sub  = num_eval_sub + 2
 
 
 im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
@@ -616,6 +616,7 @@ if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     unet.cuda()
+    
 #%% Load Model
 #PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
@@ -633,13 +634,13 @@ unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cuda'))
 #im_flat_test_es = im_flat_test_es.cuda()
 
 unet_es.eval()
-out_trained_es = unet_es(Tensor(im_test_es_sub))
+out_trained_es = unet_es(Tensor(im_test_es_sub).cuda())
 out_image_es   = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 
 unet_ed.eval()
-out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
+out_trained_ed = unet_ed(Tensor(im_test_ed_sub).cuda())
 out_image_ed   = out_trained_ed["softmax"]
 
 #%% One hot encoding
