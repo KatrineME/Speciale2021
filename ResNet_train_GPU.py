@@ -375,13 +375,13 @@ if __name__ == "__main__":
 os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021/") 
 
 from load_data_gt_im_sub import load_data_sub
-
+"""
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('GPU','Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub('GPU','Systole','MINF')
 data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('GPU','Systole','NOR')
 data_im_es_RV,   data_gt_es_RV   = load_data_sub('GPU','Systole','RV')
-
+"""
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU','Diastole','DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU','Diastole','HCM')
 data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU','Diastole','MINF')
@@ -394,7 +394,7 @@ num_train_sub = 16
 num_eval_sub  = num_train_sub + 1
 num_test_sub  = num_eval_sub + 2
 
-
+"""
 im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
@@ -407,7 +407,7 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
-
+"""
 im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
@@ -596,18 +596,18 @@ if __name__ == "__main__":
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100_2.pt'
 #PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_big_batch_100_2.pt'
 
-PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt'
+#PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt'
 PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 # Load
-unet_es = torch.load(PATH_model_es, map_location=torch.device('cuda'))
+#unet_es = torch.load(PATH_model_es, map_location=torch.device('cuda'))
 unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cuda'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
 
-unet_es.eval()
-out_trained_es = unet_es(Tensor(im_test_es_sub).cuda())
-out_image_es   = out_trained_es["softmax"]
+#unet_es.eval()
+#out_trained_es = unet_es(Tensor(im_test_es_sub).cuda())
+#out_image_es   = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 
@@ -620,13 +620,13 @@ seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
-
+"""
 seg_met_sys = np.argmax(out_image_es.detach().cpu().numpy(), axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
 ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
-
+"""
 #%% E-map
 import scipy.stats
 
@@ -808,50 +808,14 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Det_dia.pt"
+PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Det_dia.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
 
 torch.save(unet, PATH_model)
 torch.save(unet.state_dict(), PATH_state)
-
-#%% Visualize output from detection network
-PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt'
-
-# Load
-unet_es = torch.load(PATH_model_es, map_location=torch.device('cuda'))
-
-out_test    = model(input_concat)
-output_test = out_test['softmax'].detach().numpy()
-
-image = 30
-
-plt.figure(dpi=200)
-plt.subplot(1,2,1)
-plt.imshow(output_test[image,0,:,:])
-plt.title('Prob. of no seg. failure')
-plt.colorbar(fraction=0.05)
-plt.subplots_adjust(hspace = 0.05, wspace = 0.4)
-
-plt.subplot(1,2,2)
-plt.imshow(output_test[image,1,:,:])
-plt.title('Prob. of seg. failure')
-plt.colorbar(fraction=0.05)
-
-#%% Upsample
-
-test_im = Tensor(np.expand_dims(output_test[30:32,1,:,:],axis=0))
-up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
-
-up_im = up(test_im)
-print(np.unique(up_im))
-
-plt.imshow(up_im[0,1,:,:])
-plt.imshow(im_flat_test_ed[31,0,:,:], alpha= 0.3)
-
-
 
 
 
