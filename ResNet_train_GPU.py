@@ -722,10 +722,12 @@ train_amount = 40
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
 
-print('look', input_concat_eval.shape)
+print('look', input_concat.shape)
 T_train = Tensor(T[0:train_amount,:,:,:])
 T_eval  = T[train_amount:,:,:,:]
 
+
+"""
 #%% Training
 train_losses = []
 eval_losses  = []
