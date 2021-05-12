@@ -644,12 +644,12 @@ out_trained_ed = unet_ed(Tensor(im_test_ed_sub).cuda())
 out_image_ed   = out_trained_ed["softmax"]
 
 #%% One hot encoding
-seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
+seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
-seg_met_sys = np.argmax(out_image_es.detach().numpy(), axis=1)
+seg_met_sys = np.argmax(out_image_es.detach().cpu().numpy(), axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
 ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
