@@ -711,7 +711,7 @@ from SI_func_mic import SI_set
 
 lim_eval = 1
 lim_test = 2
-T_j = SI_set('GPU', 'dia', lim_eval,lim_test)
+T_j = SI_set('GPU', 'dia')
 
 
 #%% Prep data

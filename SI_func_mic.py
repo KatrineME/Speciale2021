@@ -11,7 +11,7 @@ Created on Wed Apr 28 14:03:20 2021
 
 @author: katrine
 """
-def SI_set(user, phase, start, stop):
+def SI_set(user, phase):
 
     #%% Load packages
     import torch
@@ -38,36 +38,54 @@ def SI_set(user, phase, start, stop):
         os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
     
     # Load data function
-    from load_data_gt_im import load_data
+    from load_data_gt_im_sub import load_data_sub
     
     if phase == 'sys':
-        data_im_es, data_gt_es = load_data(user,'Systole')
+       data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
+       data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
+       data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
+       data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,'Systole','NOR')
+       data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,'Systole','RV')
     else:
-        data_im_es, data_gt_es = load_data(user,'Diastole')
+        data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Diastole','DCM')
+        data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Diastole','HCM')
+        data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Diastole','MINF')
+        data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,'Diastole','NOR')
+        data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,'Diastole','RV')
     
-    #%% Load  subjects
-    
-    # SYSTOLIC
-    im_flat_train_es = np.concatenate(data_im_es[start:stop]).astype(None)
-    gt_flat_train_es = np.concatenate(data_gt_es[start:stop]).astype(None)
+
+#%% BATCH GENERATOR
+num_train_sub = 16 
+num_eval_sub = num_train_sub + 2
+num_test_sub = num_eval_sub + 2
 
 
-    #im_flat_eval_es = np.concatenate(data_im_es[num_train:lim_eval]).astype(None)
-    #gt_flat_eval_es = np.concatenate(data_gt_es[num_train:lim_eval]).astype(None)
+im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
-    #im_flat_test_es = np.concatenate(data_im_es[lim_eval:lim_test]).astype(None)
-    #gt_flat_test_es = np.concatenate(data_gt_es[lim_eval:lim_test]).astype(None)
-    
-    # DIASTOLIC
-    #im_flat_train_ed = np.concatenate(data_im_ed[0:num_train]).astype(None)
-    #gt_flat_train_ed = np.concatenate(data_gt_ed[0:num_train]).astype(None)
+gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
-    #im_flat_eval_ed = np.concatenate(data_im_ed[num_train:lim_eval]).astype(None)
-    #gt_flat_eval_ed = np.concatenate(data_gt_ed[num_train:lim_eval]).astype(None)
+"""
+im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
 
-    #im_flat_test_ed = np.concatenate(data_im_ed[lim_eval:lim_test]).astype(None)
-    #gt_flat_test_ed = np.concatenate(data_gt_ed[lim_eval:lim_test]).astype(None)
-    
+gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+"""
+
 #%% BayesUNet
     # recursive implementation of Unet
     
@@ -252,7 +270,7 @@ def SI_set(user, phase, start, stop):
     
     # SYSTOLIC
     unet.eval()
-    output_unet= unet(Tensor(im_flat_train_es).cuda())
+    output_unet= unet(Tensor(im_test_es_sub).cuda())
     output_unet= output_unet["softmax"]
     
     #output_unet_es_eval = unet_es(Tensor(im_flat_eval_es))
@@ -273,7 +291,7 @@ def SI_set(user, phase, start, stop):
     #output_unet_ed_test = output_unet_ed_test["softmax"]
     
     #%% Onehot encode class channels
-    gt_es_oh_train = torch.nn.functional.one_hot(Tensor(gt_flat_train_es).to(torch.int64), num_classes=4).detach().cpu().numpy().astype(np.bool)
+    gt_es_oh_train = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().cpu().numpy().astype(np.bool)
     
     # Argmax
     seg_met_sys_train = np.argmax(output_unet.detach().cpu().numpy(), axis=1)
