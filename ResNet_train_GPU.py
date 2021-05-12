@@ -834,9 +834,9 @@ plt.legend(loc="upper right")
 plt.title("Loss function")
 plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
-"""
-#%% Visualize output from detection network
 
+#%% Visualize output from detection network
+"""
 out_test    = model(input_concat)
 output_test = out_test['softmax'].detach().numpy()
 
@@ -865,7 +865,7 @@ print(np.unique(up_im))
 plt.imshow(up_im[0,1,:,:])
 plt.imshow(im_flat_test_ed[31,0,:,:], alpha= 0.3)
 
-
+"""
 #%% Save model
 PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt"
@@ -876,5 +876,5 @@ PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Det_sys.pt"
 torch.save(unet, PATH_model)
 torch.save(unet.state_dict(), PATH_state)
 
-"""
+
 
