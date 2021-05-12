@@ -367,10 +367,11 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
-os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from load_data_gt_im_sub import load_data_sub
-user = 'M' 
+#user = 'M'
+user = 'K' 
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
@@ -589,7 +590,8 @@ if __name__ == "__main__":
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100_2.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_sub_batch_100.pt'
+PATH_model_ed  = 'C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_sub_batch_100.pt'
+#PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 #PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt'
 #PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
@@ -669,27 +671,27 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_d
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 20
+num_epoch = 10
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
-#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
 #os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 
-pwd
+
 #%%
 from SI_func_mic import SI_set
 
 lim_eval = 1
 lim_test = 1
-T_j = SI_set('M', 'dia')
+T_j = SI_set('K', 'dia')
 
 
 #%% Prep data
 T = np.expand_dims(T_j, axis=1)
 
 print('T', T.shape)
-train_amount = 34
+train_amount = 60
 
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
@@ -803,7 +805,51 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
+#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
+
+#%% Visualize output from detection network
+
+out_test    = model(input_concat_eval)
+output_test = out_test['softmax'].detach().numpy()
+
+#%%
+image = 16
+
+plt.figure(dpi=200)
+plt.subplot(1,2,1)
+plt.imshow(output_test[image,0,:,:])
+plt.title('Prob. of no seg. failure')
+plt.colorbar(fraction=0.05)
+plt.subplots_adjust(hspace = 0.05, wspace = 0.4)
+
+plt.subplot(1,2,2)
+plt.imshow(output_test[image,1,:,:])
+plt.title('Prob. of seg. failure')
+plt.colorbar(fraction=0.05)
+
+#%% Upsample
+upper_image = image - 1
+lower_image = image + 1
+
+#test_im = Tensor(np.expand_dims(output_test[lower_image:upper_image,1,:,:],axis=0))
+test_im = Tensor(np.expand_dims(output_test[13:15,1,:,:],axis=0))
+
+up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
+
+up_im = up(test_im)
+
+#up_im[up_im > 0] = 1
+
+plt.figure(dpi=200)
+plt.subplot(1,2,1)
+plt.imshow(input_concat[image,2,:,:])
+#plt.imshow(up_im[0,0,:,:])
+plt.imshow(im_test_ed_sub[image,0,:,:], alpha= 0.2)
+plt.subplot(1,2,2)
+plt.imshow(up_im[0,1,:,:])
+#plt.imshow(im_test_ed_sub[image,0,:,:], alpha= 0.2)
+
+
 
 
 #%% Save model
