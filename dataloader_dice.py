@@ -353,12 +353,13 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
         inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
+        labels = Tensor(np.expand_dims(labels,axis=1))
         labels = labels.cuda()
         #print('i=',i)
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
-        labels_pred = Tensor(np.expand_dims(labels,axis=1).detach().cpu().numpy())
+        #labels_pred = Tensor(np.expand_dims(labels,axis=1))
         
         # Clear the gradients
         optimizer.zero_grad()
@@ -371,7 +372,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Find loss
         #loss = criterion(output, labels)
-        loss = dice_loss(output, labels_pred)
+        loss = dice_loss(output, labels)
 
         #print('loss = ', loss)
         
@@ -397,6 +398,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
         inputs = inputs.cuda()
         labels = eval_data[:,1,:,:]
+        labels = Tensor(np.expand_dims(labels,axis=1))
         labels = labels.cuda()
         
         #print('i=',i)
@@ -412,7 +414,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         # Find loss
         #loss = criterion(output, labels)
-        loss = dice_loss(output, labels_pred)
+        loss = dice_loss(output, labels)
         
         # Calculate loss
         #eval_loss.append(loss.item())
