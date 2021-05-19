@@ -350,10 +350,10 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
-        #inputs = inputs.cuda()
+        inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
         labels = Tensor(np.expand_dims(labels,axis=1))
-        #labels = labels.cuda()
+        labels = labels.cuda()
         #print('i=',i)
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
@@ -383,7 +383,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
 
         # Calculate loss
         train_loss += loss.item() #.detach().cpu().numpy()
-        """
+        
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     #train_losses.append(np.mean(batch_loss))
     train_loss = 0.0 #[]
@@ -423,7 +423,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     eval_losses.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
     #eval_losses.append(np.mean(eval_loss))
     eval_loss = 0.0
-"""
+    
 print('Finished Training + Evaluation')
         
 
@@ -439,7 +439,7 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_loss.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_loss.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
