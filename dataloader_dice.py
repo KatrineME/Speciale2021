@@ -358,7 +358,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
-        labels_pred = Tensor(np.expand_dims(labels,axis=1))
+        labels_pred = Tensor(np.expand_dims(labels,axis=1)).detach().cpu().numpy()
         
         # Clear the gradients
         optimizer.zero_grad()
