@@ -12,7 +12,7 @@ import math
 import os
 import numpy as np
 import torch.optim as optim
-from torch.autograd  import Variable
+from torch.autograd import Variable
 import matplotlib.pyplot as plt
 from torch import Tensor
 import torch.utils.model_zoo as model_zoo
@@ -367,29 +367,29 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from load_data_gt_im_sub import load_data_sub
-#user = 'M'
-user = 'K' 
+user = 'M'
+#user = 'K' 
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
 data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,'Systole','NOR')
 data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,'Systole','RV')
-
+"""
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
 data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
 data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
 data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
-
+"""
 
 #%% BATCH GENERATOR
 num_train_sub = 16 
 num_eval_sub  = num_train_sub + 2
 num_test_sub  = num_eval_sub + 2
-"""
+
 im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
@@ -415,7 +415,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-
+"""
 
 
 #%% Load U-NET
@@ -589,30 +589,31 @@ if __name__ == "__main__":
 #PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
 
-#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_big_batch_100_2.pt'
-PATH_model_ed  = 'C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_sub_batch_100.pt'
+PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
+#PATH_model_ed  = 'C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_sub_batch_100.pt'
 #PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 #PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt'
 #PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 # Load
-#unet_es = torch.load(PATH_model_es, map_location=torch.device('cuda'))
-unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
+unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
+#unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
 
-#unet_es.eval()
-#out_trained_es = unet_es(Tensor(im_test_es_sub).cuda())
-#out_image_es   = out_trained_es["softmax"]
+unet_es.eval()
+out_trained_es = unet_es(Tensor(im_test_es_sub))
+out_image_es   = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 
-unet_ed.eval()
-out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
-out_image_ed   = out_trained_ed["softmax"]
+#unet_ed.eval()
+#out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
+#out_image_ed   = out_trained_ed["softmax"]
 
 #%% One hot encoding
+"""
 seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
@@ -623,15 +624,16 @@ seg_met_sys = np.argmax(out_image_es.detach().cpu().numpy(), axis=1)
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
 ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
-"""
+
 #%% E-map
 import scipy.stats
 
-emap = np.zeros((out_image_ed.shape[0],out_image_ed.shape[2],out_image_ed.shape[3]))
+#emap = np.zeros((out_image_ed.shape[0],out_image_ed.shape[2],out_image_ed.shape[3]))
+emap = np.zeros((out_image_es.shape[0],out_image_es.shape[2],out_image_es.shape[3]))
 
 for i in range(0, emap.shape[0]):
 
-    out_img = (out_image_ed[i,:,:].detach().cpu().numpy())
+    out_img = (out_image_es[i,:,:].detach().cpu().numpy())
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
@@ -643,9 +645,15 @@ emap = np.expand_dims(emap, axis=1)
 
 #%% Plot
 #% Wrap all inputs together
-im     = Tensor(im_test_ed_sub)
+im     = Tensor(im_test_es_sub)
 umap   = Tensor(emap)
-seg    = Tensor(np.expand_dims(seg_met_dia, axis=1))
+seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
+
+"""
+for i in range(0,9):
+    plt.subplot(4,3,i+1)
+    plt.imshow(seg[i+47,0,:,:])
+"""    
 
 input_concat = torch.cat((im,umap,seg), dim=1)
 
@@ -658,12 +666,13 @@ output = out['softmax'].detach().cpu().numpy()
 
 LEARNING_RATE = 0.0001 # 
 criterion     = nn.CrossEntropyLoss() 
+#criterion = nn.NLLLoss()
 #criterion     = nn.BCELoss()
 #criterion     = SoftDice
 #criterion     = brier_score_loss()
 
 # weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_decay=1e-4)
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 # torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 
 # and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
@@ -671,47 +680,36 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-04, weight_d
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 10
+num_epoch = 20
+
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
-os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
 #os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 
-
-#%%
 from SI_func_mic import SI_set
 
-lim_eval = 1
-lim_test = 1
-T_j = SI_set('K', 'dia')
-
+T_j = SI_set(user, 'sys')
 
 #%% Prep data
 T = np.expand_dims(T_j, axis=1)
 
-print('T', T.shape)
 train_amount = 60
 
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
-print('input', input_concat.shape)
 
-
-print('train shape', input_concat_train.shape)
-print('eval shape', input_concat_eval.shape)
 T_train = Tensor(T[0:train_amount,:,:,:])
 T_eval  = T[train_amount:,:,:,:]
-
-print('T_train', T_train.shape)
-print('T_eval', T_eval.shape)
-
+    
 #%% Training
 train_losses = []
 eval_losses  = []
 eval_loss    = 0.0
 train_loss   = 0.0
-
+fn_penalty_weight = 1.2
+fp_penalty_weight = 0.085
 
 trainloader = input_concat_train
 
@@ -731,17 +729,30 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
-        labels = torch.argmax(labels, dim=1)
+        #labels = torch.argmax(labels, dim=1)
         labels = labels.long()
+        labels = np.squeeze(labels)
         # Clear the gradients
         optimizer.zero_grad()
        
         # Forward Pass
         output = model(inputs)     
         output = output["log_softmax"]
-        
+        """
         # Find loss
+        # false negative
+        #inputs = inputs.view(inputs.size(0), 2, -1)
+        fn_soft = output[:, 0] * labels.float()
+        batch_size = output.size(0)  
+        fn_soft = torch.sum(fn_soft) * 1 / float(batch_size)
+        
+        ones = torch.ones(labels.size())
+        fp_soft = (ones - labels.float()) * output[:, 1]
+        # fp_nonzero = torch.nonzero(fp_soft).size(0)
+        fp_soft = torch.sum(fp_soft) * 1 / float(batch_size)
+        """
         loss = criterion(output, labels)
+        #loss = loss #+ fn_penalty_weight * fn_soft + fp_penalty_weight * fp_soft
         
         # Calculate gradients
         loss.backward()
@@ -768,8 +779,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
-        labels = torch.argmax(labels, dim=1)
+        #labels = torch.argmax(labels, dim=1)
         labels = labels.long()
+        labels = np.squeeze(labels)
         # Clear the gradients
         optimizer.zero_grad()
        
@@ -788,8 +800,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         eval_loss += loss.item()#.detach().cpu().numpy()
         
     eval_losses.append(eval_loss/data_eval.shape[0]) # This is normalised by batch size
-    eval_loss = 0.0
-    
+    eval_loss = 0.0 
 
 print('Finished Training + Evaluation')
 
@@ -813,41 +824,55 @@ out_test    = model(input_concat_eval)
 output_test = out_test['softmax'].detach().numpy()
 
 #%%
-image = 16
+image = 24
 
+k = np.zeros((output_test.shape[0],2,16,16))
+
+for i in range (0,output_test.shape[0]):
+    k[i,:,:,:] = output_test[i,:,:,:] > 0.1
+    
 plt.figure(dpi=200)
-plt.subplot(1,2,1)
+plt.subplot(1,3,1)
 plt.imshow(output_test[image,0,:,:])
-plt.title('Prob. of no seg. failure')
+plt.title('no seg. failure')
 plt.colorbar(fraction=0.05)
-plt.subplots_adjust(hspace = 0.05, wspace = 0.4)
+plt.subplots_adjust(hspace = 0.05, wspace = 0.5)
 
-plt.subplot(1,2,2)
+plt.subplot(1,3,2)
 plt.imshow(output_test[image,1,:,:])
-plt.title('Prob. of seg. failure')
+plt.title('seg. failure')
 plt.colorbar(fraction=0.05)
 
-#%% Upsample
+plt.subplot(1,3,3)
+plt.imshow(k[image,1,:,:])
+plt.title('bin 0.1')
+#plt.colorbar(fraction=0.05)
+
+#% Upsample
 upper_image = image - 1
 lower_image = image + 1
 
 #test_im = Tensor(np.expand_dims(output_test[lower_image:upper_image,1,:,:],axis=0))
-test_im = Tensor(np.expand_dims(output_test[13:15,1,:,:],axis=0))
+#test_im = Tensor(np.expand_dims(output_test[upper_image:lower_image,1,:,:],axis=0))
+test_im = Tensor(np.expand_dims(k[upper_image:lower_image,1,:,:],axis=0))
 
 up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
 
-up_im = up(test_im)
+up_im = up(test_im) > 0
 
 #up_im[up_im > 0] = 1
 
 plt.figure(dpi=200)
-plt.subplot(1,2,1)
-plt.imshow(input_concat[image,2,:,:])
+plt.subplot(1,3,1)
+plt.imshow(input_concat_eval[image,2,:,:])
 #plt.imshow(up_im[0,0,:,:])
-plt.imshow(im_test_ed_sub[image,0,:,:], alpha= 0.2)
-plt.subplot(1,2,2)
+plt.imshow(input_concat_eval[image,0,:,:], alpha= 0.4)
+plt.subplot(1,3,2)
 plt.imshow(up_im[0,1,:,:])
-#plt.imshow(im_test_ed_sub[image,0,:,:], alpha= 0.2)
+plt.imshow(input_concat_eval[image,0,:,:], alpha= 0.4)
+plt.subplot(1,3,3)
+plt.imshow(up_im[0,1,:,:])
+plt.imshow(np.argmax((ref_sys[image+70,:,:,:]),axis=2), alpha= 0.6)
 
 
 

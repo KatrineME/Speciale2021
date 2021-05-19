@@ -269,7 +269,6 @@ def SI_set(user, phase):
         unet = torch.load(PATH_model_ed, map_location=torch.device(device))
         
     #%% Running  models 
-    print('systolic')
     # SYSTOLIC
     unet.eval()
     output_unet= unet(Tensor(im_test_es_sub))
