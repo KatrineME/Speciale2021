@@ -299,7 +299,7 @@ def dice_loss(pred,target):
     denominator = torch.sum(pred + target)
     return 1 - (numerator + 1) / (denominator + 1)
 
-def soft_dice_loss(y_true, y_pred, epsilon=1e-6): 
+def soft_dice_loss(y_true, y_pred, epsilon = 1e-6): 
     """Soft dice loss calculation for arbitrary batch size, number of classes, and number of spatial dimensions.
     Assumes the `channels_last` format.
   
@@ -311,10 +311,11 @@ def soft_dice_loss(y_true, y_pred, epsilon=1e-6):
    
     # skip the batch and class axis for calculating Dice score
     axes = tuple(range(1, len(y_pred.shape)-1)) 
-    numerator = 2. * np.sum(y_pred * y_true, axes)
+    numerator   = 2. * np.sum(y_pred * y_true, axes)
     denominator = np.sum(np.square(y_pred) + np.square(y_true), axes)
     
-    return 1 - np.mean(numerator / (denominator + epsilon)) # average over classes
+    return 1 - np.mean(numerator / (denominator + epsilon)) # average over classes and batch
+
 
 LEARNING_RATE = 0.0001 # 
 #criterion    = dice_loss()
@@ -332,8 +333,6 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               gamma=0.1)
 
 num_epoch = 20
-
-
 
 
 #%% Training
@@ -372,7 +371,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Find loss
         #loss = criterion(output, labels)
-        loss = dice_loss(output, labels)
+        loss = soft_dice_loss(labels, output)
 
         #print('loss = ', loss)
         
@@ -414,7 +413,8 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         # Find loss
         #loss = criterion(output, labels)
-        loss = dice_loss(output, labels)
+        loss = soft_dice_loss(labels, output)
+
         
         # Calculate loss
         #eval_loss.append(loss.item())
