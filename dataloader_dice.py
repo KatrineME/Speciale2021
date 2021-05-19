@@ -225,7 +225,7 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 16 
+num_train_sub = 5 # 16 
 num_eval_sub = num_train_sub + 2
 num_test_sub = num_eval_sub + 2
 
@@ -310,9 +310,9 @@ def soft_dice_loss(y_true, y_pred, epsilon = 1e-6):
     """
    
     # skip the batch and class axis for calculating Dice score
-    axes = tuple(range(1, len(y_pred.shape)-1)) 
-    numerator   = 2. * np.sum(y_pred * y_true, axes)
-    denominator = np.sum(np.square(y_pred) + np.square(y_true), axes)
+    axes = 1 # tuple(range(1, len(y_pred.shape)-1)) 
+    numerator   = 2. * torch.sum(y_pred * y_true, axes)
+    denominator = torch.sum(np.square(y_pred) + np.square(y_true), axes)
     
     return 1 - np.mean(numerator / (denominator + epsilon)) # average over classes and batch
 
@@ -332,7 +332,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 20
+num_epoch = 1
 
 
 #%% Training
@@ -350,10 +350,10 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
-        inputs = inputs.cuda()
+        #inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
         labels = Tensor(np.expand_dims(labels,axis=1))
-        labels = labels.cuda()
+        #labels = labels.cuda()
         #print('i=',i)
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
@@ -383,7 +383,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
 
         # Calculate loss
         train_loss += loss.item() #.detach().cpu().numpy()
-        
+        """
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     #train_losses.append(np.mean(batch_loss))
     train_loss = 0.0 #[]
@@ -423,7 +423,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     eval_losses.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
     #eval_losses.append(np.mean(eval_loss))
     eval_loss = 0.0
-
+"""
 print('Finished Training + Evaluation')
         
 
