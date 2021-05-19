@@ -351,9 +351,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
-        #inputs = inputs.cuda()
+        inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
-        #labels = labels.cuda()
+        labels = labels.cuda()
         #print('i=',i)
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
