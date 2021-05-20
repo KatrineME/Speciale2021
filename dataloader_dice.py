@@ -305,7 +305,7 @@ def soft_dice_loss(y_true, y_pred):
 
 
 
-LEARNING_RATE = 0.001 # 
+LEARNING_RATE = 0.0001 # 
 #criterion    = dice_loss()
 #criterion     = nn.BCELoss()
 #criterion     = SoftDice
@@ -341,7 +341,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         
         labels = train_data[:,1,:,:]
-        labels = Tensor(np.expand_dims(labels, axis=1))
+        #labels = Tensor(np.expand_dims(labels, axis=1))
+        labels = Tensor(torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4))#.detach().numpy()
+
         labels = labels.cuda()
         #print('i=',i)
         # wrap them in Variable
@@ -386,7 +388,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
         inputs = inputs.cuda()
         labels = eval_data[:,1,:,:]
-        labels = Tensor(np.expand_dims(labels, axis=1))
+        #labels = Tensor(np.expand_dims(labels, axis=1))
+        labels = Tensor(torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4))#.detach().numpy()
+
         labels = labels.cuda()
         
         #print('i=',i)
