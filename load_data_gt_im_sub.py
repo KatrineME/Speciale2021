@@ -88,8 +88,8 @@ def load_data_sub(user, phase, diagnose):
         centercrop_img = Tensor(np.zeros((H,W,im_slices)))
         centercrop_gt  = Tensor(np.zeros((H,W,gt_slices)))
                 
-        gt_slices     = anno.shape[2]
-        centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
+        #gt_slices     = anno.shape[2]-1
+        #centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
             
         for j in range(0,im_slices):
             centercrop_img[:,:,j] = centercrop(Tensor(img[:,:,j]))
@@ -103,3 +103,8 @@ def load_data_sub(user, phase, diagnose):
         gt.append(in_gt.astype(object))
         
     return im, gt
+
+
+
+
+

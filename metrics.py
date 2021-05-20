@@ -94,7 +94,7 @@ def precision(result, reference):
     try:
         precision = tp / float(tp + fp)
     except ZeroDivisionError:
-        precision = 0.0
+        precision = 1# 0.0
     
     return precision
 

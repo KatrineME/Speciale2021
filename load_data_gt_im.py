@@ -93,12 +93,19 @@ def load_data(user,phase):
     return im, gt
 
 #%% Example on how to call function:
-    
-# im_trial,gt_trial = load_data('K','Systole')
+
+im_trial,gt_trial = load_data('M','Diastole')
 
 #%% How to concatenate lists of data:
 #gt_sys = np.concatenate(gt_sys).astype(None)
 #im_sys = np.concatenate(im_sys).astype(None)
 
-#gt_dia = np.concatenate(gt_dia).astype(None)
+gt_dia = np.concatenate(gt_trial).astype(None)
 #im_dia = np.concatenate(im_dia).astype(None)
+
+
+
+plt.imshow(gt_dia[])
+
+
+
