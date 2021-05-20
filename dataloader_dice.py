@@ -298,19 +298,18 @@ print("The shape of the data loader", len(eval_dataloader),
 #y_true = labels
 
 def soft_dice_loss(y_true, y_pred):
+     """ Calculate soft dice loss for each class
+        y_pred = bs x c x h x w
+        y_true = bs x c x h x w (one hot)
+     """
      eps = 1e-6
+     
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
      denominator = torch.sum(torch.square(y_pred) + y_true, (2,3))
      
      return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
 
-
-
 LEARNING_RATE = 0.0001 # 
-#criterion    = dice_loss()
-#criterion     = nn.BCELoss()
-#criterion     = SoftDice
-#criterion     = brier_score_loss()
 
 # weight_decay is equal to L2 regularizationst
 optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
