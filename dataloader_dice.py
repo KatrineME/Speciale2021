@@ -362,7 +362,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #loss = criterion(output, labels)
         loss = soft_dice_loss(labels, output)
 
-        #print('loss = ', loss)
+        print('loss = ', loss)
         
         # Calculate gradients
         loss.backward()
