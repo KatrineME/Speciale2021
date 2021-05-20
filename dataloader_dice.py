@@ -305,7 +305,7 @@ def soft_dice_loss(y_true, y_pred):
 
 
 
-LEARNING_RATE = 0.0001 # 
+LEARNING_RATE = 0.001 # 
 #criterion    = dice_loss()
 #criterion     = nn.BCELoss()
 #criterion     = SoftDice
