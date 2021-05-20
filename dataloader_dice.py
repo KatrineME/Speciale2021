@@ -343,6 +343,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         labels = train_data[:,1,:,:]
         #labels = Tensor(np.expand_dims(labels, axis=1))
         labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
+        labels = labels.permute(0,3,1,2)
         #labels = Tensor(labels)
         labels = labels.cuda()
         #print('i=',i)
@@ -390,6 +391,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         labels = eval_data[:,1,:,:]
         #labels = Tensor(np.expand_dims(labels, axis=1))
         labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
+        labels = labels.permute(0,3,1,2)
         #labels = Tensor(labels)
         labels = labels.cuda()
         
