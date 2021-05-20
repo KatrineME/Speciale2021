@@ -322,6 +322,26 @@ def soft_dice_score(prob_c, one_hot):
 
     return - torch.mean(nominator/denominator)
 
+def soft_dice_loss(prob_c, true_label_c):
+    """
+    Computing the soft-dice-loss for a SPECIFIC class according to:
+    DICE_c = \frac{\sum_{i=1}^{N} (R_c(i) * A_c(i) ) }{ \sum_{i=1}^{N} (R_c(i) +   \sum_{i=1}^{N} A_c(i)  }
+    Input: (1) probs: 4-dim tensor [batch_size, num_of_classes, width, height]
+               contains the probabilities for each class
+           (2) true_binary_labels, [z, y, x]
+           Remember that classes 0-3 belongs to ES images (phase) and 4-7 to ED images
+    """
+    eps = 1.0e-6
+    n_classes = prob_c.size(1)
+    true_label_c = torch.zeros(prob_c.shape).scatter_(1, true_label_c.unsqueeze(1), 1)
+    if not isinstance(true_label_c, torch.FloatTensor) and not isinstance(true_label_c, torch.DoubleTensor):
+        true_label_c = true_label_c.float()
+    losses = torch.FloatTensor(n_classes).cuda()
+    for cls_idx in np.arange(n_classes):
+        losses[cls_idx] = torch.sum(true_label_c[:, cls_idx] * prob_c[:, cls_idx]) / \
+                          (torch.sum(true_label_c[:, cls_idx]) + torch.sum(prob_c[:, cls_idx]) + eps)
+
+    return (-1.) * torch.sum(losses)
 
     
 LEARNING_RATE = 0.0001 # 
@@ -380,7 +400,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Find loss
         #loss = criterion(output, labels)
-        loss = soft_dice_score(output, labels)
+        loss = soft_dice_loss(output, labels)
 
         #print('loss = ', loss)
         
@@ -424,7 +444,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         # Find loss
         #loss = criterion(output, labels)
-        loss = soft_dice_score(output,labels)
+        loss = soft_dice_loss(output,labels)
 
         
         # Calculate loss
