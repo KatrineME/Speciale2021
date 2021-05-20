@@ -335,8 +335,8 @@ def soft_dice_loss(prob_c, true_label_c):
     n_classes = prob_c.size(1)
     true_label_c = torch.zeros(prob_c.shape).scatter_(1, true_label_c.unsqueeze(1), 1)
     if not isinstance(true_label_c, torch.FloatTensor) and not isinstance(true_label_c, torch.DoubleTensor):
-        true_label_c = true_label_c.float()
-    losses = torch.FloatTensor(n_classes)#.cuda()
+        true_label_c = true_label_c.float().cuda()
+    losses = torch.FloatTensor(n_classes).cuda()
     for cls_idx in np.arange(n_classes):
         losses[cls_idx] = torch.sum(true_label_c[:, cls_idx] * prob_c[:, cls_idx]) / \
                           (torch.sum(true_label_c[:, cls_idx]) + torch.sum(prob_c[:, cls_idx]) + eps)
