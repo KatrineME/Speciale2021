@@ -295,55 +295,16 @@ print("The shape of the data loader", len(eval_dataloader),
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
 
-def soft_dice_score(prob_c, one_hot):
-    """
-    Computing the soft-dice-loss for a SPECIFIC class according to:
-    DICE_c = \frac{\sum_{i=1}^{N} (R_c(i) * A_c(i) ) }{ \sum_{i=1}^{N} (R_c(i) +   \sum_{i=1}^{N} A_c(i)  }
-    Input: (1) probs: 4-dim tensor [batch_size, num_of_classes, width, height]
-               contains the probabilities for each class
-           (2) true_binary_labels, 4-dim tensor with the same dimensionalities as probs, but contains binary
-           labels for a specific class
-           Remember that classes 0-3 belongs to ES images (phase) and 4-7 to ED images
-    """
-    eps = 1.0e-6
 
-    # if not isinstance(true_label_c, torch.FloatTensor) and not isinstance(true_label_c, torch.DoubleTensor):
-    #     true_label_c = true_label_c.float()
+def soft_dice_loss(y_true, y_pred):
+     eps = 1e-6
+     numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
+     denominator = torch.sum(torch.square(y_pred) + y_true, (2,3))
+     
+     return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
 
-    # nominator = torch.sum(one_hot * prob_c) # seems to be faster for small tensors, but slower for large tensors
-    # Bob's version
-    # nominator = torch.dot(one_hot.view(-1), prob_c.view(-1)) # the other way around
-    # denominator = torch.sum(one_hot) + torch.sum(prob_c) + eps
-    # Jorg's version: first compute loss per class and then sum all class losses
-    
-    nominator = 2 * torch.sum(one_hot * prob_c, dim=(2, 3))
-    
-    denominator = torch.sum(one_hot, dim=(2, 3)) + torch.sum(prob_c, dim=(2, 3)) + eps
 
-    return - torch.mean(nominator/denominator)
 
-def soft_dice_loss(prob_c, true_label_c):
-    """
-    Computing the soft-dice-loss for a SPECIFIC class according to:
-    DICE_c = \frac{\sum_{i=1}^{N} (R_c(i) * A_c(i) ) }{ \sum_{i=1}^{N} (R_c(i) +   \sum_{i=1}^{N} A_c(i)  }
-    Input: (1) probs: 4-dim tensor [batch_size, num_of_classes, width, height]
-               contains the probabilities for each class
-           (2) true_binary_labels, [z, y, x]
-           Remember that classes 0-3 belongs to ES images (phase) and 4-7 to ED images
-    """
-    eps = 1.0e-6
-    n_classes = prob_c.size(1)
-    true_label_c = torch.zeros(prob_c.shape).scatter_(1, true_label_c.unsqueeze(1), 1)
-    if not isinstance(true_label_c, torch.FloatTensor) and not isinstance(true_label_c, torch.DoubleTensor):
-        true_label_c = true_label_c.float().cuda()
-    losses = torch.FloatTensor(n_classes).cuda()
-    for cls_idx in np.arange(n_classes):
-        losses[cls_idx] = torch.sum(true_label_c[:, cls_idx] * prob_c[:, cls_idx]) / \
-                          (torch.sum(true_label_c[:, cls_idx]) + torch.sum(prob_c[:, cls_idx]) + eps)
-
-    return (-1.) * torch.sum(losses)
-
-    
 LEARNING_RATE = 0.0001 # 
 #criterion    = dice_loss()
 #criterion     = nn.BCELoss()
@@ -359,7 +320,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 20
+num_epoch = 10
 
 
 #%% Training
@@ -378,10 +339,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
         inputs = inputs.cuda()
+        
         labels = train_data[:,1,:,:]
-        #labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
-        #labels = labels.permute(0,3,1,2)
-        labels = Tensor(labels)#np.expand_dims(labels,axis=1))
+        labels = Tensor(np.expand_dims(labels, axis=1))
         labels = labels.cuda()
         #print('i=',i)
         # wrap them in Variable
@@ -400,7 +360,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Find loss
         #loss = criterion(output, labels)
-        loss = soft_dice_loss(output, labels)
+        loss = soft_dice_loss(labels, output)
 
         #print('loss = ', loss)
         
@@ -444,7 +404,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         # Find loss
         #loss = criterion(output, labels)
-        loss = soft_dice_loss(output,labels)
+        loss = soft_dice_loss(labels, output)
 
         
         # Calculate loss
