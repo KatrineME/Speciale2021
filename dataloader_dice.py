@@ -225,7 +225,7 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 16 
+num_train_sub = 1 # 16 
 num_eval_sub = num_train_sub + 2
 num_test_sub = num_eval_sub + 2
 
@@ -294,7 +294,8 @@ print("The shape of the data loader", len(eval_dataloader),
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
-
+#y_pred = output
+#y_true = labels
 
 def soft_dice_loss(y_true, y_pred):
      eps = 1e-6
@@ -357,7 +358,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
        
         # Forward Pass
         output = unet(inputs)     
-        output = output["log_softmax"]
+        output = output["softmax"]
         
         #print('output shape = ', output.shape)
         
@@ -405,7 +406,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Forward pass
         output = unet(inputs)     
-        output = output["log_softmax"]
+        output = output["softmax"]
         # Find loss
         #loss = criterion(output, labels)
         loss = soft_dice_loss(labels, output)
