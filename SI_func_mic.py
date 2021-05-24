@@ -288,7 +288,7 @@ def SI_set(user, phase):
         
     
     if phase == 'sys':
-        unet = torch.load(PATH_model_es, map_location=torch.device('cpu'))
+        unet = torch.load(PATH_model_es, map_location=torch.device(device))
     else:
         unet = torch.load(PATH_model_ed, map_location=torch.device(device))
         
