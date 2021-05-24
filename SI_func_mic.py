@@ -275,6 +275,7 @@ def SI_set(user, phase):
         #import torchsummary
         unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
         unet.cuda()
+        
     #%% Load model
     if user == 'K':
         PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_sub_batch_100.pt"
@@ -300,7 +301,7 @@ def SI_set(user, phase):
     unet.eval()
     im_train_es_res = Tensor(im_train_es_res)
     im_train_es_res = im_train_es_res.cuda()
-    output_unet= unet(Tensor(im_train_es_res))
+    output_unet= unet(im_train_es_res).detach().cpu().numpy()
     output_unet= output_unet["softmax"]
 
     #output_unet_es_eval = unet_es(Tensor(im_flat_eval_es))
