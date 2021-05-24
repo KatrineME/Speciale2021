@@ -300,8 +300,8 @@ def SI_set(user, phase):
     print(device)
     unet.eval()
     im_train_es_res = Tensor(im_train_es_res)
-    im_train_es_res = im_train_es_res.cuda()
-    output_unet= unet(im_train_es_res).detach().cpu().numpy()
+    im_train_es_res = im_train_es_res#.cuda()
+    output_unet= unet(im_train_es_res)
     output_unet= output_unet["softmax"]
 
     #output_unet_es_eval = unet_es(Tensor(im_flat_eval_es))
