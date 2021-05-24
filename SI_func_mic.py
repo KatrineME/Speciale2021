@@ -297,7 +297,7 @@ def SI_set(user, phase):
     unet.eval()
     output_unet= unet(Tensor(im_train_es_res))
     output_unet= output_unet["softmax"]
-    print('res shape', im_train_es_res.shape)
+
     #output_unet_es_eval = unet_es(Tensor(im_flat_eval_es))
     #output_unet_es_eval = output_unet_es_eval["softmax"]
     

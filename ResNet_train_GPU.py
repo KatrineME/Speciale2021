@@ -712,12 +712,12 @@ num_epoch = 20
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
-#os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
+#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 
 from SI_func_mic import SI_set
 
-user = 'M'
+user = 'GPU'
 T_j = SI_set(user, 'sys')
 
 # Prep data
