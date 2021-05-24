@@ -296,6 +296,7 @@ def SI_set(user, phase):
        # unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
     #%% Running  models 
     # SYSTOLIC
+    print(device)
     unet.eval()
     output_unet= unet(Tensor(im_train_es_res))
     output_unet= output_unet["softmax"]
