@@ -274,7 +274,7 @@ def SI_set(user, phase):
     if __name__ == "__main__":
         #import torchsummary
         unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    
+        unet.cuda()
     #%% Load model
     if user == 'K':
         PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_sub_batch_100.pt"
@@ -288,9 +288,9 @@ def SI_set(user, phase):
         
     
     if phase == 'sys':
-        unet = torch.load(PATH_model_es, map_location=torch.device(device))
+        unet = torch.load(PATH_model_es, map_location=torch.device('cpu'))
     else:
-        unet = torch.load(PATH_model_ed, map_location=torch.device(device))
+        unet = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
         
         
        # unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
