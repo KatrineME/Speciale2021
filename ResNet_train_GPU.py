@@ -618,7 +618,7 @@ PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub
 
 # Load
 print('device = ', device)
-unet_es = torch.load(PATH_model_es, map_location=torch.device(device))
+unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 #unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
