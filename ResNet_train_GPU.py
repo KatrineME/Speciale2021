@@ -624,7 +624,7 @@ unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 #%% Run model
 unet_es.eval()
 im_train_es_res = Tensor(im_train_es_res)
-im_train_es_res = im_train_es_res.cuda()
+#im_train_es_res = im_train_es_res
 out_trained_es = unet_es(im_train_es_res)
 out_image_es   = out_trained_es["softmax"]
 
