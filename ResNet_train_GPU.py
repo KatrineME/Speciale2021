@@ -603,7 +603,7 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    unet.cuda()
+    #unet.cuda()
     
 #%% Load Model
 #PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
@@ -617,7 +617,7 @@ PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub
 #PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 # Load
-unet_es = torch.load(PATH_model_es, map_location=torch.device('cuda'))
+unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 #unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
