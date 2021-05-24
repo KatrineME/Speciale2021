@@ -687,8 +687,8 @@ plt.title('U-map')
 input_concat = torch.cat((im,umap,seg), dim=1)
 #%%
 
-out    = model(input_concat)
-output = out['softmax'].detach().cpu().numpy()
+#out    = model(input_concat)
+#output = out['softmax'].detach().cpu().numpy()
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
