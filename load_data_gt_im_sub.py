@@ -9,7 +9,7 @@ def load_data_sub(user, phase, diagnose):
     #% Load packages
     import torch
     import os
-    #import cv2
+    import cv2
     import nibabel as nib
     import numpy   as np
     #import pandas  as pd
@@ -92,9 +92,11 @@ def load_data_sub(user, phase, diagnose):
         centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
             
         for j in range(0,im_slices):
-            centercrop_img[:,:,j] = centercrop(Tensor(img[:,:,j]))
-            centercrop_gt[:,:,j] = centercrop(Tensor(anno[:,:,j]))
-           
+            center_img = centercrop(Tensor(img[:,:,j]))
+            centercrop_img[:,:,j] = Tensor(cv2.normalize(center_img.detach().numpy(), None, 255, 0, cv2.NORM_MINMAX))   
+            
+            centercrop_gt[:,:,j]  = centercrop(Tensor(anno[:,:,j]))
+        
         in_image = np.expand_dims(centercrop_img,0)
         in_image = Tensor(in_image).permute(3,0,1,2).detach().numpy()
         im.append(in_image.astype(object))
@@ -103,3 +105,23 @@ def load_data_sub(user, phase, diagnose):
         gt.append(in_gt.astype(object))
         
     return im, gt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
