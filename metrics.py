@@ -55,7 +55,7 @@ def dc(result, reference):
     try:
         dc = 2. * intersection / float(size_i1 + size_i2)
     except ZeroDivisionError:
-        dc = 0.0
+        dc = 1#0.0
     
     return dc
 
@@ -71,7 +71,11 @@ def jc(result, reference):
     intersection = np.count_nonzero(result & reference)
     union = np.count_nonzero(result | reference)
     
-    jc = float(intersection) / float(union)
+    try:
+        jc = float(intersection) / float(union)
+    except ZeroDivisionError:
+        jc = 0.0
+    #jc = float(intersection) / float(union)
     
     return jc
 
@@ -90,10 +94,25 @@ def precision(result, reference):
     try:
         precision = tp / float(tp + fp)
     except ZeroDivisionError:
-        precision = 0.0
+        precision = 1# 0.0
     
     return precision
 
+def accuracy_self(result, reference):
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
+        
+    tp = np.count_nonzero(result & reference)
+    fp = np.count_nonzero(result & ~reference)
+    fn = np.count_nonzero(~result & reference)
+    tn = np.count_nonzero(~result & ~reference)
+    
+    try:
+        acc = (tp + tn) / float(tp + fp + tn + fn)
+    except ZeroDivisionError:
+        acc = 0.0
+        
+    return acc
 
 def recall(result, reference):
     """

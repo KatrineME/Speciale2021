@@ -55,6 +55,7 @@ def SI_set(user, phase):
     
 
 #%% BATCH GENERATOR
+    """
     num_train_sub = 16 
     num_eval_sub = num_train_sub + 2
     num_test_sub = num_eval_sub + 2
@@ -71,8 +72,9 @@ def SI_set(user, phase):
                                       np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
                                       np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
                                       np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
-    
-    """
+
+
+
     im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
                                       np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
                                       np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
@@ -85,6 +87,28 @@ def SI_set(user, phase):
                                       np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
                                       np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
     """
+    
+    num_train_sub = 16 
+    num_eval_sub  = num_train_sub + 1
+    
+    
+    
+    num_train_res  = num_eval_sub + 2
+    num_test_res  = num_train_res + 1
+    
+    im_train_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_im_es_HCM[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_im_es_MINF[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_im_es_NOR[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_im_es_RV[num_eval_sub:num_train_res]).astype(None)))
+    
+    gt_train_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_gt_es_HCM[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_gt_es_MINF[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_gt_es_NOR[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_gt_es_RV[num_eval_sub:num_train_res]).astype(None)))
+    
+
 
 #%% BayesUNet
     # recursive implementation of Unet
@@ -250,7 +274,8 @@ def SI_set(user, phase):
     if __name__ == "__main__":
         #import torchsummary
         unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    
+        unet.cuda()
+        
     #%% Load model
     if user == 'K':
         PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_sub_batch_100.pt"
@@ -268,13 +293,17 @@ def SI_set(user, phase):
     else:
         unet = torch.load(PATH_model_ed, map_location=torch.device(device))
         
+        
+       # unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
     #%% Running  models 
-    print('systolic')
     # SYSTOLIC
+    print(device)
     unet.eval()
-    output_unet= unet(Tensor(im_test_es_sub))
+    im_train_es_res = Tensor(im_train_es_res)
+    im_train_es_res = im_train_es_res#.cuda()
+    output_unet= unet(im_train_es_res)
     output_unet= output_unet["softmax"]
-    
+
     #output_unet_es_eval = unet_es(Tensor(im_flat_eval_es))
     #output_unet_es_eval = output_unet_es_eval["softmax"]
     
@@ -293,7 +322,7 @@ def SI_set(user, phase):
     #output_unet_ed_test = output_unet_ed_test["softmax"]
     
     #%% Onehot encode class channels
-    gt_es_oh_train = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().cpu().numpy().astype(np.bool)
+    gt_es_oh_train = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy().astype(np.bool)
     
     # Argmax
     seg_met_sys_train = np.argmax(output_unet.detach().cpu().numpy(), axis=1)
