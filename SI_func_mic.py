@@ -288,10 +288,12 @@ def SI_set(user, phase):
         
     
     if phase == 'sys':
-        unet = torch.load(PATH_model_es, map_location=torch.device(device))
+        unet = torch.load(PATH_model_es, map_location=torch.device('cpu'))
     else:
         unet = torch.load(PATH_model_ed, map_location=torch.device(device))
         
+        
+       # unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
     #%% Running  models 
     # SYSTOLIC
     unet.eval()
