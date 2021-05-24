@@ -718,9 +718,9 @@ os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021")
 
 from SI_func_mic import SI_set
 
-print()
+print('How far??')
 user = 'GPU'
-T_j = SI_set(user, 'sys')
+T_j = SI_set(user, 'sys').cuda()
 
 # Prep data
 T = np.expand_dims(T_j, axis=1)
