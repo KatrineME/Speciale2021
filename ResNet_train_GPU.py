@@ -715,6 +715,7 @@ os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021")
 
 from SI_func_mic import SI_set
 
+user = 'GPU'
 T_j = SI_set(user, 'sys')
 
 # Prep data
