@@ -369,9 +369,11 @@ if __name__ == "__main__":
 #%% Specify directory
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 #os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 from load_data_gt_im_sub import load_data_sub
 user = 'GPU'
 #user = 'K' 
+print('Dataloader')
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
