@@ -82,8 +82,8 @@ def load_data_sub(user, phase, diagnose):
         n_gt = nib.load(frame_gt[i])
         anno = n_gt.get_fdata()
                 
-        im_slices  = img.shape[2]
-        gt_slices  = anno.shape[2]
+        im_slices  = img.shape[2]-1
+        gt_slices  = anno.shape[2]-1
         
         centercrop_img = Tensor(np.zeros((H,W,im_slices)))
         centercrop_gt  = Tensor(np.zeros((H,W,gt_slices)))

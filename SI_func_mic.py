@@ -55,6 +55,7 @@ def SI_set(user, phase):
     
 
 #%% BATCH GENERATOR
+    """
     num_train_sub = 16 
     num_eval_sub = num_train_sub + 2
     num_test_sub = num_eval_sub + 2
@@ -71,8 +72,9 @@ def SI_set(user, phase):
                                       np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
                                       np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
                                       np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
-    
-    """
+
+
+
     im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
                                       np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
                                       np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
@@ -85,6 +87,28 @@ def SI_set(user, phase):
                                       np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
                                       np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
     """
+    
+    num_train_sub = 16 
+    num_eval_sub  = num_train_sub + 1
+    
+    
+    
+    num_train_res  = num_eval_sub + 2
+    num_test_res  = num_train_res + 1
+    
+    im_train_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_im_es_HCM[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_im_es_MINF[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_im_es_NOR[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_im_es_RV[num_eval_sub:num_train_res]).astype(None)))
+    
+    gt_train_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_gt_es_HCM[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_gt_es_MINF[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_gt_es_NOR[num_eval_sub:num_train_res]).astype(None),
+                                      np.concatenate(data_gt_es_RV[num_eval_sub:num_train_res]).astype(None)))
+    
+
 
 #%% BayesUNet
     # recursive implementation of Unet
@@ -271,9 +295,9 @@ def SI_set(user, phase):
     #%% Running  models 
     # SYSTOLIC
     unet.eval()
-    output_unet= unet(Tensor(im_test_es_sub))
+    output_unet= unet(Tensor(im_train_es_res))
     output_unet= output_unet["softmax"]
-    
+    print('res shape', im_train_es_res.shape)
     #output_unet_es_eval = unet_es(Tensor(im_flat_eval_es))
     #output_unet_es_eval = output_unet_es_eval["softmax"]
     
@@ -292,7 +316,7 @@ def SI_set(user, phase):
     #output_unet_ed_test = output_unet_ed_test["softmax"]
     
     #%% Onehot encode class channels
-    gt_es_oh_train = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().cpu().numpy().astype(np.bool)
+    gt_es_oh_train = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy().astype(np.bool)
     
     # Argmax
     seg_met_sys_train = np.argmax(output_unet.detach().cpu().numpy(), axis=1)

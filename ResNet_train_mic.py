@@ -387,20 +387,40 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 #%% BATCH GENERATOR
 num_train_sub = 16 
-num_eval_sub  = num_train_sub + 2
-num_test_sub  = num_eval_sub + 2
+num_eval_sub  = num_train_sub + 1
 
-im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
-gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+num_train_res  = num_eval_sub + 2
+num_test_res  = num_train_res + 1
+
+im_train_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_eval_sub:num_train_res]).astype(None)))
+
+gt_train_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_train_res]).astype(None)))
+
+
+
+
+im_test_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_train_res:num_test_res]).astype(None)))
+
+gt_test_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_train_res:num_test_res]).astype(None)))
+
+
 
 """
 
@@ -601,9 +621,9 @@ unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 #unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
-
+#%% Run model
 unet_es.eval()
-out_trained_es = unet_es(Tensor(im_test_es_sub))
+out_trained_es = unet_es(Tensor(im_train_es_res))
 out_image_es   = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
@@ -622,7 +642,7 @@ ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), nu
 seg_met_sys = np.argmax(out_image_es.detach().cpu().numpy(), axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
-ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
+ref_sys = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
 
 #%% E-map
@@ -645,18 +665,27 @@ emap = np.expand_dims(emap, axis=1)
 
 #%% Plot
 #% Wrap all inputs together
-im     = Tensor(im_test_es_sub)
+im     = Tensor(im_train_es_res)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
 
-"""
-for i in range(0,9):
-    plt.subplot(4,3,i+1)
-    plt.imshow(seg[i+47,0,:,:])
-"""    
+image = 10
+
+plt.figure(dpi=200)
+plt.subplot(1,3,1)
+plt.subplots_adjust(wspace = 0.4)
+plt.imshow(im[image,0,:,:])
+plt.title('cMRI') 
+plt.subplot(1,3,2)
+plt.imshow(seg[image,0,:,:])
+plt.title('Segmentation') 
+plt.subplot(1,3,3)
+plt.imshow(umap[image,0,:,:])   
+plt.title('U-map') 
+
 
 input_concat = torch.cat((im,umap,seg), dim=1)
-
+#%%
 
 out    = model(input_concat)
 output = out['softmax'].detach().cpu().numpy()
@@ -666,10 +695,6 @@ output = out['softmax'].detach().cpu().numpy()
 
 LEARNING_RATE = 0.0001 # 
 criterion     = nn.CrossEntropyLoss() 
-#criterion = nn.NLLLoss()
-#criterion     = nn.BCELoss()
-#criterion     = SoftDice
-#criterion     = brier_score_loss()
 
 # weight_decay is equal to L2 regularizationst
 optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
@@ -695,7 +720,8 @@ T_j = SI_set(user, 'sys')
 #%% Prep data
 T = np.expand_dims(T_j, axis=1)
 
-train_amount = 60
+#%%
+train_amount = 58
 
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
@@ -708,10 +734,8 @@ train_losses = []
 eval_losses  = []
 eval_loss    = 0.0
 train_loss   = 0.0
-fn_penalty_weight = 1.2
-fp_penalty_weight = 0.085
 
-trainloader = input_concat_train
+trainloader = input_concat#_train
 
 for epoch in range(num_epoch):  # loop over the dataset multiple times
     
@@ -720,9 +744,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     for i, data_train in enumerate(trainloader, 0):
         # get the inputs
         #inputs, labels = data
-        inputs = input_concat_train
+        inputs = input_concat #input_concat_train
         #inputs = inputs.cuda()
-        labels = Tensor(T_train)
+        labels = Tensor(T)#_train)
         #labels = labels.cuda()
         #print('i=',i)
         
@@ -738,19 +762,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Forward Pass
         output = model(inputs)     
         output = output["log_softmax"]
-        """
-        # Find loss
-        # false negative
-        #inputs = inputs.view(inputs.size(0), 2, -1)
-        fn_soft = output[:, 0] * labels.float()
-        batch_size = output.size(0)  
-        fn_soft = torch.sum(fn_soft) * 1 / float(batch_size)
-        
-        ones = torch.ones(labels.size())
-        fp_soft = (ones - labels.float()) * output[:, 1]
-        # fp_nonzero = torch.nonzero(fp_soft).size(0)
-        fp_soft = torch.sum(fp_soft) * 1 / float(batch_size)
-        """
+
         loss = criterion(output, labels)
         #loss = loss #+ fn_penalty_weight * fn_soft + fp_penalty_weight * fp_soft
         
@@ -765,7 +777,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
     train_losses.append(train_loss/data_train.shape[0]) # This is normalised by batch size
     train_loss = 0.0
-
+"""
     model.eval()
     for i, data_eval in enumerate(input_concat_eval, 0):
         # get the inputs
@@ -801,16 +813,16 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
     eval_losses.append(eval_loss/data_eval.shape[0]) # This is normalised by batch size
     eval_loss = 0.0 
-
+"""
 print('Finished Training + Evaluation')
 
 #%% Plot loss curve
 epochs = np.arange(len(train_losses))
-epochs_eval = np.arange(len(eval_losses))
+#epochs_eval = np.arange(len(eval_losses))
 
 plt.figure(dpi=200)
 plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
-plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
+#plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
 plt.xticks(np.arange(1,num_epoch+1, step = 1))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
@@ -818,13 +830,82 @@ plt.legend(loc="upper right")
 plt.title("Loss function")
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
-#%% Visualize output from detection network
 
-out_test    = model(input_concat_eval)
+
+#%%%%%%%%%%%%%%%%%%%%%%% TESTING MODEL %%%%%%%%%%%%%%%%%%%%%
+#%% Run model
+unet_es.eval()
+out_trained_es = unet_es(Tensor(im_test_es_res))
+out_image_es   = out_trained_es["softmax"]
+
+#im_flat_test_ed = im_flat_test_ed.cuda()
+
+#unet_ed.eval()
+#out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
+#out_image_ed   = out_trained_ed["softmax"]
+
+#%% One hot encoding
+"""
+seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
+
+seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
+"""
+seg_met_sys = np.argmax(out_image_es.detach().cpu().numpy(), axis=1)
+
+seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
+ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+
+
+#%% E-map
+import scipy.stats
+
+#emap = np.zeros((out_image_ed.shape[0],out_image_ed.shape[2],out_image_ed.shape[3]))
+emap = np.zeros((out_image_es.shape[0],out_image_es.shape[2],out_image_es.shape[3]))
+
+for i in range(0, emap.shape[0]):
+
+    out_img = (out_image_es[i,:,:].detach().cpu().numpy())
+    entropy2 = scipy.stats.entropy(out_img)
+    
+    # Normalize 
+    m_entropy   = np.max(entropy2)
+    entropy     = entropy2/m_entropy
+    emap[i,:,:] = entropy
+
+emap = np.expand_dims(emap, axis=1)
+
+#%% Plot
+#% Wrap all inputs together
+im     = Tensor(im_test_es_res)
+umap   = Tensor(emap)
+seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
+
+image = 2
+
+plt.figure(dpi=200)
+plt.subplot(1,4,1)
+plt.subplots_adjust(wspace = 0.4)
+plt.imshow(im[image,0,:,:])
+plt.title('cMRI') 
+plt.subplot(1,4,2)
+plt.imshow(seg[image,0,:,:])
+plt.title('Segmentation') 
+plt.subplot(1,4,3)
+plt.imshow(umap[image,0,:,:])   
+plt.title('U-map') 
+plt.subplot(1,4,4)
+plt.imshow(gt_test_es_res[image,:,:])   
+plt.title('ref') 
+
+input_concat = torch.cat((im,umap,seg), dim=1)
+
+
+out_test    = model(input_concat)
 output_test = out_test['softmax'].detach().numpy()
 
-#%%
-image = 24
+#%% Visualize output from detection network
+image = 2
 
 k = np.zeros((output_test.shape[0],2,16,16))
 
@@ -847,8 +928,9 @@ plt.subplot(1,3,3)
 plt.imshow(k[image,1,:,:])
 plt.title('bin 0.1')
 #plt.colorbar(fraction=0.05)
-
+#%%
 #% Upsample
+image = 2
 upper_image = image - 1
 lower_image = image + 1
 
@@ -864,17 +946,20 @@ up_im = up(test_im) > 0
 
 plt.figure(dpi=200)
 plt.subplot(1,3,1)
-plt.imshow(input_concat_eval[image,2,:,:])
+plt.subplots_adjust(wspace = 0.4)
+plt.imshow(input_concat[image,2,:,:])
 #plt.imshow(up_im[0,0,:,:])
-plt.imshow(input_concat_eval[image,0,:,:], alpha= 0.4)
+plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
+plt.title('Segmentation')
 plt.subplot(1,3,2)
 plt.imshow(up_im[0,1,:,:])
-plt.imshow(input_concat_eval[image,0,:,:], alpha= 0.4)
+plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
+plt.title('Error patch')
 plt.subplot(1,3,3)
 plt.imshow(up_im[0,1,:,:])
-plt.imshow(np.argmax((ref_sys[image+70,:,:,:]),axis=2), alpha= 0.6)
-
-
+plt.imshow(np.argmax((ref_sys[image,:,:,:]),axis=2), alpha= 0.6)
+plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
+plt.title('Reference w. error')
 
 
 #%% Save model
@@ -889,5 +974,35 @@ torch.save(unet, PATH_model)
 torch.save(unet.state_dict(), PATH_state)
 
 """
+
+#%%
+k = np.zeros((output_test.shape[0],2,16,16))
+test_im = np.zeros((output_test.shape[0],2,16,16))
+up_im = np.zeros((output_test.shape[0],2,128,128))
+
+up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
+
+for i in range (1,output_test.shape[0]):
+    k[i,:,:,:] = output_test[i,:,:,:] > 0.1
+    upper_image = i - 1
+    lower_image = i + 1
+    test_im = Tensor(np.expand_dims(k[upper_image:lower_image,1,:,:],axis=0))
+
+    up_im[i,:,:,:] = up(test_im) > 0
+
+
+#%%
+plt.figure(dpi=200)
+for i in range(0,36):
+    plt.subplot(8,6,i+1)
+    plt.subplots_adjust(wspace = 0.2)
+    plt.imshow(up_im[i,1,:,:])
+    plt.imshow(input_concat[i,0,:,:], alpha= 0.4)
+    plt.imshow(input_concat[i,2,:,:], alpha= 0.4)
+    plt.xticks(fontsize = 6)
+    plt.yticks(fontsize = 6)
+
+
+
 
 

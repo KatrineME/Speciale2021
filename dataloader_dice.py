@@ -267,6 +267,11 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_tes
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
 
 
+#%%
+plt.figure(dpi=200)
+plt.imshow(im_train_sub[200,0,:,:])
+
+
 
 #%% Dataloader 
 
@@ -305,7 +310,7 @@ def soft_dice_loss(y_true, y_pred):
      eps = 1e-6
      
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
-     denominator = torch.sum(torch.square(y_pred) + y_true, (2,3))
+     denominator = torch.sum(torch.square(y_pred) + torch.square(y_true), (2,3))
      
      return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
 
@@ -357,7 +362,8 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
        
         # Forward Pass
         output = unet(inputs)     
-        output = output["softmax"]
+        output = output["log_softmax"]
+        # OBS LOG????????
         
         #print('output shape = ', output.shape)
         
