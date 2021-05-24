@@ -88,7 +88,6 @@ for i in sub:
         centercrop_img[:,:,j] = (center_img-torch.mean(center_img)) / torch.std(center_img)
         #centercrop_img[:,:,j]  = Tensor(cv2.normalize(center_img.detach().numpy(), None, 255, 0, cv2.NORM_MINMAX))
         
-        
         """ NORM_MINMAX: The minimum pixel value will be mapped to the minimum output value(alpha), 
             the maximum pixel value will be mapped to the maximum output value(beta). 
             With linear scaling for everything in between """

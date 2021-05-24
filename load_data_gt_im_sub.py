@@ -91,9 +91,11 @@ def load_data_sub(user, phase, diagnose):
         #gt_slices     = anno.shape[2]-1
         #centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
             
+        print('Pre-loop')
         for j in range(0,im_slices):
+            print('loop started')
             centercrop_img[:,:,j] = centercrop(Tensor(img[:,:,j]))
-            #centercrop_img[:,:,j]  = center_img
+            #centercrop_img[:,:,j] = center_img
             #centercrop_img[:,:,j] = (center_img-torch.mean(center_img)) / torch.std(center_img)
             #centercrop_img[:,:,j] = Tensor(cv2.normalize(center_img.detach().numpy(), None, 255, 0, cv2.NORM_MINMAX))   
             
