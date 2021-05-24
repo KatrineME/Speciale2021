@@ -407,8 +407,6 @@ gt_train_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_train_res]).astype(None)))
 
 
-
-
 im_test_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_im_es_HCM[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_im_es_MINF[num_train_res:num_test_res]).astype(None),
