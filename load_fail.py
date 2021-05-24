@@ -6,7 +6,7 @@ Created on Mon May 24 13:10:39 2021
 """
 import torch
 import os
-import cv2
+
 import nibabel as nib
 import numpy   as np
 #import pandas  as pd
