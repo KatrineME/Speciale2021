@@ -298,6 +298,8 @@ def SI_set(user, phase):
     # SYSTOLIC
     print(device)
     unet.eval()
+    im_train_es_res = Tensor(im_train_es_res)
+    im_train_es_res = im_train_es_res.cuda()
     output_unet= unet(Tensor(im_train_es_res))
     output_unet= output_unet["softmax"]
 
