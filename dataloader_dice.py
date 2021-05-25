@@ -226,8 +226,8 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 #%% BATCH GENERATOR
 num_train_sub = 16 
-num_eval_sub = num_train_sub + 2
-num_test_sub = num_eval_sub + 2
+num_eval_sub = num_train_sub + 1
+num_test_sub = num_eval_sub + 3
 
 im_train_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
@@ -303,7 +303,7 @@ def soft_dice_loss(y_true, y_pred):
         y_true = bs x c x h x w (one hot)
      """
      eps = 1e-6
-     y_true = torch.log(y_true)
+     
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
      denominator = torch.sum(torch.square(y_pred) + torch.square(y_true), (2,3))
      
@@ -370,6 +370,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Forward Pass
         output = unet(inputs)     
         output = output["log_softmax"]
+        output = torch.exp(output)
         # OBS LOG????????
         
         #print('output shape = ', output.shape)
