@@ -22,7 +22,8 @@ def load_data_sub(user, phase, diagnose):
     from torch import nn
     from torch import Tensor
     import re
-    
+    from PIL import Image
+
     
     # Load paths
         
@@ -91,12 +92,12 @@ def load_data_sub(user, phase, diagnose):
                 
         #gt_slices     = anno.shape[2]-1
         #centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
-        centercrop = torchvision.transforms.CenterCrop((H,W))  
         
         for j in range(0,im_slices):
             print('Centrcrop - for loop')
             #centercrop_img[:,:,j] = centercrop(Tensor(img[:,:,j]))
-            center_img = centercrop(Tensor(img[:,:,j]))
+            img_c = Image.open(img)
+            center_img = centercrop(Tensor(img_c[:,:,j]))
             #centercrop_img[:,:,j] = center_img
             centercrop_img[:,:,j] = (center_img-torch.mean(center_img)) / torch.std(center_img)
             #centercrop_img[:,:,j] = Tensor(cv2.normalize(center_img.detach().numpy(), None, 255, 0, cv2.NORM_MINMAX))   
