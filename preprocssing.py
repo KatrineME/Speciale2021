@@ -124,7 +124,7 @@ for i in range(0,100):
 center_slices.astype(np.int64)
 
 
-patient = 38  # fail
+patient = 99  # fail
 #patient = 0  # correct
 
 nimg = nib.load(frame_im[patient])
@@ -137,7 +137,7 @@ crop_off = (ori_resol-H)/2
 
 fig, ax = plt.subplots(dpi=200)
 plt.imshow(image)
-
+#%%
 for i in range(0,circles[patient].shape[1]):
     x = circles[patient][i][0][0]+crop_off[patient][1]
     y = circles[patient][i][0][1]+crop_off[patient][0]
