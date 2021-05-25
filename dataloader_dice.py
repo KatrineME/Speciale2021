@@ -307,14 +307,18 @@ def soft_dice_loss(y_true, y_pred):
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
      denominator = torch.sum(torch.square(y_pred) + torch.square(y_true), (2,3))
      
-     return  torch.log(1 - torch.mean((numerator + eps) / (denominator + eps)))
-""" 
+     return  (1 - torch.mean((numerator + eps) / (denominator + eps)))
+ 
 def class_loss(y_pred, y_true):
     
     eps = 1e-6
-    if y_true[] 
-    return - 1*torch.sum(torch.log(1 - y_pred + eps), (2,3))
-"""
+    
+    y_true_s = torch.sum(y_true, (2,3))
+    
+    if y_true_s.detach().numpy().any(): 
+        loss_c_temp = - 1*torch.sum(torch.log(1 - y_pred + eps), (2,3))
+        
+    return loss_c_temp
 
 
 LEARNING_RATE = 0.0001 # 
@@ -365,7 +369,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
        
         # Forward Pass
         output = unet(inputs)     
-        output = output["log_softmax"]
+        output = output["softmax"]
         # OBS LOG????????
         
         #print('output shape = ', output.shape)
