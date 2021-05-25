@@ -225,7 +225,7 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 16 # 16 
+num_train_sub = 2 # 16 
 num_eval_sub = num_train_sub + 2
 num_test_sub = num_eval_sub + 2
 
@@ -265,11 +265,6 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_tes
                                   np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-
-
-#%%
-plt.figure(dpi=200)
-plt.imshow(im_train_sub[200,0,:,:])
 
 
 
@@ -312,7 +307,15 @@ def soft_dice_loss(y_true, y_pred):
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
      denominator = torch.sum(torch.square(y_pred) + torch.square(y_true), (2,3))
      
-     return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
+     return  torch.log(1 - torch.mean((numerator + eps) / (denominator + eps)))
+""" 
+def class_loss(y_pred, y_true):
+    
+    eps = 1e-6
+    if y_true[] 
+    return - 1*torch.sum(torch.log(1 - y_pred + eps), (2,3))
+"""
+
 
 LEARNING_RATE = 0.0001 # 
 
@@ -325,7 +328,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 10
+num_epoch = 20
 
 
 #%% Training
@@ -369,8 +372,10 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Find loss
         #loss = criterion(output, labels)
-        loss = soft_dice_loss(labels, output)
-
+        loss_d = soft_dice_loss(labels, output)
+        #loss_c = class_loss(output)
+        
+        loss = loss_d
         #print('loss = ', loss)
         
         # Calculate gradients
@@ -385,7 +390,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     #train_losses.append(np.mean(batch_loss))
     train_loss = 0.0 #[]
-    
+    """
     unet.eval()
     print('Epoch eval=',epoch)
      
@@ -393,13 +398,13 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # get the inputs
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
-        inputs = inputs.cuda()
+        #inputs = inputs.cuda()
         labels = eval_data[:,1,:,:]
         #labels = Tensor(np.expand_dims(labels, axis=1))
         labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
         labels = labels.permute(0,3,1,2)
         #labels = Tensor(labels)
-        labels = labels.cuda()
+        #labels = labels.cuda()
         
         #print('i=',i)
 
@@ -424,7 +429,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     eval_losses.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
     #eval_losses.append(np.mean(eval_loss))
     eval_loss = 0.0
-    
+    """
 print('Finished Training + Evaluation')
         
 
