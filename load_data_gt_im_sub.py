@@ -53,7 +53,7 @@ def load_data_sub(user, phase, diagnose):
     im = []
     gt = [] 
    
-    centercrop = torchvision.transforms.CenterCrop((128,128))
+    centercrop = torchvision.transforms.CenterCrop((H,W))
     
     
     num_case = 20  # Number of patients within each subgroup
