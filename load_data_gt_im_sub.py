@@ -84,8 +84,8 @@ def load_data_sub(user, phase, diagnose):
         n_gt = nib.load(frame_gt[i])
         anno = n_gt.get_fdata()
                 
-        im_slices  = img.shape[2]#-1
-        gt_slices  = anno.shape[2]#-1
+        im_slices  = img.shape[2]-1
+        gt_slices  = anno.shape[2]-1
         
         centercrop_img = Tensor(np.zeros((H,W,im_slices)))
         centercrop_gt  = Tensor(np.zeros((H,W,gt_slices)))
@@ -96,8 +96,7 @@ def load_data_sub(user, phase, diagnose):
         for j in range(0,im_slices):
             print('Centrcrop - for loop')
             #centercrop_img[:,:,j] = centercrop(Tensor(img[:,:,j]))
-            img_c = Image.open(Tensor(img))
-            center_img = centercrop(Tensor(img_c[:,:,j]))
+            center_img = centercrop((img[:,:,j]))
             #centercrop_img[:,:,j] = center_img
             centercrop_img[:,:,j] = (center_img-torch.mean(center_img)) / torch.std(center_img)
             #centercrop_img[:,:,j] = Tensor(cv2.normalize(center_img.detach().numpy(), None, 255, 0, cv2.NORM_MINMAX))   
