@@ -22,8 +22,6 @@ def load_data_sub(user, phase, diagnose):
     from torch import nn
     from torch import Tensor
     import re
-    from PIL import Image
-
     
     # Load paths
         
@@ -56,11 +54,6 @@ def load_data_sub(user, phase, diagnose):
     gt = [] 
    
     centercrop = torchvision.transforms.CenterCrop((128,128))
-    
-    import torch
-    import torchvision.transforms as transforms
-    tensor_x = torch.randn(3, 100, 100)
-    print(transforms.CenterCrop(150)(tensor_x).shape)
     
     
     num_case = 20  # Number of patients within each subgroup
