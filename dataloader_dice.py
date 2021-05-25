@@ -307,7 +307,7 @@ def soft_dice_loss(y_true, y_pred):
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
      denominator = torch.sum(torch.square(y_pred) + torch.square(y_true), (2,3))
      
-     return  (1 - torch.mean((numerator + eps) / (denominator + eps)))
+     return  torch.log(1 - torch.mean((numerator + eps) / (denominator + eps)))
  
 def class_loss(y_pred, y_true):
     
@@ -369,7 +369,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
        
         # Forward Pass
         output = unet(inputs)     
-        output = output["softmax"]
+        output = output["log_softmax"]
         # OBS LOG????????
         
         #print('output shape = ', output.shape)
@@ -394,7 +394,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     #train_losses.append(np.mean(batch_loss))
     train_loss = 0.0 #[]
-    """
+    
     unet.eval()
     print('Epoch eval=',epoch)
      
@@ -420,7 +420,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Forward pass
         output = unet(inputs)     
-        output = output["softmax"]
+        output = output["log_softmax"]
         # Find loss
         #loss = criterion(output, labels)
         loss = soft_dice_loss(labels, output)
@@ -433,7 +433,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     eval_losses.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
     #eval_losses.append(np.mean(eval_loss))
     eval_loss = 0.0
-    """
+    
 print('Finished Training + Evaluation')
         
 
@@ -457,7 +457,7 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_l
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_batch_100.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_batch_100_log.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
