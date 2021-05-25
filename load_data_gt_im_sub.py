@@ -57,6 +57,11 @@ def load_data_sub(user, phase, diagnose):
    
     centercrop = torchvision.transforms.CenterCrop((128,128))
     
+    
+    tensor_x = torch.randn(3, 100, 100)
+    print(centercrop(150)(tensor_x).shape)
+    
+    
     num_case = 20  # Number of patients within each subgroup
     
     DCM  = np.linspace(0, num_case-1, num_case).astype(int)
@@ -94,11 +99,10 @@ def load_data_sub(user, phase, diagnose):
         #centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
         
         for j in range(0,im_slices):
-            print('Centrcrop - for loop')
+
             centercrop_gt[:,:,j]  = centercrop(Tensor(anno[:,:,j]))
             #centercrop_img[:,:,j] = centercrop(Tensor(img[:,:,j]))
-            im = img[:,:,j]
-            print('img',im.shape)
+            
             center_img = centercrop(Tensor(img[:,:,j]))
             #centercrop_img[:,:,j] = center_img
             centercrop_img[:,:,j] = (center_img-torch.mean(center_img)) / torch.std(center_img)
