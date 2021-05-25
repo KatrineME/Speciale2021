@@ -303,11 +303,11 @@ def soft_dice_loss(y_true, y_pred):
         y_true = bs x c x h x w (one hot)
      """
      eps = 1e-6
-     
+     y_true = torch.log(y_true)
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
      denominator = torch.sum(torch.square(y_pred) + torch.square(y_true), (2,3))
      
-     return  torch.log(1 - torch.mean((numerator + eps) / (denominator + eps)))
+     return  (1 - torch.mean((numerator + eps) / (denominator + eps)))
  
 def class_loss(y_pred, y_true):
     
