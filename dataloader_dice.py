@@ -404,7 +404,6 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         output = torch.exp(output)
         
-        # OBS LOG????????
         
         #print('output shape = ', output.shape)
         
