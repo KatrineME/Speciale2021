@@ -16,7 +16,7 @@ from PIL   import Image
 import nibabel as nib
 import numpy   as np
 import matplotlib.pyplot as plt
-
+#%%
     
 os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")
 
@@ -77,15 +77,15 @@ for i in range(0,100):
     circ = cv2.HoughCircles(img_center, cv2.HOUGH_GRADIENT, 1, img_center.shape[0], param1=200, param2=10, minRadius=5, maxRadius=35)
     circles.append(circ)
     
-    print(i)
+    #print(i)
     
     left  = int((circles[i][0][0][0]+crop_off[i][1])-(H/2))
     upper = int((circles[i][0][0][1]+crop_off[i][0])-(H/2))
     right = int((circles[i][0][0][0]+crop_off[i][1])+(H/2))
     lower = int((circles[i][0][0][1]+crop_off[i][0])+(H/2))
     
-    print(left, upper, right, lower)
-    print(gt.shape)
+    #print(left, upper, right, lower)
+    #print(gt.shape)
     """
     for j in range(0,im_slices):
         gt_pt = gt[:,:,j]
@@ -124,8 +124,8 @@ for i in range(0,100):
 center_slices.astype(np.int64)
 
 
-patient = 99  # fail
-#patient = 0  # correct
+#patient = 99  # fail
+patient = 0 # correct
 
 nimg = nib.load(frame_im[patient])
 img  = nimg.get_fdata()
@@ -137,7 +137,7 @@ crop_off = (ori_resol-H)/2
 
 fig, ax = plt.subplots(dpi=200)
 plt.imshow(image)
-#%%
+
 for i in range(0,circles[patient].shape[1]):
     x = circles[patient][i][0][0]+crop_off[patient][1]
     y = circles[patient][i][0][1]+crop_off[patient][0]
@@ -152,10 +152,14 @@ image = im[s,0,:,:]
 fig, ax = plt.subplots()
 plt.imshow(image)
 for i in range(0,circles[patient].shape[1]):
-    c = plt.Circle((circles[patient][i][0][0],circles[patient][i][0][1]), circles[patient][i][0][2], color='red', alpha=0.2)
+    c = plt.Circle((circles[patient][i][0][0],circles[patient][i][0][1]), circles[patient][i][0][2], color='red', alpha=0.4)
     ax.add_patch(c)
 
+#param1=200, param2=10
+edges = cv2.Canny(np.uint8(image),200,10)
 
+plt.imshow(edges)
+plt.title('Canny for patient 1')
 
 #%%
 

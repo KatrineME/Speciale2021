@@ -84,7 +84,9 @@ for i in sub:
 
             
     for j in range(0,im_slices):
+        print(img.shape)
         center_img = centercrop(Tensor(img[:,:,j]))
+        print(center_img.shape)
         centercrop_img[:,:,j] = (center_img-torch.mean(center_img)) / torch.std(center_img)
         #centercrop_img[:,:,j]  = Tensor(cv2.normalize(center_img.detach().numpy(), None, 255, 0, cv2.NORM_MINMAX))
         
@@ -124,8 +126,60 @@ from load_data_gt_im_sub import load_data_sub
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('K','Systole','DCM')
 
 
+#%%
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('K','Diastole','DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('K','Diastole','HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('K','Diastole','MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('K','Diastole','NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('K','Diastole','RV')
 
+num_train_sub = 16 
+num_eval_sub = num_train_sub + 2
+num_test_sub = num_eval_sub + 2
 
+im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().numpy()
+#%%
+ref = Tensor(ref_dia).permute(0,3,1,2)
+
+y_ref = torch.sum(ref, (2,3))
+y_pred = Tensor(im_test_ed_sub) - 4
+epsilon = 0.000001
+
+a = y_ref
+
+if not a.detach().numpy().all():
+    #loss_c = -1* torch.sum( torch.log(1-y_pred + epsilon),(2,3))
+    print(a)
+    print('Something is zero')
+else:
+    print(a)
+    print('Nothing is zero')
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
 
 
