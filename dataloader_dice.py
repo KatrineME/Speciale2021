@@ -349,10 +349,8 @@ def lv_loss(y_pred):
     
     
     inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)).detach().cpu().numpy()
-    outside = torch.sum(Tensor(inside)) 
-    print('Hej hej')
-    #outside = outside.cuda()    
-    return outside
+    #outside = torch.sum(Tensor(inside))   
+    return torch.sum(Tensor(inside))
 
  
 LEARNING_RATE = 0.0001 # 
@@ -414,10 +412,10 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Find loss
         #loss = criterion(output, labels)
         loss_d  = soft_dice_loss(labels, output)
-        print('loss_d = ', loss_d)
+        #print('loss_d = ', loss_d)
         #loss_c  = class_loss(labels, output)
         loss_lv = lv_loss(output)
-        print('loss_lv = ', loss_lv)
+        #print('loss_lv = ', loss_lv)
 
         loss = loss_d + loss_lv
         print('loss = ', loss)
