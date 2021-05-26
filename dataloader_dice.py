@@ -410,7 +410,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #loss = criterion(output, labels)
         loss_d  = soft_dice_loss(labels, output)
         print('loss_d = ', loss_d)
-        loss_c  = class_loss(labels, output)
+        #loss_c  = class_loss(labels, output)
         loss_lv = lv_loss(labels, output)
         print('loss_lv = ', loss_lv)
 
