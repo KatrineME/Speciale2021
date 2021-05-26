@@ -348,9 +348,9 @@ def lv_loss(y_true, y_pred):
     
     
     
-    inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)) #.detach().cpu().numpy()
+    inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)).detach().cpu().numpy()
 
-    return torch.sum(Tensor(inside).cuda())
+    return torch.sum(Tensor(inside))
 
  
 LEARNING_RATE = 0.0001 # 
@@ -417,7 +417,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         loss_lv = lv_loss(labels, output)
         #print('loss_lv = ', loss_lv)
 
-        loss = loss_d #+ loss_lv
+        loss = loss_lv #+ loss_lv
         print('loss = ', loss)
         
         # Calculate gradients
