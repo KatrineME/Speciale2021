@@ -349,7 +349,7 @@ def lv_loss(y_true, y_pred):
     
     
     inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)).detach().cpu().numpy()
-    inside[inside > 0] = 0.1
+    inside[inside > 0] = 0.0001
     #outside = torch.sum(Tensor(inside))
     return torch.sum(Tensor(inside))
 
@@ -408,7 +408,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         loss_c  = class_loss(labels, output)
         loss_lv = lv_loss(labels, output)
         
-        loss = loss_d + loss_lv  # + loss_c
+        loss = 0.001*loss_d + loss_lv  # + loss_c
         print('Loss only lv ', loss)
         # Calculate gradients
         loss.backward()
