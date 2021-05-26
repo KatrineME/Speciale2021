@@ -320,13 +320,13 @@ def class_loss(y_true, y_pred):
         loss_c   = torch.mean(loss_c)
         #d_loss_c = 1 / (1-y_pred+eps)
     else:
-        d_loss_c = 0
+        loss_c = 0
         """print('No L_C calculated')
         for i in range(0,y_true.shape[0]):
             plt.subplot(6,6,i+1)
             plt.imshow(y_true[i,1,:,:].detach().numpy())"""
     
-    return d_loss_c
+    return loss_c
 
 def lv_loss(y_true, y_pred):
     Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
