@@ -127,7 +127,7 @@ class UnetSkipConnectionBlock(nn.Module):
             nn.LeakyReLU(inplace=True),
         )
         return layer
-"""
+
     @staticmethod
     def center_crop(layer, target_width, target_height):
         batch_size, n_channels, layer_width, layer_height = layer.size()
@@ -144,7 +144,7 @@ class UnetSkipConnectionBlock(nn.Module):
             crop = self.center_crop(self.model(x), x.size()[2], x.size()[3])
             out = torch.cat([x, crop], 1)
             return out
-"""
+
     
 class BayesUNet(UNet):
 
@@ -282,7 +282,7 @@ for i in range (0,11):
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_sub_batch_100_log.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_sub_batch_100_log_ld.pt'
 
 # Load
 #unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
