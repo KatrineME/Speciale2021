@@ -346,6 +346,8 @@ def lv_loss(y_pred):
     Y_DoRi = Y_LV_pad[:,0:128,0:128]
     Y_DoLe = Y_LV_pad[:,0:128,2:130]
     
+    
+    print('Hej hej')
     inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
     inside = inside.cuda()    
     return torch.sum(Tensor(inside))
