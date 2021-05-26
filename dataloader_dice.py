@@ -349,8 +349,9 @@ def lv_loss(y_pred):
     
     
     inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
-    print('Hej hej')
+    
     outside = torch.sum(Tensor(inside)) 
+    print('Hej hej')
     outside = outside.cuda()    
     return outside
 
