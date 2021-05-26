@@ -348,7 +348,6 @@ def lv_loss(y_true, y_pred):
     Y_DoLe = Y_LV_pad[:,0:128,2:130]
     
     
-    
     inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)).detach().cpu().numpy()
     inside[inside>0] = 1
     outside = torch.sum(Tensor(inside))
@@ -366,7 +365,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 20
+num_epoch = 10
 
 
 #%% Training
@@ -381,22 +380,19 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     print('Epoch train =',epoch)
     #0.0  
     for i, (train_data) in enumerate(train_dataloader):
-        # get the inputs
+
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
         inputs = inputs.cuda()
         
         labels = train_data[:,1,:,:]
-        #labels = Tensor(np.expand_dims(labels, axis=1))
         labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
         labels = labels.permute(0,3,1,2)
-        #labels = Tensor(labels)
         labels = labels.cuda()
-        #print('i=',i)
+
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
-        #labels_pred = Tensor(np.expand_dims(labels,axis=1))
         
         # Clear the gradients
         optimizer.zero_grad()
@@ -406,20 +402,13 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         output = torch.exp(output)
         
-        #print('output shape = ', output.shape)
         
         # Find loss
-        # Find loss
-        #loss = criterion(output, labels)
         loss_d  = soft_dice_loss(labels, output)
-        #print('loss_d = ', loss_d)
         loss_c  = class_loss(labels, output)
-        print('loss_d = ', loss_d)
         loss_lv = lv_loss(labels, output)
-        #print('loss_lv = ', loss_lv)
-
+        
         loss = loss_d + loss_lv + loss_c
-        #print('loss = ', loss)
         
         # Calculate gradients
         loss.backward()
@@ -428,34 +417,28 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         optimizer.step()
 
         # Calculate loss
-        train_loss += loss.item() #.detach().cpu().numpy()
+        train_loss += loss.item() 
        
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
-    #train_losses.append(np.mean(batch_loss))
     train_loss = 0.0 #[]
     
     unet.eval()
     print('Epoch eval=',epoch)
      
     for i, (eval_data) in enumerate(eval_dataloader):
-        # get the inputs
+
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
         inputs = inputs.cuda()
         
         labels = eval_data[:,1,:,:]
-        #labels = Tensor(np.expand_dims(labels, axis=1))
         labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
         labels = labels.permute(0,3,1,2)
-        #labels = Tensor(labels)
         labels = labels.cuda()
         
-        #print('i=',i)
-
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
-        #labels_pred = Tensor(np.expand_dims(labels,axis=1))
 
         
         # Forward pass
@@ -463,21 +446,16 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         # Find loss
         loss_d  = soft_dice_loss(labels, output)
-        #print('loss_d = ', loss_d)
-        #loss_c  = class_loss(labels, output)
+        loss_c  = class_loss(labels, output)
         loss_lv = lv_loss(labels, output)
-        #print('loss_lv = ', loss_lv)
 
-        loss = loss_d + loss_lv
-        #print('loss = ', loss)
-
+        #loss = loss_d + loss_lv + loss_c
+        loss = 0.001*loss_d + loss_lv # + loss_c
         
         # Calculate loss
-        #eval_loss.append(loss.item())
-        eval_loss += loss.item() #.detach().cpu().numpy()
+        eval_loss += loss.item()
         
     eval_losses.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
-    #eval_losses.append(np.mean(eval_loss))
     eval_loss = 0.0
     
 print('Finished Training + Evaluation')
