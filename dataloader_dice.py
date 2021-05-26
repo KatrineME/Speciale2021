@@ -307,20 +307,50 @@ def soft_dice_loss(y_true, y_pred):
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
      denominator = torch.sum(torch.square(y_pred) + torch.square(y_true), (2,3))
      
-     return  (1 - torch.mean((numerator + eps) / (denominator + eps)))
- 
-def class_loss(y_pred, y_true):
-    
-    eps = 1e-6
-    
+     return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
+
+
+def class_loss(y_true,y_pred):
+    eps =1e-6
+
     y_true_s = torch.sum(y_true, (2,3))
     
-    if y_true_s.detach().numpy().any(): 
-        loss_c_temp = - 1*torch.sum(torch.log(1 - y_pred + eps), (2,3))
+    if not y_true_s.detach().numpy().all():
+        #loss_c   = -1* torch.sum( torch.log(1-y_pred + eps),(2,3))
+        d_loss_c = 1 / (1-y_pred+eps)
+    else:
+        d_loss_c = 0
+        """print('No L_C calculated')
+        for i in range(0,y_true.shape[0]):
+            plt.subplot(6,6,i+1)
+            plt.imshow(y_true[i,1,:,:].detach().numpy())"""
+    
+    return d_loss_c
+
+def lv_loss(y_true, y_pred):
+    Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
+    Y_RV   = y_pred[:,1,:,:]           # size([B,H,W])
+    Y_LV   = y_pred[:,3,:,:]           # size([B,H,W])
+
+    Y_LV_pad = torch.nn.functional.pad(Y_LV,(1,1,1,1),'constant', 0)
+
+    Y_up   = Y_LV_pad[:,2:130,1:129]
+    Y_down = Y_LV_pad[:,0:128,1:129]
+    
+    Y_left = Y_LV_pad[:,1:129,2:130]
+    Y_right= Y_LV_pad[:,1:129,0:128]
+    
+    Y_UpLe = Y_LV_pad[:,2:130,2:130]
+    Y_UpRi = Y_LV_pad[:,2:130,0:128]
+    
+    Y_DoRi = Y_LV_pad[:,0:128,0:128]
+    Y_DoLe = Y_LV_pad[:,0:128,2:130]
+    
+    inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
         
-    return loss_c_temp
+    return torch.sum(Tensor(inside))
 
-
+ 
 LEARNING_RATE = 0.0001 # 
 
 # weight_decay is equal to L2 regularizationst
@@ -376,12 +406,16 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #print('output shape = ', output.shape)
         
         # Find loss
+        # Find loss
         #loss = criterion(output, labels)
-        loss_d = soft_dice_loss(labels, output)
-        #loss_c = class_loss(output)
-        
-        loss = loss_d
-        #print('loss = ', loss)
+        loss_d  = soft_dice_loss(labels, output)
+        print('loss_d = ', loss_d)
+        loss_c  = class_loss(labels, output)
+        loss_lv = lv_loss(labels, output)
+        print('loss_lv = ', loss_lv)
+
+        loss = loss_d + loss_lv
+        print('loss = ', loss)
         
         # Calculate gradients
         loss.backward()

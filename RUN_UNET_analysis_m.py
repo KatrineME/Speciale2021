@@ -111,7 +111,7 @@ class UnetSkipConnectionBlock(nn.Module):
                 model = down + [submodule] + up
 
         self.model = nn.Sequential(*model)
-"""
+        
     @staticmethod
     def contract(in_channels, out_channels, kernel_size=3, norm_layer=nn.InstanceNorm2d):
         layer = nn.Sequential(
@@ -127,7 +127,7 @@ class UnetSkipConnectionBlock(nn.Module):
             nn.LeakyReLU(inplace=True),
         )
         return layer
-
+"""
     @staticmethod
     def center_crop(layer, target_width, target_height):
         batch_size, n_channels, layer_width, layer_height = layer.size()
