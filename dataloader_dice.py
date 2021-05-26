@@ -401,6 +401,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = unet(inputs)     
         output = output["log_softmax"]
         output = torch.exp(output)
+        output = output.cuda()
         # OBS LOG????????
         
         #print('output shape = ', output.shape)
@@ -438,6 +439,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
         inputs = inputs.cuda()
+        
         labels = eval_data[:,1,:,:]
         #labels = Tensor(np.expand_dims(labels, axis=1))
         labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
