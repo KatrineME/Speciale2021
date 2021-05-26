@@ -408,8 +408,8 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         loss_c  = class_loss(labels, output)
         loss_lv = lv_loss(labels, output)
         
-        loss = loss_d + loss_lv  # + loss_c
-        print('Loss only lv ', loss)
+        loss = loss_d #+ loss_lv  # + loss_c
+        print('Loss only ld ', loss)
         # Calculate gradients
         loss.backward()
         
@@ -450,7 +450,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         loss_lv = lv_loss(labels, output)
 
         #loss = loss_d + loss_lv + loss_c
-        loss = loss_d + loss_lv # + loss_c
+        loss = loss_d #+ loss_lv # + loss_c
         
         # Calculate loss
         eval_loss += loss.item()
