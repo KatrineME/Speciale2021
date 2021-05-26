@@ -225,9 +225,9 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 16 # 16 
-num_eval_sub = num_train_sub + 2
-num_test_sub = num_eval_sub + 2
+num_train_sub = 16 
+num_eval_sub = num_train_sub + 1
+num_test_sub = num_eval_sub + 3
 
 im_train_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
@@ -265,11 +265,6 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_tes
                                   np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-
-
-#%%
-plt.figure(dpi=200)
-plt.imshow(im_train_sub[200,0,:,:])
 
 
 
@@ -312,7 +307,19 @@ def soft_dice_loss(y_true, y_pred):
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
      denominator = torch.sum(torch.square(y_pred) + torch.square(y_true), (2,3))
      
-     return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
+     return  (1 - torch.mean((numerator + eps) / (denominator + eps)))
+ 
+def class_loss(y_pred, y_true):
+    
+    eps = 1e-6
+    
+    y_true_s = torch.sum(y_true, (2,3))
+    
+    if y_true_s.detach().numpy().any(): 
+        loss_c_temp = - 1*torch.sum(torch.log(1 - y_pred + eps), (2,3))
+        
+    return loss_c_temp
+
 
 LEARNING_RATE = 0.0001 # 
 
@@ -325,7 +332,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 10
+num_epoch = 20
 
 
 #%% Training
@@ -363,14 +370,17 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Forward Pass
         output = unet(inputs)     
         output = output["log_softmax"]
+        output = torch.exp(output)
         # OBS LOG????????
         
         #print('output shape = ', output.shape)
         
         # Find loss
         #loss = criterion(output, labels)
-        loss = soft_dice_loss(labels, output)
-
+        loss_d = soft_dice_loss(labels, output)
+        #loss_c = class_loss(output)
+        
+        loss = loss_d
         #print('loss = ', loss)
         
         # Calculate gradients
@@ -411,7 +421,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Forward pass
         output = unet(inputs)     
-        output = output["softmax"]
+        output = output["log_softmax"]
         # Find loss
         #loss = criterion(output, labels)
         loss = soft_dice_loss(labels, output)
@@ -448,7 +458,7 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_l
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_batch_100.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_batch_100_log.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"

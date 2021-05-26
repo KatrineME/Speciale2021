@@ -23,7 +23,6 @@ def load_data_sub(user, phase, diagnose):
     from torch import Tensor
     import re
     
-    
     # Load paths
         
     if user == 'K':
@@ -53,7 +52,9 @@ def load_data_sub(user, phase, diagnose):
      
     im = []
     gt = [] 
+   
     centercrop = torchvision.transforms.CenterCrop((H,W))
+    
     
     num_case = 20  # Number of patients within each subgroup
     
@@ -90,15 +91,18 @@ def load_data_sub(user, phase, diagnose):
                 
         #gt_slices     = anno.shape[2]-1
         #centercrop_gt = Tensor(np.zeros((H,W,gt_slices)))
-            
+        
         for j in range(0,im_slices):
+
+            centercrop_gt[:,:,j]  = centercrop(Tensor(anno[:,:,j]))
             #centercrop_img[:,:,j] = centercrop(Tensor(img[:,:,j]))
+            
             center_img = centercrop(Tensor(img[:,:,j]))
-            #centercrop_img[:,:,j] = center_img
-            centercrop_img[:,:,j] = (center_img-torch.mean(center_img)) / torch.std(center_img)
+            centercrop_img[:,:,j] = center_img
+            #centercrop_img[:,:,j] = (center_img-torch.mean(center_img)) / torch.std(center_img)
             #centercrop_img[:,:,j] = Tensor(cv2.normalize(center_img.detach().numpy(), None, 255, 0, cv2.NORM_MINMAX))   
             
-            centercrop_gt[:,:,j]  = centercrop(Tensor(anno[:,:,j]))
+           
         
         in_image = np.expand_dims(centercrop_img,0)
         in_image = Tensor(in_image).permute(3,0,1,2).detach().numpy()
@@ -107,6 +111,7 @@ def load_data_sub(user, phase, diagnose):
         in_gt = Tensor(centercrop_gt).permute(2,0,1).detach().numpy()
         gt.append(in_gt.astype(object))
         
+    
     return im, gt
 
 
