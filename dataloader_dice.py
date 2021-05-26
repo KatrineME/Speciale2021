@@ -350,7 +350,7 @@ def lv_loss(y_true, y_pred):
     
     inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)) #.detach().cpu().numpy()
 
-    return torch.sum(Tensor(inside))
+    return torch.sum(Tensor(inside)).cuda()
 
  
 LEARNING_RATE = 0.0001 # 
