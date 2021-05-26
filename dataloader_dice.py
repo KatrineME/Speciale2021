@@ -348,11 +348,10 @@ def lv_loss(y_pred):
     
     
     
-    inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
-    
+    inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)).detach().cpu().numpy()
     outside = torch.sum(Tensor(inside)) 
     print('Hej hej')
-    outside = outside.cuda()    
+    #outside = outside.cuda()    
     return outside
 
  
@@ -406,7 +405,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = unet(inputs)     
         output = output["log_softmax"]
         output = torch.exp(output)
-        output = output.cuda()
+        
         # OBS LOG????????
         
         #print('output shape = ', output.shape)
