@@ -327,7 +327,7 @@ def class_loss(y_true,y_pred):
     
     return d_loss_c
 
-def lv_loss(y_pred):
+def lv_loss(y_true, y_pred):
     Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
     Y_RV   = y_pred[:,1,:,:]           # size([B,H,W])
     Y_LV   = y_pred[:,3,:,:]           # size([B,H,W])
@@ -348,7 +348,7 @@ def lv_loss(y_pred):
     
     
     
-    inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)).detach().cpu().numpy()
+    inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)) #.detach().cpu().numpy()
 
     return torch.sum(Tensor(inside))
 
@@ -414,7 +414,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         loss_d  = soft_dice_loss(labels, output)
         #print('loss_d = ', loss_d)
         #loss_c  = class_loss(labels, output)
-        #loss_lv = lv_loss(output)
+        loss_lv = lv_loss(labels, output)
         #print('loss_lv = ', loss_lv)
 
         loss = loss_d #+ loss_lv
