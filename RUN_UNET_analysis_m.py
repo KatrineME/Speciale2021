@@ -111,7 +111,7 @@ class UnetSkipConnectionBlock(nn.Module):
                 model = down + [submodule] + up
 
         self.model = nn.Sequential(*model)
-
+"""
     @staticmethod
     def contract(in_channels, out_channels, kernel_size=3, norm_layer=nn.InstanceNorm2d):
         layer = nn.Sequential(
@@ -144,8 +144,8 @@ class UnetSkipConnectionBlock(nn.Module):
             crop = self.center_crop(self.model(x), x.size()[2], x.size()[3])
             out = torch.cat([x, crop], 1)
             return out
-
-
+"""
+    
 class BayesUNet(UNet):
 
     def __init__(self, num_classes=3, in_channels=1, initial_filter_size=64, kernel_size=3, num_downs=4,
@@ -261,7 +261,7 @@ plt.figure(dpi = 200)
 plt.title("Intensity Histogram")
 plt.xlabel("Grayscale value")
 plt.ylabel("Pixel count")
-histogram, bin_edges = np.histogram(im_test_es_sub, bins= 256, range=(0, 256))
+histogram, bin_edges = np.histogram(im_train_sub, bins= 256, range=(0, 256))
 plt.plot(bin_edges[0:-1], histogram)  # <- or here
 
 
