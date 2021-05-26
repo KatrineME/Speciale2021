@@ -315,7 +315,7 @@ def class_loss(y_true, y_pred):
 
     y_true_s = torch.sum(y_true, (2,3))
     
-    if not y_true_s.detach().numpy().all():
+    if not y_true_s.detach().cpu().numpy().all():
         loss_c   = -1* torch.sum( torch.log(1-y_pred + eps),(2,3))
         loss_c   = torch.mean(loss_c)
         #d_loss_c = 1 / (1-y_pred+eps)
