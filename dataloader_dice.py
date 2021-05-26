@@ -225,9 +225,9 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 16 
-num_eval_sub = num_train_sub + 1
-num_test_sub = num_eval_sub + 3
+num_train_sub = 12 
+num_eval_sub = num_train_sub + 2
+num_test_sub = num_eval_sub + 6
 
 im_train_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
@@ -310,14 +310,15 @@ def soft_dice_loss(y_true, y_pred):
      return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
 
 
-def class_loss(y_true,y_pred):
+def class_loss(y_true, y_pred):
     eps =1e-6
 
     y_true_s = torch.sum(y_true, (2,3))
     
     if not y_true_s.detach().numpy().all():
-        #loss_c   = -1* torch.sum( torch.log(1-y_pred + eps),(2,3))
-        d_loss_c = 1 / (1-y_pred+eps)
+        loss_c   = -1* torch.sum( torch.log(1-y_pred + eps),(2,3))
+        loss_c   = torch.mean(loss_c)
+        #d_loss_c = 1 / (1-y_pred+eps)
     else:
         d_loss_c = 0
         """print('No L_C calculated')
@@ -349,8 +350,9 @@ def lv_loss(y_true, y_pred):
     
     
     inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)).detach().cpu().numpy()
-
-    return torch.sum(Tensor(inside))
+    inside[inside>0] = 1
+    outside = torch.sum(Tensor(inside))
+    return torch.mean(outside)
 
  
 LEARNING_RATE = 0.0001 # 
@@ -404,7 +406,6 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
         output = torch.exp(output)
         
-        
         #print('output shape = ', output.shape)
         
         # Find loss
@@ -412,12 +413,13 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #loss = criterion(output, labels)
         loss_d  = soft_dice_loss(labels, output)
         #print('loss_d = ', loss_d)
-        #loss_c  = class_loss(labels, output)
+        loss_c  = class_loss(labels, output)
+        print('loss_d = ', loss_d)
         loss_lv = lv_loss(labels, output)
         #print('loss_lv = ', loss_lv)
 
-        loss = loss_d + loss_lv #+ loss_lv
-        print('loss = ', loss)
+        loss = loss_d + loss_lv + loss_c
+        #print('loss = ', loss)
         
         # Calculate gradients
         loss.backward()
@@ -463,11 +465,11 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         loss_d  = soft_dice_loss(labels, output)
         #print('loss_d = ', loss_d)
         #loss_c  = class_loss(labels, output)
-        #loss_lv = lv_loss(output)
+        loss_lv = lv_loss(labels, output)
         #print('loss_lv = ', loss_lv)
 
-        loss = loss_d #+ loss_lv
-        print('loss = ', loss)
+        loss = loss_d + loss_lv
+        #print('loss = ', loss)
 
         
         # Calculate loss
@@ -501,7 +503,7 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_l
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_batch_100_log.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_batch_100.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
@@ -510,9 +512,6 @@ PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_batch_st
 torch.save(unet, PATH_model)
 torch.save(unet.state_dict(), PATH_state)
 
-
-
-#%%
 
 
 

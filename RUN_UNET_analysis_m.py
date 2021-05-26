@@ -282,7 +282,7 @@ for i in range (0,11):
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_sub_batch_100_log.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_sub_batch_100_log_ld.pt'
 
 # Load
 #unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
@@ -299,7 +299,7 @@ unet_ed.eval()
 out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
 out_image_ed    = out_trained_ed["softmax"]
 
-#%%
+#%% One-hot encoding
 seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
@@ -312,7 +312,7 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), nu
 """
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 45
+test_slice = 77
 out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
 alpha = 0.4
 
