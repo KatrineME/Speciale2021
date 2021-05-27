@@ -407,11 +407,12 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         loss_d  = soft_dice_loss(labels, output)
         loss_c  = class_loss(labels, output)
         loss_lv = lv_loss(labels, output)
-        print('Loss only d ', loss_d)
-        print('Loss only c ', loss_c)
-        print('Loss only lv ', loss_lv)
+        #print('Loss only d ', loss_d)
+        #print('Loss only c ', loss_c)
+        #print('Loss only lv ', loss_lv)
         
-        loss = loss_d #+ loss_lv  # + loss_c
+        loss = loss_d + loss_c #+ loss_lv  # + loss_c
+        print('loss d + c', loss)
        
         # Calculate gradients
         loss.backward()
