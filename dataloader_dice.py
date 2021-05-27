@@ -328,7 +328,7 @@ def class_loss(y_true, y_pred):
             plt.subplot(6,6,i+1)
             plt.imshow(y_true[i,1,:,:].detach().numpy())"""
     
-    return loss_c
+    return loss_c/(128*128*32)
 
 def lv_loss(y_true, y_pred):
     Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
@@ -412,11 +412,11 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         loss_lv = lv_loss(labels, output)
         #print('Loss only d ', loss_d)
-        #print('Loss only c ', loss_c)
-        #print('Loss only lv ', loss_lv)
+        print('Loss only c ', loss_c)
+        print('Loss only lv ', loss_lv)
         #print('loss_c shape in loop', loss_c.shape)
         
-        loss = loss_d + loss_lv #+ 0.0001*loss_c #+ loss_lv  # + loss_c
+        loss = loss_d + loss_c + loss_lv #+ 0.0001*loss_c #+ loss_lv  # + loss_c
         print('loss d + lv', loss)
        
         # Calculate gradients
