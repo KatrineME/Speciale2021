@@ -411,7 +411,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #print('Loss only c ', loss_c)
         #print('Loss only lv ', loss_lv)
         
-        loss = loss_d + loss_c #+ loss_lv  # + loss_c
+        loss = loss_d + 0.001*loss_c #+ loss_lv  # + loss_c
         print('loss d + c', loss)
        
         # Calculate gradients
