@@ -202,7 +202,7 @@ data_im_es, data_gt_es = load_data('M','Systole')
 data_im_ed, data_gt_ed = load_data('M','Diastole')
 
 """
-#%%
+#%% load data
 os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im_sub import load_data_sub
@@ -312,7 +312,7 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), nu
 """
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 81
+test_slice = 42
 out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
 alpha = 0.4
 
