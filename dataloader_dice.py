@@ -368,7 +368,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 30
+num_epoch = 10
 
 
 #%% Training
@@ -416,8 +416,8 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #print('Loss only lv ', loss_lv)
         #print('loss_c shape in loop', loss_c.shape)
         
-        loss = loss_d #+ 0.0001*loss_c #+ loss_lv  # + loss_c
-        print('loss d + c', loss)
+        loss = loss_d + loss_lv #+ 0.0001*loss_c #+ loss_lv  # + loss_c
+        print('loss d + lv', loss)
        
         # Calculate gradients
         loss.backward()
@@ -459,7 +459,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         loss_lv = lv_loss(labels, output)
 
         #loss = loss_d + loss_lv + loss_c
-        loss = loss_d #+ loss_lv # + loss_c
+        loss = loss_d + loss_lv #+ loss_lv # + loss_c
         
         # Calculate loss
         eval_loss += loss.item()
