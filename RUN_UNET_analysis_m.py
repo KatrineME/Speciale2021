@@ -203,21 +203,25 @@ data_im_ed, data_gt_ed = load_data('M','Diastole')
 
 """
 #%% load data
-os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im_sub import load_data_sub
 """
-data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('M','Systole','DCM')
+
+data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('M','Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub('M','Systole','MINF')
 data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('M','Systole','NOR')
 data_im_es_RV,   data_gt_es_RV   = load_data_sub('M','Systole','RV')
 """
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('M','Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('M','Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('M','Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('M','Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('M','Diastole','RV')
+user = 'K'
+
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 
@@ -227,7 +231,7 @@ num_eval_sub = num_train_sub + 2
 num_test_sub = num_eval_sub + 6
 
 ###################################### OBS APPICAL SLICES REMOVED! ####################################
-
+"""
 im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
@@ -240,7 +244,7 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
-
+"""
 im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
@@ -282,7 +286,7 @@ for i in range (0,11):
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_sub_ld.pt'
+PATH_model_ed = 'C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_dice_dia_sub_ld.pt'
 
 # Load
 #unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
