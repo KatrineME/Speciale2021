@@ -317,7 +317,9 @@ def class_loss(y_true, y_pred):
     
     if not y_true_s.detach().cpu().numpy().all():
         loss_c   = -1* torch.sum( torch.log(1-y_pred + eps),(2,3))
+        print('loss_c shape before mean', loss_c.shape)
         loss_c   = torch.mean(loss_c)
+        print('loss_c shape after mean', loss_c.shape)
         #d_loss_c = 1 / (1-y_pred+eps)
     else:
         loss_c = 0
@@ -365,7 +367,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 10
+num_epoch = 1
 
 
 #%% Training
