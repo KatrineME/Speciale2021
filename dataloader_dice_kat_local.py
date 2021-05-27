@@ -212,7 +212,7 @@ os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/tra
 
 
 #%% Specify directory
-#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im_sub import load_data_sub
@@ -317,21 +317,24 @@ def soft_dice_loss(y_true, y_pred):
 
 
 def class_loss(y_true,y_pred):
-    eps =1e-6
+    eps = 1e-6
 
     y_true_s = torch.sum(y_true, (2,3))
     
-    if not y_true_s.detach().numpy().all():
-        #loss_c   = -1* torch.sum( torch.log(1-y_pred + eps),(2,3))
-        d_loss_c = 1 / (1-y_pred+eps)
+   # if not y_true_s.detach().numpy().all():
+    if np.count_nonzero(y_true_s) != 4:
+        loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(2,3))
+        #loss_c = torch.sum(l_c)
     else:
-        d_loss_c = 0
+        loss_c = 0
         """print('No L_C calculated')
         for i in range(0,y_true.shape[0]):
             plt.subplot(6,6,i+1)
             plt.imshow(y_true[i,1,:,:].detach().numpy())"""
+            
+    loss_c[:,0]= 0
     
-    return d_loss_c
+    return loss_c
 
 def lv_loss(y_true, y_pred):
     Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
@@ -368,7 +371,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 2
+num_epoch = 1
 
 
 #%% Training
@@ -377,8 +380,10 @@ eval_losses  = []
 eval_loss    = 0.0
 train_loss   = 0.0 #[]
 
+l_c = []
+
 for epoch in range(num_epoch):  # loop over the dataset multiple times
-    
+
     unet.train()
     print('Epoch train =',epoch)
     #0.0  
@@ -413,12 +418,14 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Find loss
         #loss = criterion(output, labels)
         loss_d  = soft_dice_loss(labels, output)
-        print('loss_d = ', loss_d)
+        #print('loss_d = ', loss_d)
         loss_c  = class_loss(labels, output)
-        loss_lv = lv_loss(labels, output)
-        print('loss_lv = ', loss_lv)
+        #print('loss_c shape = ', loss_c.shape)
+        #loss_lv = lv_loss(labels, output)
+        #print('loss_lv = ', loss_lv)
 
-        loss = loss_d + loss_lv
+        #loss = loss_d + loss_lv
+        loss = loss_d
         #print('loss = ', loss)
         
         # Calculate gradients
@@ -433,6 +440,8 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     #train_losses.append(np.mean(batch_loss))
     train_loss = 0.0 #[]
+    
+    l_c.append(loss_c)
     
     unet.eval()
     print('Epoch eval=',epoch)
@@ -488,28 +497,13 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_loss.png')
+#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_loss.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
-
-
-#%% Plot accuracy curve
-
-
-#%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_batch_100.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_batch_state.pt"
-
-#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
-#PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
-
-torch.save(unet, PATH_model)
-torch.save(unet.state_dict(), PATH_state)
 
 
 
 #%%
-
-
-
+out_trained_es = unet(Tensor(im_test_sub))
+out_image_es    = out_trained_es["softmax"]
 
 
