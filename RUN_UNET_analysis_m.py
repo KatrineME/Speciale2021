@@ -111,7 +111,7 @@ class UnetSkipConnectionBlock(nn.Module):
                 model = down + [submodule] + up
 
         self.model = nn.Sequential(*model)
-"""
+        
     @staticmethod
     def contract(in_channels, out_channels, kernel_size=3, norm_layer=nn.InstanceNorm2d):
         layer = nn.Sequential(
@@ -144,7 +144,7 @@ class UnetSkipConnectionBlock(nn.Module):
             crop = self.center_crop(self.model(x), x.size()[2], x.size()[3])
             out = torch.cat([x, crop], 1)
             return out
-"""
+
     
 class BayesUNet(UNet):
 
@@ -202,17 +202,17 @@ data_im_es, data_gt_es = load_data('M','Systole')
 data_im_ed, data_gt_ed = load_data('M','Diastole')
 
 """
-#%%
+#%% load data
 os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im_sub import load_data_sub
-
+"""
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('M','Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('M','Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub('M','Systole','MINF')
 data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('M','Systole','NOR')
 data_im_es_RV,   data_gt_es_RV   = load_data_sub('M','Systole','RV')
-
+"""
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('M','Diastole','DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('M','Diastole','HCM')
 data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('M','Diastole','MINF')
@@ -222,9 +222,9 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('M','Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 16 
+num_train_sub = 12 
 num_eval_sub = num_train_sub + 2
-num_test_sub = num_eval_sub + 2
+num_test_sub = num_eval_sub + 6
 
 ###################################### OBS APPICAL SLICES REMOVED! ####################################
 
@@ -282,7 +282,7 @@ for i in range (0,11):
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_sub_batch_100_log.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_sub_ld.pt'
 
 # Load
 #unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
@@ -299,7 +299,7 @@ unet_ed.eval()
 out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
 out_image_ed    = out_trained_ed["softmax"]
 
-#%%
+#%% One-hot encoding
 seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
@@ -312,7 +312,7 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), nu
 """
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 45
+test_slice = 42
 out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
 alpha = 0.4
 
