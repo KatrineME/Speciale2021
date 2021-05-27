@@ -353,6 +353,7 @@ def lv_loss(y_true, y_pred):
     inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)).detach().cpu().numpy()
     inside[inside > 0] = 0.0001
     #outside = torch.sum(Tensor(inside))
+    
     return torch.sum(Tensor(inside))
 
  
@@ -415,7 +416,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #print('Loss only lv ', loss_lv)
         #print('loss_c shape in loop', loss_c.shape)
         
-        loss = loss_d + 0.0001*loss_c #+ loss_lv  # + loss_c
+        loss = loss_d #+ 0.0001*loss_c #+ loss_lv  # + loss_c
         print('loss d + c', loss)
        
         # Calculate gradients
@@ -488,7 +489,7 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_l
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_batch_100.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_ld.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
