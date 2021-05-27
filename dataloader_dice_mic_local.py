@@ -1,6 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Thu May 27 13:34:57 2021
+
+@author: michalablicher
+"""
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May 25 10:56:56 2021
+
+@author: katrine
+"""
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Wed May 19 10:44:49 2021
 
 @author: michalablicher
@@ -14,6 +27,7 @@ import numpy   as np
 import torchvision
 import glob2
 import torch.optim as optim
+from scipy import ndimage
 
 from torch.autograd  import Variable
 from torch import nn
@@ -194,23 +208,23 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    unet.cuda()
+    #unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
 #%% Specify directory
 cwd = os.getcwd()
 #os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")   # Local directory katrine
-#os.chdir('/Users/michalablicher/Desktop/training')     # Local directory michala
-os.chdir("/home/michala/training")                      # Server directory michala
+os.chdir('/Users/michalablicher/Desktop/training')     # Local directory michala
+#os.chdir("/home/michala/training")                      # Server directory michala
 
 
 #%% Specify directory
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im_sub import load_data_sub
 
-user = 'GPU'
+user = 'M'
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
@@ -225,9 +239,9 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 12 
+num_train_sub = 2 # 16 
 num_eval_sub = num_train_sub + 2
-num_test_sub = num_eval_sub + 6
+num_test_sub = num_eval_sub + 2
 
 im_train_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
@@ -265,7 +279,6 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_tes
                                   np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-
 
 
 #%% Dataloader 
@@ -310,23 +323,23 @@ def soft_dice_loss(y_true, y_pred):
      return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
 
 
-def class_loss(y_true, y_pred):
-    eps =1e-6
+def class_loss(y_true,y_pred):
+    eps = 1e-6
 
     y_true_s = torch.sum(y_true, (2,3))
     
-    if not y_true_s.detach().cpu().numpy().all():
-        loss_c   = -1* torch.sum( torch.log(1-y_pred + eps),(2,3))
-        #print('loss_c shape before mean', loss_c.shape)
-        loss_c   = torch.mean(loss_c)
-        #print('loss_c shape after mean', loss_c.shape)
-        #d_loss_c = 1 / (1-y_pred+eps)
+   # if not y_true_s.detach().numpy().all():
+    if np.count_nonzero(y_true_s) != 4:
+        loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(2,3))
+        #loss_c = torch.sum(l_c)
     else:
         loss_c = 0
         """print('No L_C calculated')
         for i in range(0,y_true.shape[0]):
             plt.subplot(6,6,i+1)
             plt.imshow(y_true[i,1,:,:].detach().numpy())"""
+            
+    loss_c[:,0]= 0
     
     return loss_c
 
@@ -349,14 +362,11 @@ def lv_loss(y_true, y_pred):
     Y_DoRi = Y_LV_pad[:,0:128,0:128]
     Y_DoLe = Y_LV_pad[:,0:128,2:130]
     
-    
-    inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)).detach().cpu().numpy()
-    inside[inside > 0] = 0.0001
-    #outside = torch.sum(Tensor(inside))
-    
+    inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
+    print('inside', inside)    
     return torch.sum(Tensor(inside))/(128*128*32)
 
- 
+
 LEARNING_RATE = 0.0001 # 
 
 # weight_decay is equal to L2 regularizationst
@@ -368,7 +378,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 30
+num_epoch = 1
 
 
 #%% Training
@@ -377,25 +387,30 @@ eval_losses  = []
 eval_loss    = 0.0
 train_loss   = 0.0 #[]
 
+l_c = []
+
 for epoch in range(num_epoch):  # loop over the dataset multiple times
-    
+
     unet.train()
     print('Epoch train =',epoch)
     #0.0  
     for i, (train_data) in enumerate(train_dataloader):
-
+        # get the inputs
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
-        inputs = inputs.cuda()
+        #inputs = inputs.cuda()
         
         labels = train_data[:,1,:,:]
+        #labels = Tensor(np.expand_dims(labels, axis=1))
         labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
         labels = labels.permute(0,3,1,2)
-        labels = labels.cuda()
-
+        #labels = Tensor(labels)
+        #labels = labels.cuda()
+        #print('i=',i)
         # wrap them in Variable
-        inputs, labels = Variable(inputs), Variable(labels)
+        inputs, labels = Variable(inputs), Variable(labels) 
         labels = labels.long()
+        #labels_pred = Tensor(np.expand_dims(labels,axis=1))
         
         # Clear the gradients
         optimizer.zero_grad()
@@ -403,22 +418,23 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Forward Pass
         output = unet(inputs)     
         output = output["log_softmax"]
-        output = torch.exp(output)
+        # OBS LOG????????
         
+        #print('output shape = ', output.shape)
         
         # Find loss
+        #loss = criterion(output, labels)
         loss_d  = soft_dice_loss(labels, output)
+        #print('loss_d = ', loss_d)
         loss_c  = class_loss(labels, output)
-        
+        #print('loss_c shape = ', loss_c.shape)
         loss_lv = lv_loss(labels, output)
-        #print('Loss only d ', loss_d)
-        #print('Loss only c ', loss_c)
-        #print('Loss only lv ', loss_lv)
-        #print('loss_c shape in loop', loss_c.shape)
+        #print('loss_lv = ', loss_lv)
+
+        #loss = loss_d + loss_lv
+        loss = loss_d + loss_lv
+        #print('loss = ', loss)
         
-        loss = loss_d #+ 0.0001*loss_c #+ loss_lv  # + loss_c
-        print('loss d + c', loss)
-       
         # Calculate gradients
         loss.backward()
         
@@ -426,51 +442,58 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         optimizer.step()
 
         # Calculate loss
-        train_loss += loss.item() 
+        train_loss += loss.item() #.detach().cpu().numpy()
        
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
+    #train_losses.append(np.mean(batch_loss))
     train_loss = 0.0 #[]
+    
+    l_c.append(loss_c)
     
     unet.eval()
     print('Epoch eval=',epoch)
      
     for i, (eval_data) in enumerate(eval_dataloader):
-
+        # get the inputs
         #inputs, labels = data
         inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
-        inputs = inputs.cuda()
-        
+        #inputs = inputs.cuda()
         labels = eval_data[:,1,:,:]
+        #labels = Tensor(np.expand_dims(labels, axis=1))
         labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
         labels = labels.permute(0,3,1,2)
-        labels = labels.cuda()
+        #labels = Tensor(labels)
+        #labels = labels.cuda()
         
+        #print('i=',i)
+
         # wrap them in Variable
         inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
+        #labels_pred = Tensor(np.expand_dims(labels,axis=1))
 
         
         # Forward pass
         output = unet(inputs)     
-        output = output["log_softmax"]
+        output = output["softmax"]
         # Find loss
-        loss_d  = soft_dice_loss(labels, output)
-        loss_c  = class_loss(labels, output)
-        loss_lv = lv_loss(labels, output)
+        #loss = criterion(output, labels)
+        loss = soft_dice_loss(labels, output)
 
-        #loss = loss_d + loss_lv + loss_c
-        loss = loss_d #+ loss_lv # + loss_c
         
         # Calculate loss
-        eval_loss += loss.item()
+        #eval_loss.append(loss.item())
+        eval_loss += loss.item() #.detach().cpu().numpy()
         
     eval_losses.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
+    #eval_losses.append(np.mean(eval_loss))
     eval_loss = 0.0
     
 print('Finished Training + Evaluation')
         
 
 #%% Plot loss curves
+
 epochs = np.arange(len(train_losses))
 epochs_eval = np.arange(len(eval_losses))
 plt.figure(dpi=200)
@@ -481,25 +504,13 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_loss.png')
+#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_loss.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
-#%% Plot accuracy curve
 
-
-#%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_ld.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_batch_state.pt"
-
-#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
-#PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
-
-torch.save(unet, PATH_model)
-torch.save(unet.state_dict(), PATH_state)
-
-
-
-
+#%%
+out_trained_es = unet(Tensor(im_test_sub))
+out_image_es    = out_trained_es["softmax"]
 
 
