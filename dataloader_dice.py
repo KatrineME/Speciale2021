@@ -313,31 +313,17 @@ def soft_dice_loss(y_true, y_pred):
 def class_loss(y_true,y_pred):
     eps = 1e-6
 
-    y_true_s = torch.sum(y_true, (2,3))
+    y_true_s   = torch.sum(y_true, (2,3))
     y_true_sin = torch.empty((y_true_s.shape))
-    y_true_sin[y_true_s > 0] = 0
+    y_true_sin[y_true_s > 0]  = 0
     y_true_sin[y_true_s == 0] = 1
     
-    loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(2,3))
-    y_true_sin = y_true_sin.cuda()
-    loss_c = loss_c*y_true_sin
-    loss_c[:,0]= 0
+    loss_c      = -1* torch.sum(torch.log(1 - y_pred + eps),(2,3))
+    y_true_sin  = y_true_sin.cuda()
+    loss_c      = loss_c * y_true_sin
     
-    loss_c = torch.sum(loss_c)
-    """
-   # if not y_true_s.detach().numpy().all():
-    if (np.count_nonzero(y_true_s, axis=1) != 4) == True:
-        loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(2,3))
-        #loss_c = torch.sum(l_c)
-    else:
-        loss_c = 0
-        print('No L_C calculated')
-        for i in range(0,y_true.shape[0]):
-            plt.subplot(6,6,i+1)
-            plt.imshow(y_true[i,1,:,:].detach().numpy())
-            
-    loss_c[:,0]= 0
-    """
+    loss_c      = torch.sum(loss_c)
+    
     return loss_c
 
 def lv_loss(y_true, y_pred):
