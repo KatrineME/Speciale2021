@@ -449,6 +449,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Forward pass
         output = unet(inputs)     
         output = output["log_softmax"]
+        output = torch.exp(output)
         # Find loss
         loss_d  = soft_dice_loss(labels, output)
         loss_c  = class_loss(labels, output)
