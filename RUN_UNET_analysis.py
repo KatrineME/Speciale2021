@@ -260,7 +260,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_sub_ld.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_sub_ld_2.pt'
 
 # Load
 #unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
