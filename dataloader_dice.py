@@ -310,25 +310,35 @@ def soft_dice_loss(y_true, y_pred):
      return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
 
 
-def class_loss(y_true, y_pred):
-    eps =1e-6
+def class_loss(y_true,y_pred):
+    eps = 1e-6
 
     y_true_s = torch.sum(y_true, (2,3))
+    y_true_sin = torch.empty((y_true_s.shape))
+    y_true_sin[y_true_s > 0] = 0
+    y_true_sin[y_true_s == 0] = 1
     
-    if not y_true_s.detach().cpu().numpy().all():
-        loss_c   = -1* torch.sum( torch.log(1-y_pred + eps),(2,3))
-        #print('loss_c shape before mean', loss_c.shape)
-        loss_c   = torch.mean(loss_c)
-        #print('loss_c shape after mean', loss_c.shape)
-        #d_loss_c = 1 / (1-y_pred+eps)
+    loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(2,3))
+    
+    loss_c = loss_c*y_true_sin
+    loss_c[:,0]= 0
+    
+    loss_c = torch.sum(loss_c)
+    """
+   # if not y_true_s.detach().numpy().all():
+    if (np.count_nonzero(y_true_s, axis=1) != 4) == True:
+        loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(2,3))
+        #loss_c = torch.sum(l_c)
     else:
         loss_c = 0
-        """print('No L_C calculated')
+        print('No L_C calculated')
         for i in range(0,y_true.shape[0]):
             plt.subplot(6,6,i+1)
-            plt.imshow(y_true[i,1,:,:].detach().numpy())"""
-    
-    return loss_c/(128*128*32)
+            plt.imshow(y_true[i,1,:,:].detach().numpy())
+            
+    loss_c[:,0]= 0
+    """
+    return loss_c
 
 def lv_loss(y_true, y_pred):
     Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
@@ -459,7 +469,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         loss_lv = lv_loss(labels, output)
 
         #loss = loss_d + loss_lv + loss_c
-        loss = loss_d + loss_lv #+ loss_lv # + loss_c
+        loss = loss_d + loss_lv + loss_c
         
         # Calculate loss
         eval_loss += loss.item()
