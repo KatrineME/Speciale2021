@@ -319,7 +319,7 @@ def class_loss(y_true,y_pred):
     y_true_sin[y_true_s == 0] = 1
     
     loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(2,3))
-    
+    y_true_sin = y_true_sin.cuda()
     loss_c = loss_c*y_true_sin
     loss_c[:,0]= 0
     
