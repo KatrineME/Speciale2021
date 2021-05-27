@@ -404,12 +404,12 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         
         # Find loss
-        loss_d  = soft_dice_loss(labels, output)
+        #loss_d  = soft_dice_loss(labels, output)
         loss_c  = class_loss(labels, output)
-        loss_lv = lv_loss(labels, output)
+        #loss_lv = lv_loss(labels, output)
         
-        loss = loss_d #+ loss_lv  # + loss_c
-        print('Loss only ld ', loss)
+        loss = loss_c #+ loss_lv  # + loss_c
+        print('Loss only c ', loss)
         # Calculate gradients
         loss.backward()
         
@@ -462,7 +462,6 @@ print('Finished Training + Evaluation')
         
 
 #%% Plot loss curves
-
 epochs = np.arange(len(train_losses))
 epochs_eval = np.arange(len(eval_losses))
 plt.figure(dpi=200)
