@@ -400,12 +400,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Set total and correct
             predicted = torch.argmax(output, axis=1)
-            #predicted = Tensor(predicted).cuda()
-            #total += (labels.detach().cpu().numpy()).shape[0]
-            #print('labels bf total',labels.shape)
-            total += labels.shape[0]
-            correct += (predicted == labels).sum().item()
-
+            total    += labels.shape[0]
+            print('total', total)
+            correct  += (predicted == labels).sum().item()
+            print('correct', correct)
       
         eval_losses.append(eval_loss/(i+1)) # This is normalised by batch size (i = 12)
         #eval_losses.append(np.mean(eval_loss))
