@@ -114,6 +114,22 @@ def accuracy_self(result, reference):
         
     return acc
 
+def mcc(result, reference):
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
+        
+    tp = np.count_nonzero(result & reference)
+    fp = np.count_nonzero(result & ~reference)
+    fn = np.count_nonzero(~result & reference)
+    tn = np.count_nonzero(~result & ~reference)
+    
+    try:
+        mcc = ((tp * tn) - (fp * fn))/ float(np.sqrt(float((tp + fp)*(tp + fn)*(tn + fp)*(tn + fn))))
+    except ZeroDivisionError:
+        mcc = 0.0
+        
+    return mcc
+
 def recall(result, reference):
     """
     Recall.

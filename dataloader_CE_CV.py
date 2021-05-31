@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed May 19 10:44:49 2021
+Created on Mon May 31 11:04:54 2021
 
 @author: michalablicher
 """
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Apr 29 15:28:28 2021
 
+@author: michalablicher
+"""
 #%% Load packages
 import torch
 import os
@@ -20,6 +26,8 @@ from torch import nn
 from torch import Tensor
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
+from sklearn.model_selection import KFold
+
 
 if torch.cuda.is_available():
     # Tensor = torch.cuda.FloatTensor
@@ -210,24 +218,24 @@ os.chdir("/home/michala/training")                      # Server directory micha
 
 from load_data_gt_im_sub import load_data_sub
 
-user = 'GPU'
-data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
-data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
-data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
-data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,'Systole','NOR')
-data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,'Systole','RV')
 
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
+data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
+data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('GPU','Systole','HCM')
+data_im_es_MINF, data_gt_es_MINF = load_data_sub('GPU','Systole','MINF')
+data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('GPU','Systole','NOR')
+data_im_es_RV,   data_gt_es_RV   = load_data_sub('GPU','Systole','RV')
+
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU','Diastole','DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU','Diastole','HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU','Diastole','MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU','Diastole','NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU','Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 12 
-num_eval_sub = num_train_sub + 2
-num_test_sub = num_eval_sub + 6
+num_train_sub = 12
+#num_eval_sub = num_train_sub + 2
+num_test_sub = num_train_sub + 8
 
 im_train_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
@@ -241,244 +249,196 @@ gt_train_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).a
                                   np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
 
-im_eval_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_im_ed_HCM[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_im_ed_MINF[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_im_ed_NOR[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_im_ed_RV[num_train_sub:num_eval_sub]).astype(None)))
 
-gt_eval_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_HCM[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_MINF[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_NOR[num_train_sub:num_eval_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_RV[num_train_sub:num_eval_sub]).astype(None)))
+im_test_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_train_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_train_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_train_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_train_sub:num_test_sub]).astype(None)))
 
-
-im_test_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-
-gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_train_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_train_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_train_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_train_sub:num_test_sub]).astype(None)))
 
 
+#%% Training with K-folds
+k_folds    = 4
+num_epochs = 10
+loss_function = nn.CrossEntropyLoss()
 
-#%% Dataloader 
 
-data_train = Tensor((np.squeeze(im_train_sub), gt_train_sub))
+# For fold results
+results = {}
+
+# Set fixed random number seed
+torch.manual_seed(42)
+
+# Define the K-fold Cross Validator
+kfold = KFold(n_splits=k_folds, shuffle=True)
+
+# Start print
+print('--------------------------------')
+
+# Prep data for dataloader
+data_train   = Tensor((np.squeeze(im_train_sub), gt_train_sub))
 data_train_n = data_train.permute(1,0,2,3)
+dataset      = data_train_n
+batch_size   = 32
 
-data_eval = Tensor((np.squeeze(im_eval_sub), gt_eval_sub))
-data_eval_n = data_eval.permute(1,0,2,3)
-
-batch_size = 32
+"""
 train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
-eval_dataloader = DataLoader(data_eval_n, batch_size=batch_size, shuffle=True, drop_last=True)
-
-#im_train , lab_train = next(iter(train_dataloader))
-#im_eval , lab_eval   = next(iter(eval_dataloader))
-
 
 print("The shape of the data loader", len(train_dataloader),
       " should equal to number of images // batch_size:", len(data_train_n),"//", batch_size, "=",len(data_train_n) // batch_size)
+"""
 
-
-print("The shape of the data loader", len(eval_dataloader),
-      " should equal to number of images // batch_size:",len(data_eval_n), "//", batch_size, "=",len(data_eval_n) // batch_size )
-
-
-#%% Setting up training loop
-# OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
-#y_pred = output
-#y_true = labels
-
-def soft_dice_loss(y_true, y_pred):
-     """ Calculate soft dice loss for each class
-        y_pred = bs x c x h x w
-        y_true = bs x c x h x w (one hot)
-     """
-     eps = 1e-6
-     
-     numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
-     denominator = torch.sum(torch.square(y_pred) + torch.square(y_true), (2,3))
-     
-     return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
-
-
-def class_loss(y_true,y_pred):
-    eps = 1e-6
-
-    y_true_s   = torch.sum(y_true, (2,3))
-    y_true_sin = torch.empty((y_true_s.shape))
-    y_true_sin[y_true_s > 0]  = 0
-    y_true_sin[y_true_s == 0] = 1
+# K-fold Cross Validation model evaluation
+for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
+    # Print
+    print(f'FOLD {fold}')
+    print('--------------------------------')
     
-    loss_c      = -1* torch.sum(torch.log(1 - y_pred + eps),(2,3))
-    y_true_sin  = y_true_sin.cuda()
-    loss_c      = loss_c * y_true_sin
+    # Sample elements randomly from a given list of ids, no replacement.
+    train_subsampler = torch.utils.data.SubsetRandomSampler(train_ids)
+    test_subsampler  = torch.utils.data.SubsetRandomSampler(test_ids)
     
-    loss_c      = torch.sum(loss_c)
+    # Define data loaders for training and testing data in this fold
+    train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
+    eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
+   
+    #train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
+
     
-    return loss_c
-
-def lv_loss(y_true, y_pred):
-    Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
-    Y_RV   = y_pred[:,1,:,:]           # size([B,H,W])
-    Y_LV   = y_pred[:,3,:,:]           # size([B,H,W])
-
-    Y_LV_pad = torch.nn.functional.pad(Y_LV,(1,1,1,1),'constant', 0)
-
-    Y_up   = Y_LV_pad[:,2:130,1:129]
-    Y_down = Y_LV_pad[:,0:128,1:129]
+    # Init the neural network
+    #network = unet()
+    unet.apply(weights_init)
     
-    Y_left = Y_LV_pad[:,1:129,2:130]
-    Y_right= Y_LV_pad[:,1:129,0:128]
+    # Initialize optimizer
+    optimizer = torch.optim.Adam(unet.parameters(), lr=1e-4, weight_decay=1e-4)
+
+
+    #% Training
+    train_losses = []
+    eval_losses  = []
+    eval_loss    = 0.0
+    train_loss   = 0.0 #[]
+    total = 0.0
+    correct = 0.0
     
-    Y_UpLe = Y_LV_pad[:,2:130,2:130]
-    Y_UpRi = Y_LV_pad[:,2:130,0:128]
+    for epoch in range(num_epochs):  # loop over the dataset multiple times
+        
+        unet.train()
+        print('Epoch train =',epoch)
+        #0.0  
+        for i, (train_data) in enumerate(train_dataloader):
+            # get the inputs
+            #print('train_data = ', train_data.shape)
+            #inputs, labels = data
+            inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
+            inputs = inputs.cuda()
+            
+            labels = train_data[:,1,:,:]
+            labels = labels.cuda()
+            #print('i=',i)
+            # wrap them in Variable
+            inputs, labels = Variable(inputs), Variable(labels)
+            labels = labels.long()
+            
+            # Clear the gradients
+            optimizer.zero_grad()
+           
+            # Forward Pass
+            output = unet(inputs)     
+            output = output["log_softmax"]
+            #print('output shape = ', output.shape)
+            
+            # Find loss
+            loss = loss_function(output, labels)
+            #print('loss = ', loss)
+            
+            # Calculate gradients
+            loss.backward()
+            
+            # Update Weights
+            optimizer.step()
     
-    Y_DoRi = Y_LV_pad[:,0:128,0:128]
-    Y_DoLe = Y_LV_pad[:,0:128,2:130]
+            # Calculate loss
+            train_loss += loss.item() #.detach().cpu().numpy()
+            
+        train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
+        print('epoch loss = ', train_losses)
+        #train_losses.append(np.mean(batch_loss))
+        train_loss = 0.0 #[]
+        
+        unet.eval()
+        print('Epoch eval=',epoch)
+         
+        for i, (eval_data) in enumerate(eval_dataloader):
+            # get the inputs
+            #inputs, labels = data
+            inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
+            inputs = inputs.cuda()
+            labels = eval_data[:,1,:,:]
+            labels = labels.cuda()
+            #print('i=',i)
     
+            # wrap them in Variable
+            inputs, labels = Variable(inputs), Variable(labels)
+            labels = labels.long()
+            
+            # Forward pass
+            output = unet(inputs)     
+            output = output["log_softmax"]
+            # Find loss
+            loss = loss_function(output, labels)
+            
+            # Calculate loss
+            #eval_loss.append(loss.item())
+            eval_loss += loss.item() #.detach().cpu().numpy()
+            
+            # Set total and correct
+            predicted = torch.argmax(output, axis=1)
+            total    += labels.shape[0]
+            print('total', total)
+            correct  += (predicted == labels).sum().item()
+            print('correct', correct)
+      
+        eval_losses.append(eval_loss/(i+1)) # This is normalised by batch size (i = 12)
+        #eval_losses.append(np.mean(eval_loss))
+        eval_loss = 0.0
+        
+        # Print accuracy
+        print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
+        print('--------------------------------')
+        results[fold] = 100.0 * (correct / total)
     
-    inside = ((Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)).detach().cpu().numpy()
-    inside[inside > 0] = 0.0001
-    #outside = torch.sum(Tensor(inside))
-    
-    return torch.sum(Tensor(inside))/(128*128*32)
+    print('Finished Training + Evaluation')
+            
 
- 
-LEARNING_RATE = 0.0001 # 
-
-# weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
-# torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
-
-# and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
-#lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-#                                               step_size=3,
-#                                               gamma=0.1)
-
-num_epoch = 10
-
-
-#%% Training
-train_losses = []
-eval_losses  = []
-eval_loss    = 0.0
-train_loss   = 0.0 #[]
-
-for epoch in range(num_epoch):  # loop over the dataset multiple times
-    
-    unet.train()
-    print('Epoch train =',epoch)
-    #0.0  
-    for i, (train_data) in enumerate(train_dataloader):
-
-        #inputs, labels = data
-        inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
-        inputs = inputs.cuda()
-        
-        labels = train_data[:,1,:,:]
-        labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
-        labels = labels.permute(0,3,1,2)
-        labels = labels.cuda()
-
-        # wrap them in Variable
-        inputs, labels = Variable(inputs), Variable(labels)
-        labels = labels.long()
-        
-        # Clear the gradients
-        optimizer.zero_grad()
-       
-        # Forward Pass
-        output = unet(inputs)     
-        output = output["log_softmax"]
-        output = torch.exp(output)
-        
-        
-        # Find loss
-        loss_d  = soft_dice_loss(labels, output)
-        loss_c  = class_loss(labels, output)
-        
-        loss_lv = lv_loss(labels, output)
-        #print('Loss only d ', loss_d)
-        print('Loss only c ', loss_c)
-        print('Loss only lv ', loss_lv)
-        #print('loss_c shape in loop', loss_c.shape)
-        
-        loss = loss_d + loss_lv #+ 0.0001*loss_c #+ loss_lv  # + loss_c
-        print('loss d + lv', loss)
-       
-        # Calculate gradients
-        loss.backward()
-        
-        # Update Weights
-        optimizer.step()
-
-        # Calculate loss
-        train_loss += loss.item() 
-       
-    train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
-    train_loss = 0.0 #[]
-    
-    unet.eval()
-    print('Epoch eval=',epoch)
-     
-    for i, (eval_data) in enumerate(eval_dataloader):
-
-        #inputs, labels = data
-        inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
-        inputs = inputs.cuda()
-        
-        labels = eval_data[:,1,:,:]
-        labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
-        labels = labels.permute(0,3,1,2)
-        labels = labels.cuda()
-        
-        # wrap them in Variable
-        inputs, labels = Variable(inputs), Variable(labels)
-        labels = labels.long()
-
-        
-        # Forward pass
-        output = unet(inputs)     
-        output = output["log_softmax"]
-        output = torch.exp(output)
-        # Find loss
-        loss_d  = soft_dice_loss(labels, output)
-        loss_c  = class_loss(labels, output)
-        loss_lv = lv_loss(labels, output)
-
-        #loss = loss_d + loss_lv + loss_c
-        loss = loss_d + loss_lv #+ loss_c
-        
-        # Calculate loss
-        eval_loss += loss.item()
-        
-    eval_losses.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
-    eval_loss = 0.0
-    
-print('Finished Training + Evaluation')
-        
-
+# Print fold results
+    print(f'K-FOLD CROSS VALIDATION RESULTS FOR {k_folds} FOLDS')
+    print('--------------------------------')
+    sum = 0.0
+    for key, value in results.items():
+        print(f'Fold {key}: {value} %')
+        sum += value
+    print(f'Average: {sum/len(results.items())} %')   
 #%% Plot loss curves
-epochs = np.arange(len(train_losses))
-epochs_eval = np.arange(len(eval_losses))
+
+epochs_train = np.arange(len(train_losses))
+epochs_eval  = np.arange(len(eval_losses))
+
 plt.figure(dpi=200)
-plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
-plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
-plt.xticks(np.arange(1,num_epoch+1, step = 10))
+plt.plot(epochs_train + 1 , train_losses, 'b', label = 'Training Loss')
+plt.plot(epochs_eval  + 1 , eval_losses,  'r', label = 'Validation Loss')
+plt.xticks(np.arange(1, num_epochs + 1, step = 10))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_loss.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
@@ -486,14 +446,21 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_l
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_sub_ld.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_batch_state.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal.pt"
+PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
 
 torch.save(unet, PATH_model)
 torch.save(unet.state_dict(), PATH_state)
+
+
+
+
+
+
+
 
 
 
