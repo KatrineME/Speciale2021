@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 10
+num_epochs = 20
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -353,7 +353,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Find loss
             loss = loss_function(output, labels)
-            #print('loss = ', loss)
+            print('loss = ', loss)
             
             # Calculate gradients
             loss.backward()
