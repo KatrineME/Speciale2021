@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 5
+num_epochs = 20
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -320,11 +320,12 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
 
 
     #% Training
-    train_losses = []
-    eval_losses  = []
-    eval_results = []
-    eval_loss    = 0.0
-    train_loss   = 0.0 #[]
+    train_losses  = []
+    train_results = []
+    eval_losses   = []
+    eval_results  = []
+    eval_loss     = 0.0
+    train_loss    = 0.0 #[]
     total = 0.0
     correct = 0.0
     
@@ -379,8 +380,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         train_loss = 0.0 #[]
         
         # Print accuracy
-        print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
-        print('--------------------------------')
+        #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
+        train_results.append(100.0 * correct / total)
+        #print('--------------------------------')
         results[fold] = 100.0 * (correct / total)
         
         unet.eval()
@@ -419,14 +421,14 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         eval_loss = 0.0
         
         # Print accuracy
-        print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
+        #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         eval_results.append(100.0 * correct / total)
-        print('--------------------------------')
+        #print('--------------------------------')
         results[fold] = 100.0 * (correct / total)
     
     print('Finished Training + Evaluation')
             
-
+"""
 # Print fold results
     print(f'K-FOLD CROSS VALIDATION RESULTS FOR {k_folds} FOLDS')
     print('--------------------------------')
@@ -435,7 +437,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         print(f'Fold {key}: {value} %')
         sum += value
     print(f'Average: {sum/len(results.items())} %') 
-
+"""
 #%% Plot loss curves
 
 epochs_train = np.arange(len(train_losses))
@@ -452,13 +454,13 @@ plt.legend(loc="upper right")
 plt.title("Loss function")
 
 plt.subplot(1,2,2)
-#plt.plot(epochs_train + 1 , train_losses, 'b', label = 'Training Loss')
-plt.plot(epochs_eval  + 1 , eval_results,  'r', label = 'Validation Loss')
+plt.plot(epochs_train + 1 , train_results, 'b', label = 'Training Acc')
+plt.plot(epochs_eval  + 1 , eval_results,  'r', label = 'Validation Acc')
 plt.xticks(np.arange(1, num_epochs + 1, step = 10))
 plt.xlabel('Epochs')
-plt.ylabel('acc')
+plt.ylabel('Accuracy %')
 plt.legend(loc="upper right")
-plt.title("Acc function")
+plt.title("Accuracy")
 
 plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
