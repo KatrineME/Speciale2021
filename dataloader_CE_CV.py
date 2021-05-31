@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 10
+num_epochs = 40
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -396,13 +396,32 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             #eval_loss.append(loss.item())
             eval_loss += loss.item() #.detach().cpu().numpy()
             
-        eval_losses.append(eval_loss/eval_data.shape[0]) # This is normalised by batch size
+            # Set total and correct
+            predicted = np.argmax(output.detach().cpu().numpy(), axis=1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+      
+        eval_losses.append(eval_loss/(i+1)) # This is normalised by batch size (i = 12)
         #eval_losses.append(np.mean(eval_loss))
         eval_loss = 0.0
+        
+        # Print accuracy
+        print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
+        print('--------------------------------')
+        results[fold] = 100.0 * (correct / total)
     
     print('Finished Training + Evaluation')
             
 
+# Print fold results
+    print(f'K-FOLD CROSS VALIDATION RESULTS FOR {k_folds} FOLDS')
+    print('--------------------------------')
+    sum = 0.0
+    for key, value in results.items():
+        print(f'Fold {key}: {value} %')
+        sum += value
+    print(f'Average: {sum/len(results.items())} %')   
 #%% Plot loss curves
 
 epochs_train = np.arange(len(train_losses))
