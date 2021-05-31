@@ -400,7 +400,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Set total and correct
             predicted = torch.argmax(output, axis=1)
-            total    += labels.shape[0]
+            total    += (labels.shape[0])*(128*128)
             print('total', total)
             correct  += (predicted == labels).sum().item()
             print('correct', correct)
