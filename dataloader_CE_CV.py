@@ -402,7 +402,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             predicted = np.argmax(output.detach().cpu().numpy(), axis=1)
             #predicted = Tensor(predicted).cuda()
             #total += (labels.detach().cpu().numpy()).shape[0]
-            prrint('labels bf total',labels.shape)
+            print('labels bf total',labels.shape)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
