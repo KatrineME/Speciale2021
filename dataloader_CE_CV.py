@@ -399,7 +399,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             eval_loss += loss.item() #.detach().cpu().numpy()
             
             # Set total and correct
-            predicted = np.argmax(output, axis=1)#.detach().cpu().numpy(), axis=1)
+            predicted = torch.argmax(output.detach().cpu().numpy(), axis=1)
             #predicted = Tensor(predicted).cuda()
             #total += (labels.detach().cpu().numpy()).shape[0]
             #print('labels bf total',labels.shape)
