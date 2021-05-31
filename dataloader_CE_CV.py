@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 20
+num_epochs = 10
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -364,7 +364,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Calculate loss
             train_loss += loss.item() #.detach().cpu().numpy()
             
-        train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
+        train_losses.append(train_loss/i)#train_data.shape[0]) # This is normalised by batch size
+        print('i =', i)
         print('epoch loss = ', train_losses)
         #train_losses.append(np.mean(batch_loss))
         train_loss = 0.0 #[]
