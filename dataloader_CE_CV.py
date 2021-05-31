@@ -400,8 +400,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Set total and correct
             predicted = np.argmax(output.detach().cpu().numpy(), axis=1)
-            predicted = Tensor(predicted).cuda()
-            total += Tensor(labels).shape[0]
+            #predicted = Tensor(predicted).cuda()
+            total += Tensor(labels.detach().cpu().numpy()).shape[0]
             correct += (predicted == labels).sum().item()
 
       
