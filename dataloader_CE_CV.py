@@ -306,7 +306,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     
     # Define data loaders for training and testing data in this fold
     train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
-    eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler, drop_last=True)
+    eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
    
     #train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
@@ -332,7 +332,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #0.0  
         for i, (train_data) in enumerate(train_dataloader):
             # get the inputs
-            print('train_data = ', train_data.shape)
+            #print('train_data = ', train_data.shape)
             #inputs, labels = data
             inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
             inputs = inputs.cuda()
@@ -365,8 +365,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Calculate loss
             train_loss += loss.item() #.detach().cpu().numpy()
             
-        train_losses.append(train_loss/i)#train_data.shape[0]) # This is normalised by batch size
-        print('i =', i)
+        train_losses.append(train_loss/(i+1) #train_data.shape[0]) # This is normalised by batch size
         print('epoch loss = ', train_losses)
         #train_losses.append(np.mean(batch_loss))
         train_loss = 0.0 #[]
