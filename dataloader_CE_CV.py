@@ -324,8 +324,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     eval_losses  = []
     eval_loss    = 0.0
     train_loss   = 0.0 #[]
-    total = []
-    correct = []
+    total = 0.0
+    correct = 0.0
     
     for epoch in range(num_epochs):  # loop over the dataset multiple times
         
@@ -399,11 +399,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             eval_loss += loss.item() #.detach().cpu().numpy()
             
             # Set total and correct
-            predicted = np.argmax(output.detach().cpu().numpy(), axis=1)
+            predicted = np.argmax(output, axis=1)#.detach().cpu().numpy(), axis=1)
             #predicted = Tensor(predicted).cuda()
             #total += (labels.detach().cpu().numpy()).shape[0]
-            print('labels bf total',labels.shape)
-            total += labels.size(0)
+            #print('labels bf total',labels.shape)
+            total += labels.shape(0)
             correct += (predicted == labels).sum().item()
 
       
