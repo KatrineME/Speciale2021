@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 10
+num_epochs = 5
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -322,6 +322,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     #% Training
     train_losses = []
     eval_losses  = []
+    eval_results = []
     eval_loss    = 0.0
     train_loss   = 0.0 #[]
     total = 0.0
@@ -367,10 +368,20 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Calculate loss
             train_loss += loss.item() #.detach().cpu().numpy()
             
+            # Set total and correct
+            predicted = torch.argmax(output, axis=1)
+            total    += (labels.shape[0])*(128*128)
+            correct  += (predicted == labels).sum().item()
+            
         train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
-        print('epoch loss = ', train_losses)
+        #print('epoch loss = ', train_losses)
         #train_losses.append(np.mean(batch_loss))
         train_loss = 0.0 #[]
+        
+        # Print accuracy
+        print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
+        print('--------------------------------')
+        results[fold] = 100.0 * (correct / total)
         
         unet.eval()
         print('Epoch eval=',epoch)
@@ -401,9 +412,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Set total and correct
             predicted = torch.argmax(output, axis=1)
             total    += (labels.shape[0])*(128*128)
-            print('total', total)
             correct  += (predicted == labels).sum().item()
-            print('correct', correct)
       
         eval_losses.append(eval_loss/(i+1)) # This is normalised by batch size (i = 12)
         #eval_losses.append(np.mean(eval_loss))
@@ -411,6 +420,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         
         # Print accuracy
         print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
+        eval_results.append(100.0 * correct / total)
         print('--------------------------------')
         results[fold] = 100.0 * (correct / total)
     
@@ -424,7 +434,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     for key, value in results.items():
         print(f'Fold {key}: {value} %')
         sum += value
-    print(f'Average: {sum/len(results.items())} %')   
+    print(f'Average: {sum/len(results.items())} %') 
+
 #%% Plot loss curves
 
 epochs_train = np.arange(len(train_losses))
@@ -442,7 +453,7 @@ plt.title("Loss function")
 
 plt.subplot(1,2,2)
 #plt.plot(epochs_train + 1 , train_losses, 'b', label = 'Training Loss')
-plt.plot(epochs_eval  + 1 , results,  'r', label = 'Validation Loss')
+plt.plot(epochs_eval  + 1 , eval_results,  'r', label = 'Validation Loss')
 plt.xticks(np.arange(1, num_epochs + 1, step = 10))
 plt.xlabel('Epochs')
 plt.ylabel('acc')
