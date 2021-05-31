@@ -302,11 +302,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     
     # Sample elements randomly from a given list of ids, no replacement.
     train_subsampler = torch.utils.data.SubsetRandomSampler(train_ids)
-    test_subsampler = torch.utils.data.SubsetRandomSampler(test_ids)
+    test_subsampler  = torch.utils.data.SubsetRandomSampler(test_ids)
     
     # Define data loaders for training and testing data in this fold
-    train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, shuffle=True, drop_last=True)
-    eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  shuffle=True, drop_last=True)
+    train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
+    eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler, drop_last=True)
    
     #train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
