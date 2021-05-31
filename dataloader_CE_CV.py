@@ -399,7 +399,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             eval_loss += loss.item() #.detach().cpu().numpy()
             
             # Set total and correct
-            predicted = np.argmax(output.detach().cpu().numpy(), axis=1)
+            predicted = np.argmax(output.detach().numpy(), axis=1)
             total += Tensor(labels).shape[0]
             correct += (predicted == labels).sum().item()
 
