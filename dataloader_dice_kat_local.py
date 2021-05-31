@@ -232,9 +232,9 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 2 # 16 
+num_train_sub = 12 # 16 
 num_eval_sub = num_train_sub + 2
-num_test_sub = num_eval_sub + 2
+num_test_sub = num_eval_sub + 8
 
 im_train_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
@@ -321,15 +321,15 @@ def class_loss(y_true,y_pred):
 
     y_true_s = torch.sum(y_true, (2,3))
     y_true_sin = torch.empty((y_true_s.shape))
-    y_true_sin[y_true_s > 0] = 0
+    
+    y_true_sin[y_true_s > 0]  = 0
     y_true_sin[y_true_s == 0] = 1
     
     loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(2,3))
     
     loss_c = loss_c*y_true_sin
-    loss_c[:,0]= 0
-    
     loss_c = torch.sum(loss_c)
+    loss_c = loss_c/21729919.19824192
     """
    # if not y_true_s.detach().numpy().all():
     if (np.count_nonzero(y_true_s, axis=1) != 4) == True:
@@ -481,8 +481,10 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["softmax"]
         # Find loss
         #loss = criterion(output, labels)
-        loss = soft_dice_loss(labels, output)
+        loss_d  = soft_dice_loss(labels, output)
+        loss_c  = class_loss(labels, output)
 
+        loss = loss_d+loss_c
         
         # Calculate loss
         #eval_loss.append(loss.item())

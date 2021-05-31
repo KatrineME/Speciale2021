@@ -15,6 +15,8 @@ from PIL   import Image
 
 import nibabel as nib
 import numpy   as np
+from torch import nn
+import torch
 import matplotlib.pyplot as plt
 #%%
     
@@ -110,8 +112,13 @@ for i in range(0,100):
     
     in_gt = Tensor(crop_gt).permute(2,0,1).detach().numpy()
     gt_data.append(in_gt.astype(object))
-
+#%%
 im = np.concatenate(im_data).astype(None)
+gt = np.concatenate(gt_data).astype(None)
+
+ref_dia = torch.nn.functional.one_hot(Tensor(gt).to(torch.int64), num_classes=4).detach().numpy()
+s = np.sum(ref_dia,(0,1,2))
+
 #%% Center slices
 center_slices = np.zeros(100)
 slices = 0
