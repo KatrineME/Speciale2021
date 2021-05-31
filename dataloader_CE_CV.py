@@ -313,7 +313,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     
     # Init the neural network
     #network = unet()
-    #network.apply(weights_init)
+    unet.apply(weights_init)
     
     # Initialize optimizer
     optimizer = torch.optim.Adam(unet.parameters(), lr=1e-4, weight_decay=1e-4)
@@ -353,7 +353,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Find loss
             loss = loss_function(output, labels)
-            print('loss = ', loss)
+            #print('loss = ', loss)
             
             # Calculate gradients
             loss.backward()
@@ -365,6 +365,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             train_loss += loss.item() #.detach().cpu().numpy()
             
         train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
+        print('epoch loss = ', train_losses)
         #train_losses.append(np.mean(batch_loss))
         train_loss = 0.0 #[]
         
