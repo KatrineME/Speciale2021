@@ -431,6 +431,7 @@ epochs_train = np.arange(len(train_losses))
 epochs_eval  = np.arange(len(eval_losses))
 
 plt.figure(dpi=200)
+plt.subplot(1,2,1)
 plt.plot(epochs_train + 1 , train_losses, 'b', label = 'Training Loss')
 plt.plot(epochs_eval  + 1 , eval_losses,  'r', label = 'Validation Loss')
 plt.xticks(np.arange(1, num_epochs + 1, step = 10))
@@ -438,7 +439,17 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV.png')
+
+plt.subplot(1,2,2)
+#plt.plot(epochs_train + 1 , train_losses, 'b', label = 'Training Loss')
+plt.plot(epochs_eval  + 1 , results,  'r', label = 'Validation Loss')
+plt.xticks(np.arange(1, num_epochs + 1, step = 10))
+plt.xlabel('Epochs')
+plt.ylabel('acc')
+plt.legend(loc="upper right")
+plt.title("Acc function")
+
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
