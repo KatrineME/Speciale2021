@@ -332,6 +332,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #0.0  
         for i, (train_data) in enumerate(train_dataloader):
             # get the inputs
+            print('train_data = ', train_data.shape)
             #inputs, labels = data
             inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
             inputs = inputs.cuda()
