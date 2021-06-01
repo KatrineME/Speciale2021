@@ -376,7 +376,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             correct  += (predicted == labels).sum().item()
             
         train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
-        #print('epoch loss = ', train_losses)
+        print('epoch loss = ', train_losses)
+
         #train_losses.append(np.mean(batch_loss))
         train_loss = 0.0 #[]
         
@@ -430,7 +431,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     
     print('Finished Training + Evaluation')
             
-
+"""
 # Print fold results
     print(f'K-FOLD CROSS VALIDATION RESULTS FOR {k_folds} FOLDS')
     print('--------------------------------')
@@ -439,7 +440,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         print(f'Fold {key}: {value} %')
         sum += value
     print(f'Average: {sum/len(results.items())} %') 
-
+"""
 #%% Plot loss curves
 
 epochs_train = np.arange(len(train_losses))
