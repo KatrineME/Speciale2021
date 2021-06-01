@@ -373,6 +373,10 @@ for i in range(0,4):
         plt.ylabel('Reference', fontsize=14)
 #plt.show()   
 
+
+
+
+#%%%%%%%%%%%%%%%%%%%%%%% METRICS %%%%%%%%%%%%%%%%%%%%%
 #%% Calculate volume for diastolic phase
 #test_index = data_gt_ed[num_eval:num_test]
 
