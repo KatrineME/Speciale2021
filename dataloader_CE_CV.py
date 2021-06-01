@@ -377,9 +377,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             correct  += (predicted == labels).sum().item()
             
         train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
-        print('epoch loss = ', train_losses)
+        #print('epoch loss = ', train_losses)
         fold_losses[fold].append(train_losses)
-        
+        print('fold loss = ', fold_losses)
         #train_losses.append(np.mean(batch_loss))
         train_loss = 0.0 #[]
         
