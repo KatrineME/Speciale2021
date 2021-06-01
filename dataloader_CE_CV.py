@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 100
+num_epochs = 40
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -320,7 +320,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     unet.apply(weights_init)
     
     # Initialize optimizer
-    optimizer = torch.optim.Adam(unet.parameters(), lr=1e-4, weight_decay=1e-4)
+    optimizer = torch.optim.Adam(unet.parameters(), lr=0.1, weight_decay=1e-4)
 
 
     #% Training
