@@ -328,7 +328,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     train_loss    = 0.0
     total         = 0.0
     correct       = 0.0
-    results_eval = []
+    results_eval = {}
     
     for epoch in range(num_epochs):  # loop over the dataset multiple times
         
