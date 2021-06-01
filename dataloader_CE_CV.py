@@ -201,7 +201,7 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.0)
     unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
@@ -308,8 +308,6 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
     eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
    
-    #train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
-
     
     # Init the neural network
     #network = unet()
@@ -460,7 +458,7 @@ plt.figure(figsize=(30, 15), dpi=200)
 plt.subplot(1,2,1)
 plt.plot(epochs_train + 1 , m_fold_train_losses, 'b', label = 'Training Loss')
 plt.plot(epochs_eval  + 1 , m_fold_eval_losses,  'r', label = 'Validation Loss')
-plt.xticks(np.arange(1, num_epochs + 1, step = 10))
+plt.xticks(np.arange(1, num_epochs + 1, step = 5))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
@@ -486,17 +484,17 @@ T = [t_res_mean, t_res]
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_MCnone.pt"
+#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
 
 torch.save(unet, PATH_model)
-torch.save(unet.state_dict(), PATH_state)
+#torch.save(unet.state_dict(), PATH_state)
 
 #%%
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_MCnone.pt"
 torch.save(T, PATH_results)
 
 
