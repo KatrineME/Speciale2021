@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 10
+num_epochs = 30
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -469,7 +469,7 @@ plt.title("Loss function")
 plt.subplot(1,2,2)
 plt.plot(epochs_train + 1 , m_fold_train_res, 'b', label = 'Training Acc')
 plt.plot(epochs_eval  + 1 , m_fold_eval_res,  'r', label = 'Validation Acc')
-plt.xticks(np.arange(1, num_epochs + 1, step = 10))
+plt.xticks(np.arange(1, num_epochs + 1, step = 5))
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy %')
 plt.legend(loc="upper right")
@@ -479,7 +479,11 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc.
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
-t_res = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res]
+t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res]
+t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res]
+
+
+T = [t_res_mean, t_res]
 #%% Plot accuracy curve
 
 
@@ -495,7 +499,7 @@ torch.save(unet.state_dict(), PATH_state)
 
 #%%
 PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results.pt"
-torch.save(t_res, PATH_results)
+torch.save(T, PATH_results)
 
 
 
