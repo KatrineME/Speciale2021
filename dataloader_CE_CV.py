@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 3
+num_epochs = 40
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -433,7 +433,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         results[fold] = 100.0 * (correct / total)
     
     fold_train_losses.append(train_losses)
-    print('fold loss = ', fold_train_losses)
+    #print('fold loss = ', fold_train_losses)
     
     fold_eval_losses.append(eval_losses)
     #print('fold loss = ', fold_eval_losses)
@@ -452,7 +452,6 @@ m_fold_train_losses = np.mean(fold_train_losses, axis = 0)
 print('m_fold_train_losses', m_fold_train_losses)
 m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
 m_fold_train_res    = np.mean(fold_train_res, axis = 0)   
-print('m_fold_train_res', m_fold_train_res)
 m_fold_eval_res     = np.mean(fold_eval_res, axis = 0)       
 
 print('Finished Training + Evaluation')
@@ -490,7 +489,7 @@ T = [t_res_mean, t_res] # listed together
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_MC01.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_mc01.pt"
 #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
@@ -500,7 +499,7 @@ torch.save(unet, PATH_model)
 #torch.save(unet.state_dict(), PATH_state)
 
 #%%
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_MC01.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_mc01.pt"
 torch.save(T, PATH_results)
 
 
