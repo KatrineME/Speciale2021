@@ -201,7 +201,7 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.0)
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 30
+num_epochs = 10
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -430,7 +430,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         results[fold] = 100.0 * (correct / total)
     
     fold_train_losses.append(train_losses)
-    #print('fold loss = ', fold_train_losses)
+    print('fold loss = ', fold_train_losses)
     
     fold_eval_losses.append(eval_losses)
     #print('fold loss = ', fold_eval_losses)
@@ -441,14 +441,14 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_res.append(eval_results)
     #print('fold loss = ', fold_eval_res)
     
-    print('Finished Training + Evaluation')
-
 
 m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
+print('m_fold_train_losses', m_fold_train_losses)
 m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
 m_fold_train_res    = np.mean(fold_train_res, axis = 0)   
 m_fold_eval_res     = np.mean(fold_eval_res, axis = 0)       
 
+print('Finished Training + Evaluation')
 #%% Plot loss curves
 
 epochs_train = np.arange(len(train_losses))
@@ -476,15 +476,14 @@ plt.title("Accuracy")
 plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
-t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res]
-t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res]
+t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res] # mean loss and accuracy
+t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res]         # loss and accuracy for each epoch
 
-T = [t_res_mean, t_res]
-#%% Plot accuracy curve
+T = [t_res_mean, t_res] # listed together
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_MCnone.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_MC01.pt"
 #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
@@ -494,7 +493,7 @@ torch.save(unet, PATH_model)
 #torch.save(unet.state_dict(), PATH_state)
 
 #%%
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_MCnone.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_MC01.pt"
 torch.save(T, PATH_results)
 
 
