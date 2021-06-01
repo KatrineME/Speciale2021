@@ -286,6 +286,12 @@ data_train   = Tensor((np.squeeze(im_train_sub), gt_train_sub))
 data_train_n = data_train.permute(1,0,2,3)
 dataset      = data_train_n
 batch_size   = 32
+all_fold_train_losses = []
+fold_train_losses = []
+fold_eval_losses  = []
+fold_train_res    = []
+fold_eval_res     = []
+
 
 """
 train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
@@ -326,11 +332,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     train_loss    = 0.0
     total         = 0.0
     correct       = 0.0
-    fold_train_losses = []
-    fold_eval_losses  = []
-    fold_train_res    = []
-    fold_eval_res     = []
-    all_fold_train_losses = []
+
+
     for epoch in range(num_epochs):  # loop over the dataset multiple times
         
         unet.train()
@@ -443,8 +446,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     
     all_fold_train_losses.append(fold_train_losses)
     print('all_fold_train_losses', all_fold_train_losses)
-
     
+        
 m_fold_train_losses = np.mean(all_fold_train_losses, axis = 0) 
 print('m_fold_train_losses', m_fold_train_losses)
 m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
