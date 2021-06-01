@@ -68,16 +68,16 @@ def load_data_sub(user, phase, diagnose):
     
     
     for i in sub:
-        nimg = nib.load(frame_im[i])
+        nimg = nib.load(frame_im[i])   # Load nii image
         img  = nimg.get_fdata()
     
-        n_gt = nib.load(frame_gt[i])
-        gt = n_gt.get_fdata()
+        n_gt = nib.load(frame_gt[i])   # Load nii labels
+        gt   = n_gt.get_fdata()
                 
         im_slices  = img.shape[2]-1
-        gt_slices  = gt.shape[2]-1  # OBS: appical slices removed
+        gt_slices  = gt.shape[2]-1     # OBS: appical slices removed
         
-        pad = 5  # padding added
+        pad = 5                        # padding added to ensure correct cropping
     
         gt_p = np.zeros((gt.shape[0]+pad,gt.shape[1]+pad,gt_slices))
         img_p = np.zeros((img.shape[0]+pad,img.shape[1]+pad,gt_slices))
@@ -86,10 +86,10 @@ def load_data_sub(user, phase, diagnose):
             img_p[:,:,j] = np.pad(img[:,:,j],((pad,0),(pad,0)), 'constant', constant_values=0)
             gt_p[:,:,j]  = np.pad(gt[:,:,j],((pad,0),(pad,0)), 'constant', constant_values=0)
         
-        c_slice   = int(np.floor(gt_slices/2))
-        bin_gt    = np.zeros((gt_p.shape[0],gt_p.shape[1]))
-        bin_gt[gt_p[:,:,c_slice] >= 1] = 1
-        center[i,0],center[i,1]  = scipy.ndimage.center_of_mass(bin_gt)
+        c_slice   = int(np.floor(gt_slices/2))                          # Finding middle slice as it's assumed these will centered and never be empty
+        bin_gt    = np.zeros((gt_p.shape[0],gt_p.shape[1]))             # Preallocate
+        bin_gt[gt_p[:,:,c_slice] >= 1] = 1                              # Binarize annotations
+        center[i,0],center[i,1]  = scipy.ndimage.center_of_mass(bin_gt) # Find center of gravity of annotated cardiac structure
         
         cropped_gt = np.zeros((H,W,gt_slices))
         cropped_im = np.zeros((H,W,gt_slices))
