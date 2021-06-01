@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 50
+num_epochs = 5
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -443,9 +443,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
 epochs_train = np.arange(len(train_losses))
 epochs_eval  = np.arange(len(eval_losses))
 
-plt.figure(figsize=(15, 15), dpi=200)
-
-#plt.figure(dpi=200)
+plt.figure(dpi=200)
+plt.subplots(figsize=(15, 15))
 plt.subplot(1,2,1)
 plt.plot(epochs_train + 1 , train_losses, 'b', label = 'Training Loss')
 plt.plot(epochs_eval  + 1 , eval_losses,  'r', label = 'Validation Loss')
@@ -468,6 +467,7 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc.
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 
+t_res = [train_losses, eval_losses, train_results, eval_results]
 #%% Plot accuracy curve
 
 
@@ -481,6 +481,9 @@ PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_stat
 torch.save(unet, PATH_model)
 torch.save(unet.state_dict(), PATH_state)
 
+#%%
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results.pt"
+torch.save(t_res, PATH_results)
 
 
 
