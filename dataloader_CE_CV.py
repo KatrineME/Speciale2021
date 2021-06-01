@@ -328,6 +328,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     train_loss    = 0.0
     total         = 0.0
     correct       = 0.0
+    results_eval = []
     
     for epoch in range(num_epochs):  # loop over the dataset multiple times
         
@@ -425,20 +426,20 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         eval_results.append(100.0 * correct / total)
         #print('--------------------------------')
-        results[fold] = 100.0 * (correct / total)
+        results_eval[fold] = 100.0 * (correct / total)
     
     print('Finished Training + Evaluation')
             
-"""
+
 # Print fold results
     print(f'K-FOLD CROSS VALIDATION RESULTS FOR {k_folds} FOLDS')
     print('--------------------------------')
     sum = 0.0
-    for key, value in results.items():
+    for key, value in results_eval.items():
         print(f'Fold {key}: {value} %')
         sum += value
     print(f'Average: {sum/len(results.items())} %') 
-"""
+
 #%% Plot loss curves
 
 epochs_train = np.arange(len(train_losses))
