@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 40
+num_epochs = 100
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -394,7 +394,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         unet.eval()
         print('Epoch eval=',epoch)
          
-        for i, (eval_data) in enumerate(eval_dataloader):
+        for j, (eval_data) in enumerate(eval_dataloader):
             # get the inputs
             #inputs, labels = data
             inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
@@ -422,7 +422,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             total    += (labels.shape[0])*(128*128)
             correct  += (predicted == labels).sum().item()
       
-        eval_losses.append(eval_loss/(i+1)) # This is normalised by batch size (i = 12)
+        eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
         #eval_losses.append(np.mean(eval_loss))
         eval_loss = 0.0
         
