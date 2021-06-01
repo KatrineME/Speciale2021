@@ -27,6 +27,7 @@ from torch import nn
 from torch import Tensor
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
+from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
 if torch.cuda.is_available():
     # Tensor = torch.cuda.FloatTensor
@@ -232,9 +233,9 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 12 # 16 
+num_train_sub = 2 # 16 
 num_eval_sub = num_train_sub + 2
-num_test_sub = num_eval_sub + 8
+num_test_sub = num_eval_sub + 2
 
 im_train_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
@@ -282,7 +283,7 @@ data_train_n = data_train.permute(1,0,2,3)
 data_eval = Tensor((np.squeeze(im_eval_sub), gt_eval_sub))
 data_eval_n = data_eval.permute(1,0,2,3)
 
-batch_size = 32
+batch_size = 16
 train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 eval_dataloader = DataLoader(data_eval_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
@@ -429,13 +430,13 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #loss = criterion(output, labels)
         loss_d  = soft_dice_loss(labels, output)
         #print('loss_d = ', loss_d)
-        loss_c  = class_loss(labels, output)
+        #loss_c  = class_loss(labels, output)
         #print('loss_c shape = ', loss_c.shape)
         #loss_lv = lv_loss(labels, output)
         #print('loss_lv = ', loss_lv)
 
         #loss = loss_d + loss_lv
-        loss = loss_d + loss_c
+        loss = loss_d 
         #print('loss = ', loss)
         
         # Calculate gradients
@@ -449,9 +450,11 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
        
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     #train_losses.append(np.mean(batch_loss))
+    
+    trainer = Trainer(callbacks=[EarlyStopping(monitor=train_loss)])
     train_loss = 0.0 #[]
     
-    l_c.append(loss_c)
+    #l_c.append(loss_c)
     
     unet.eval()
     print('Epoch eval=',epoch)
@@ -482,9 +485,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Find loss
         #loss = criterion(output, labels)
         loss_d  = soft_dice_loss(labels, output)
-        loss_c  = class_loss(labels, output)
+        #loss_c  = class_loss(labels, output)
 
-        loss = loss_d+loss_c
+        loss = loss_d #+loss_c
         
         # Calculate loss
         #eval_loss.append(loss.item())
