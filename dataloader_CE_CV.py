@@ -463,6 +463,7 @@ plt.ylabel('Accuracy %')
 plt.legend(loc="upper right")
 plt.title("Accuracy")
 
+plt.figure.set_size_inches(8, 8)
 plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
