@@ -447,9 +447,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
 
 
 m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
-m_fold_eval_losses = np.mean(fold_eval_losses, axis = 0)   
-m_fold_train_res = np.mean(fold_train_res, axis = 0)   
-m_fold_eval_res = np.mean(fold_eval_res, axis = 0)       
+m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
+m_fold_train_res    = np.mean(fold_train_res, axis = 0)   
+m_fold_eval_res     = np.mean(fold_eval_res, axis = 0)       
 
 #%% Plot loss curves
 
@@ -478,10 +478,8 @@ plt.title("Accuracy")
 plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
-
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res]
 t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res]
-
 
 T = [t_res_mean, t_res]
 #%% Plot accuracy curve
