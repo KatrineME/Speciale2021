@@ -261,7 +261,10 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
 PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal.pt'
-
+#%%
+PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_train_results.pt'
+res_ed = torch.load(PATH_res_ed, map_location=torch.device('cpu'))
+#%%
 # Load
 #unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
