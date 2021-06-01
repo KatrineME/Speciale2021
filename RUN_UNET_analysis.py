@@ -223,9 +223,9 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 16 
-num_eval_sub = num_train_sub + 2
-num_test_sub = num_eval_sub + 2
+num_train_sub = 12
+num_eval_sub = num_train_sub
+num_test_sub = num_eval_sub + 4
 
 """
 im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
@@ -260,8 +260,11 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_sub_ld_2.pt'
-
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal.pt'
+#%%
+PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_train_results.pt'
+res_ed = torch.load(PATH_res_ed, map_location=torch.device('cpu'))
+#%%
 # Load
 #unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
@@ -289,7 +292,7 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), nu
 """
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 42
+test_slice = 41
 out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
 alpha = 0.4
 
@@ -403,7 +406,7 @@ for i in range(0,len(test_index)):
 #%% Calculate EF        
 os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
-from metrics import EF_calculation, dc, hd, jc, precision, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
+from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 #%%
 spacings = [1.4, 1.4, 8]
 
@@ -496,6 +499,19 @@ F1_dia = 2 * ((precision_dia * recall_dia) / (precision_dia + recall_dia))
 mean_F1_dia = np.nanmean(F1_dia, axis=0) 
 
 print('mean F1 = ',mean_F1_dia)  
+
+#%% Mathew Correlation
+mcc_dia    = np.zeros((seg_met_dia.shape[0],3))
+
+for i in range(0,seg_met_dia.shape[0]):
+    #mcc_dia[i,0] = mcc(seg_dia,ref_dia)
+    mcc_dia[i,0] = mcc(seg_dia[i,:,:,1],ref_dia[i,:,:,1])  # = RV
+    mcc_dia[i,1] = mcc(seg_dia[i,:,:,2],ref_dia[i,:,:,2])  # = MYO
+    mcc_dia[i,2] = mcc(seg_dia[i,:,:,3],ref_dia[i,:,:,3])  # = LV
+    
+mean_mcc = np.mean(mcc_dia, axis=0)  
+print('MCC = ',mean_mcc)  
+
 
 #%% Calculate sensitivity + specificity
 sensitivity_dia    = np.zeros((seg_met_dia.shape[0],3))
@@ -611,9 +627,17 @@ print('mean sensitivity = ',mean_sensitivity)
 print('mean specificity = ',mean_specificity)
 
 
+#%% Mathew Correlation
+mcc_sys    = np.zeros((seg_met_sys.shape[0],3))
 
-
-
+for i in range(0,seg_met_dia.shape[0]):
+    #mcc_dia[i,0] = mcc(seg_dia,ref_dia)
+    mcc_sys[i,0] = mcc(seg_sys[i,:,:,1],ref_sys[i,:,:,1])  # = RV
+    mcc_sys[i,1] = mcc(seg_sys[i,:,:,2],ref_sys[i,:,:,2])  # = MYO
+    mcc_sys[i,2] = mcc(seg_sys[i,:,:,3],ref_sys[i,:,:,3])  # = LV
+    
+mean_mcc = np.mean(mcc_sys, axis=0)  
+print('MCC = ',mean_mcc)  
 
 
 
