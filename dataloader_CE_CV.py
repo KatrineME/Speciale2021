@@ -429,7 +429,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         eval_results.append(100.0 * correct / total)
         #print('--------------------------------')
-        results_eval[fold] = 100.0 * (correct / total)
+        results[fold] = 100.0 * (correct / total)
     
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
