@@ -20,7 +20,7 @@ import glob2
 #from skimage.transform import resize
 from torch import nn
 from torch import Tensor
-
+import scipy.ndimage
 #!pip install torch-summary
 #!pip install opencv-python
 
@@ -192,17 +192,6 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (1, 128, 128))
 
 #%% Specify directory
-"""
-#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-
-from load_data_gt_im import load_data
-
-data_im_es, data_gt_es = load_data('M','Systole')
-data_im_ed, data_gt_ed = load_data('M','Diastole')
-
-"""
-#%%
 os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im_sub import load_data_sub
@@ -225,7 +214,7 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 #%% BATCH GENERATOR
 num_train_sub = 12
 num_eval_sub = num_train_sub
-num_test_sub = num_eval_sub + 4
+num_test_sub = num_eval_sub + 8
 
 """
 im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
@@ -260,26 +249,27 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal.pt'
-#%%
-PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_train_results.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal_mc01.pt'
+
+#% Import results from training (Loss + Accuracy)
+PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_train_results_MC01.pt'
 res_ed = torch.load(PATH_res_ed, map_location=torch.device('cpu'))
-#%%
-# Load
+
+#%% Load model
 #unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
-#%% unet es
+#%% U-net Systolic data
 unet_es.eval()
 out_trained_es = unet_es(Tensor(im_test_es_sub))
 out_image_es    = out_trained_es["softmax"]
 
-#%% unet ed
+#%% U-net Diastolic data
 unet_ed.eval()
 out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
 out_image_ed    = out_trained_ed["softmax"]
 
-#%%
+#%% Argmax and one-hot encoding
 seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
@@ -290,6 +280,49 @@ seg_met_sys = np.argmax(out_image_es.detach().numpy(), axis=1)
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().numpy()
 ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().numpy()
 """
+
+#%% Loss and accuracy
+out_mean = res_ed[0] # import mean from model
+out_one  = res_ed[1] 
+
+train_loss = out_mean[0]
+eval_loss = out_mean[1]
+
+train_loss_1 = out_one[0][0]
+eval_loss_1 = out_one[1]
+
+train_acc = out_mean[2]
+eval_acc = out_mean[3]
+
+
+
+
+#%% Plot function
+epochs_train = np.arange(len(train_loss))
+epochs_eval  = np.arange(len(eval_loss))
+
+plt.figure(figsize=(10, 5),dpi=200)
+plt.subplot(1,2,1)
+plt.plot(epochs_train + 1 , train_loss, 'b', label = 'Training Loss')
+plt.plot(epochs_train + 1 , train_loss_1, 'g', label = 'Training Loss 1')
+plt.plot(epochs_eval  + 1 , eval_loss,  'r', label = 'Validation Loss')
+plt.xticks(np.arange(1, 30 + 1, step = 5))
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend(loc="upper right")
+plt.title("Loss function")
+
+
+plt.subplot(1,2,2)
+plt.plot(epochs_train + 1 , train_acc, 'b', label = 'Training Loss')
+plt.plot(epochs_eval  + 1 , eval_acc,  'r', label = 'Validation Loss')
+plt.xticks(np.arange(1, 30 + 1, step = 5))
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend(loc="lower right")
+plt.title("Loss function")
+
+
 
 #%% Plot softmax probabilities for a single slice
 test_slice = 41

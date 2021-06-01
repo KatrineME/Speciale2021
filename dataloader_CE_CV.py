@@ -446,6 +446,7 @@ m_fold_train_losses = np.mean(fold_train_losses, axis = 0)
 print('m_fold_train_losses', m_fold_train_losses)
 m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
 m_fold_train_res    = np.mean(fold_train_res, axis = 0)   
+print('m_fold_train_res', m_fold_train_res)
 m_fold_eval_res     = np.mean(fold_eval_res, axis = 0)       
 
 print('Finished Training + Evaluation')
