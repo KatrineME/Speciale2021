@@ -378,8 +378,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
         train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
         #print('epoch loss = ', train_losses)
-        fold_losses.append(train_losses)
-        print('fold loss = ', fold_losses)
+    
         #train_losses.append(np.mean(batch_loss))
         train_loss = 0.0 #[]
         
@@ -429,6 +428,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         eval_results.append(100.0 * correct / total)
         #print('--------------------------------')
         results_eval[fold] = 100.0 * (correct / total)
+    
+    fold_losses.append(train_losses)
+    print('fold loss = ', fold_losses)
     
     print('Finished Training + Evaluation')
             
