@@ -378,6 +378,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             total    += (labels.shape[0])*(128*128)
             correct  += (predicted == labels).sum().item()
             
+            print('predicted', predicted)
             print('total', total)
             print('correct', correct)
         
