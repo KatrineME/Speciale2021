@@ -265,7 +265,7 @@ def soft_dice_loss(y_true, y_pred):
      eps = 1e-6
      
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
-     denominator = torch.sum((y_pred) + (y_true), (2,3))
+     denominator = torch.sum(torch.square(y_pred) + torch.square(y_true), (2,3))
      
      return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
 
@@ -455,7 +455,6 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             #loss_lv = lv_loss(labels, output)
     
             loss = loss_d #+ loss_lv + loss_c
-            
     
             # Calculate loss
             eval_loss += loss.item()
