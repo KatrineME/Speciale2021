@@ -332,7 +332,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     train_loss    = 0.0
     total         = 0.0
     correct       = 0.0
-
+    incorrect       = 0.0
     for epoch in range(num_epochs):  # loop over the dataset multiple times
         
         unet.train()
@@ -377,10 +377,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             predicted = torch.argmax(output, axis=1)
             total    += (labels.shape[0])*(128*128)
             correct  += (predicted == labels).sum().item()
+            incorrect += (predicted != labels).sum().item()
             
-            print('predicted', predicted)
             print('total', total)
             print('correct', correct)
+            print('incorrect', incorrect)
         
         train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
         #print('epoch loss = ', train_losses)
