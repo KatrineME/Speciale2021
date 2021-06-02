@@ -261,7 +261,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 
 #%% Setting up loss function
-"""
+
 def soft_dice_loss(y_true, y_pred):
      """ Calculate soft dice loss for each class
         y_pred = bs x c x h x w
@@ -318,11 +318,11 @@ def lv_loss(y_true, y_pred):
     print('inside', inside)    
     return torch.sum(Tensor(inside))/(128*128*32)
 
-"""
+
 #%% Training with K-folds
 k_folds    = 4
 num_epochs = 40
-loss_function = nn.CrossEntropyLoss()
+#loss_function = nn.CrossEntropyLoss()
 
 
 # For fold results
@@ -480,9 +480,12 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             output = output["softmax"]
             # Find loss
             #loss = criterion(output, labels)
-            loss = soft_dice_loss(labels, output)
+            loss_d  = soft_dice_loss(labels, output)
+            #loss_c  = class_loss(labels, output)
+            #loss_lv = lv_loss(labels, output)
     
-            
+            loss = loss_d #+ loss_lv + loss_c
+    
             # Calculate loss
             #eval_loss.append(loss.item())
             eval_loss += loss.item() #.detach().cpu().numpy()
