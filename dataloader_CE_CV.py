@@ -290,14 +290,10 @@ fold_train_losses = []
 fold_eval_losses  = []
 fold_train_res    = []
 fold_eval_res     = []
+fold_train_incorrect = []
+fold_eval_incorrect = []
 
-output_fold = []
 
-
-#train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
-
-#print("The shape of the data loader", len(train_dataloader),
-#      " should equal to number of images // batch_size:", len(data_train_n),"//", batch_size, "=",len(data_train_n) // batch_size)
 #%%
 # K-fold Cross Validation model evaluation
 for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
@@ -325,16 +321,18 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     #% Training
     train_losses  = []
     train_results = []
+    train_incorrect = []
     eval_losses   = []
     eval_results  = []
+    eval_incorrect = []
     eval_loss     = 0.0
     train_loss    = 0.0
     total         = 0.0
     correct       = 0.0
-    incorrect = 0.0
+    incorrect     = 0.0
     total_e         = 0.0
     correct_e       = 0.0
-    incorrect_e = 0.0
+    incorrect_e     = 0.0
 
     for epoch in range(num_epochs):  # loop over the dataset multiple times
         
@@ -377,7 +375,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             train_loss += loss.item() #.detach().cpu().numpy()
             
             # Set total and correct
-            predicted = torch.argmax(output, axis=1)
+            predicted  = torch.argmax(output, axis=1)
             total     += (labels.shape[0])*(128*128)
             correct   += (predicted == labels).sum().item()
             incorrect += (predicted != labels).sum().item()
@@ -391,6 +389,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         # Print accuracy
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         train_results.append(100.0 * correct / total)
+        train_incorrect.append(incorrect)
         #print('train_results', train_results)
         #print('--------------------------------')
         results[fold] = 100.0 * (correct / total)
@@ -423,8 +422,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Set total and correct
             predicted_e = torch.argmax(output, axis=1)
-            total_e    += (labels.shape[0])*(128*128)
-            correct_e  += (predicted_e == labels).sum().item()
+            total_e     += (labels.shape[0])*(128*128)
+            correct_e   += (predicted_e == labels).sum().item()
             incorrect_e += (predicted_e != labels).sum().item()
             
         eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
@@ -434,6 +433,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         # Print accuracy
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         eval_results.append(100.0 * correct_e / total_e)
+        eval_incorrect.append(incorrect_e)
+
         #print('eval_results', eval_results)
 
         #print('--------------------------------')
@@ -451,15 +452,19 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_res.append(eval_results)
     #print('fold loss = ', fold_eval_res)
     
-    #all_fold_train_losses.append(fold_train_losses)
-    #print('all_fold_train_losses', all_fold_train_losses)
+    fold_train_incorrect.append(train_incorrect)
+    #print('fold loss = ', fold_train_res)
+    
+    fold_eval_incorrect.append(eval_incorrect)
+    
     
         
 m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
-print('m_fold_train_losses', m_fold_train_losses)
 m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
 m_fold_train_res    = np.mean(fold_train_res, axis = 0)   
-m_fold_eval_res     = np.mean(fold_eval_res, axis = 0)       
+m_fold_eval_res     = np.mean(fold_eval_res, axis = 0)   
+m_fold_train_incorrect    = np.mean(fold_train_res, axis = 0)   
+m_fold_eval_incorrect     = np.mean(fold_eval_res, axis = 0)       
 
 print('Finished Training + Evaluation')
 #%% Plot loss curves
@@ -489,7 +494,7 @@ plt.title("Accuracy")
 plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
-t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res] # mean loss and accuracy
+t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
 t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res]         # loss and accuracy for each epoch
 
 T = [t_res_mean, t_res] # listed together
