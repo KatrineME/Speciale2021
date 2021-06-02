@@ -316,7 +316,7 @@ def lv_loss(y_true, y_pred):
 
 #%% Training with K-folds
 k_folds    = 4
-num_epochs = 40
+num_epochs = 10
 #loss_function = nn.CrossEntropyLoss()
 
 
