@@ -94,4 +94,10 @@ for i in range(0,100):
     in_gt = Tensor(cropped_gt).permute(2,0,1).detach().numpy()
     gt_crop.append(in_gt)
         
-    
+#%%
+plt.figure(dpi=200)
+plt.imshow(img_p[:,:,c_slice])
+plt.imshow(bin_gt, alpha=0.3)
+plt.plot(center[-1,1],center[-1,0],'r+')
+
+

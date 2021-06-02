@@ -9,6 +9,21 @@ from torch import Tensor
 import numpy   as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
+import torch
+import os
+import nibabel as nib
+import numpy   as np
+import torchvision
+import glob2
+import torch.optim as optim
+from scipy import ndimage
+
+from torch.autograd  import Variable
+from torch import nn
+from torch import Tensor
+import matplotlib.pyplot as plt
+from torch.utils.data import DataLoader
+#%%
 
 y = gt_train_sub[2,:,:]
 
@@ -68,3 +83,45 @@ plt.imshow(Y_MYO, alpha=0.2)
 plt.imshow(Y_LVmod, alpha=0.2)
 plt.imshow(Y_RV, alpha=0.2)
 plt.title('Pixels penalized for neighbourhood')
+
+#%% Class loss
+y1 = labels[10:11,:,:,:] # No RV
+x1 = output[10:11,:,:,:]
+z1 = inputs[10,0,:,:]
+
+y2 = labels[1:2,:,:,:]  # All structures
+x2 = output[1:2,:,:,:]
+z2 = inputs[1,0,:,:]
+
+y_true = y1
+y_pred = x1
+
+eps = 1e-6
+
+y_true_s   = torch.sum(y_true, (2,3))
+y_true_sin = torch.empty((y_true_s.shape))
+    
+y_true_sin[y_true_s > 0]  = 0
+y_true_sin[y_true_s == 0] = 1
+    
+y_pred_e = torch.exp(y_pred)
+loss_c = -1* torch.sum(torch.log(1-y_pred_e + eps),(2,3))
+
+loss_c = loss_c*y_true_sin
+loss_c = torch.sum(loss_c)
+loss_c = loss_c/(y_pred.shape[3]*y_pred.shape[2]*y_pred.shape[1]*y_pred.shape[0])
+
+print(loss_c)
+#%%
+plt.figure(dpi=200)
+plt.subplot(1,3,1)
+plt.imshow(z1.detach().numpy())
+plt.title('Input image (no RV)')
+
+plt.subplot(1,3,2)
+plt.imshow(x1[0,1,:,:].detach().numpy())
+plt.title('Predicted RV')
+
+plt.subplot(1,3,3)
+plt.imshow(torch.argmax(y1[0,:,:,:],axis=0).detach().numpy())
+plt.title('Annotation (no RV)')
