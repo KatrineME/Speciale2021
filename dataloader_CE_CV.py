@@ -424,7 +424,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             predicted = torch.argmax(output, axis=1)
             total    += (labels.shape[0])*(128*128)
             correct  += (predicted == labels).sum().item()
-      
+            print('total', total)
+            print('correct', correct)
+            
         eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
         #eval_losses.append(np.mean(eval_loss))
         eval_loss = 0.0
@@ -432,6 +434,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         # Print accuracy
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         eval_results.append(100.0 * correct / total)
+        print('eval_results', eval_results)
+
         #print('--------------------------------')
         results[fold] = 100.0 * (correct / total)
     
