@@ -376,8 +376,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Set total and correct
             predicted = torch.argmax(output, axis=1)
             total    += (labels.shape[0])*(128*128)
-            correct  += (predicted == labels).sum().item()
-            incorrect += (predicted != labels).sum().item()
+            correct  += (predicted == labels)#.sum().item()
+            incorrect += (predicted != labels)#.sum().item()
             
             print('total', total)
             print('correct', correct)
