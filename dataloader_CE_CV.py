@@ -264,7 +264,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 
 #%% Training with K-folds
-k_folds    = 4
+k_folds    = 6
 num_epochs = 40
 loss_function = nn.CrossEntropyLoss()
 
@@ -286,20 +286,20 @@ data_train   = Tensor((np.squeeze(im_train_sub), gt_train_sub))
 data_train_n = data_train.permute(1,0,2,3)
 dataset      = data_train_n
 batch_size   = 32
-all_fold_train_losses = []
+
 fold_train_losses = []
 fold_eval_losses  = []
 fold_train_res    = []
 fold_eval_res     = []
 
+output_fold = []
 
-"""
-train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
-print("The shape of the data loader", len(train_dataloader),
-      " should equal to number of images // batch_size:", len(data_train_n),"//", batch_size, "=",len(data_train_n) // batch_size)
-"""
+#train_dataloader = DataLoader(data_train_n, batch_size=batch_size, shuffle=True, drop_last=True)
 
+#print("The shape of the data loader", len(train_dataloader),
+#      " should equal to number of images // batch_size:", len(data_train_n),"//", batch_size, "=",len(data_train_n) // batch_size)
+#%%
 # K-fold Cross Validation model evaluation
 for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     # Print
@@ -332,7 +332,6 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     train_loss    = 0.0
     total         = 0.0
     correct       = 0.0
-
 
     for epoch in range(num_epochs):  # loop over the dataset multiple times
         
@@ -379,6 +378,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             total    += (labels.shape[0])*(128*128)
             correct  += (predicted == labels).sum().item()
             
+            print('total', total)
+            print('correct', correct)
+        
         train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
         #print('epoch loss = ', train_losses)
     
@@ -388,6 +390,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         # Print accuracy
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         train_results.append(100.0 * correct / total)
+        print('train_results', train_results)
         #print('--------------------------------')
         results[fold] = 100.0 * (correct / total)
         
