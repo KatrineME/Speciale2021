@@ -204,8 +204,8 @@ if __name__ == "__main__":
 #%% Specify directory
 cwd = os.getcwd()
 #os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")   # Local directory katrine
-os.chdir('/Users/michalablicher/Desktop/training')     # Local directory michala
-#os.chdir("/home/michala/training")                      # Server directory michala
+#os.chdir('/Users/michalablicher/Desktop/training')     # Local directory michala
+os.chdir("/home/michala/training")                      # Server directory michala
 
 
 #%% Specify directory
@@ -399,14 +399,14 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # get the inputs
             #inputs, labels = data
             inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
-            #inputs = inputs.cuda()
+            inputs = inputs.cuda()
             
             labels = train_data[:,1,:,:]
             #labels = Tensor(np.expand_dims(labels, axis=1))
             labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
             labels = labels.permute(0,3,1,2)
             #labels = Tensor(labels)
-            #labels = labels.cuda()
+            labels = labels.cuda()
             #print('i=',i)
             # wrap them in Variable
             inputs, labels = Variable(inputs), Variable(labels) 
@@ -459,13 +459,13 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # get the inputs
             #inputs, labels = data
             inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
-            #inputs = inputs.cuda()
+            inputs = inputs.cuda()
             labels = eval_data[:,1,:,:]
             #labels = Tensor(np.expand_dims(labels, axis=1))
             labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
             labels = labels.permute(0,3,1,2)
             #labels = Tensor(labels)
-            #labels = labels.cuda()
+            labels = labels.cuda()
             
             #print('i=',i)
     
