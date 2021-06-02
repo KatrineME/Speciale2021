@@ -455,6 +455,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             #loss_lv = lv_loss(labels, output)
     
             loss = loss_d #+ loss_lv + loss_c
+            
     
             # Calculate loss
             eval_loss += loss.item()
@@ -474,7 +475,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         results[fold] = 100.0 * (correct / total)
     
     fold_train_losses.append(train_losses)
-    #print('fold loss = ', fold_train_losses)
+    print('fold loss = ', fold_train_losses)
     
     fold_eval_losses.append(eval_losses)
     #print('fold loss = ', fold_eval_losses)
