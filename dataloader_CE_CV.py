@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 40
+num_epochs = 5
 loss_function = nn.CrossEntropyLoss()
 
 
@@ -332,7 +332,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     train_loss    = 0.0
     total         = 0.0
     correct       = 0.0
-    incorrect       = 0.0
+    total_e         = 0.0
+    correct_e       = 0.0
+
     for epoch in range(num_epochs):  # loop over the dataset multiple times
         
         unet.train()
@@ -376,12 +378,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Set total and correct
             predicted = torch.argmax(output, axis=1)
             total     += (labels.shape[0])*(128*128)
-            correct   += (predicted == labels).sum()#.item()
-            incorrect += (predicted != labels).sum()#.item()
+            correct   += (predicted == labels).sum().item()
             
             print('total', total)
             print('correct', correct)
-            print('incorrect', incorrect)
         
         train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
         #print('epoch loss = ', train_losses)
@@ -423,11 +423,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             eval_loss += loss.item() #.detach().cpu().numpy()
             
             # Set total and correct
-            predicted = torch.argmax(output, axis=1)
-            total    += (labels.shape[0])*(128*128)
-            correct  += (predicted == labels).sum().item()
-            print('total', total)
-            print('correct', correct)
+            predicted_e = torch.argmax(output, axis=1)
+            total_e    += (labels.shape[0])*(128*128)
+            correct_e  += (predicted_e == labels).sum().item()
+            print('total', total_e)
+            print('correct', correct_e)
             
         eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
         #eval_losses.append(np.mean(eval_loss))
@@ -435,11 +435,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         
         # Print accuracy
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
-        eval_results.append(100.0 * correct / total)
+        eval_results.append(100.0 * correct_e / total_e)
         print('eval_results', eval_results)
 
         #print('--------------------------------')
-        results[fold] = 100.0 * (correct / total)
+        results[fold] = 100.0 * (correct_e / total_e)
     
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
