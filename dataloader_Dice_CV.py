@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon May 31 11:04:54 2021
+Created on Wed Jun  2 09:00:59 2021
 
 @author: michalablicher
 """
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 29 15:28:28 2021
 
-@author: michalablicher
-"""
 #%% Load packages
 import torch
 import os
@@ -20,14 +16,14 @@ import numpy   as np
 import torchvision
 import glob2
 import torch.optim as optim
+from scipy import ndimage
+from sklearn.model_selection import KFold
 
 from torch.autograd  import Variable
 from torch import nn
 from torch import Tensor
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
-from sklearn.model_selection import KFold
-
 
 if torch.cuda.is_available():
     # Tensor = torch.cuda.FloatTensor
@@ -37,9 +33,7 @@ else:
     device = 'cpu'
 torch.cuda.manual_seed_all(808)
 
-
 #%% BayesUNet
-# recursive implementation of Unet
 
 def weights_init(m):
     classname = m.__class__.__name__
@@ -77,7 +71,6 @@ class UNet(nn.Module):
     def forward(self, x):
         out = self.model(x)
         return {'log_softmax': self.log_softmax(out), 'softmax': self.softmax(out)}
-
 
 # Defines the submodule with skip connection.
 # X -------------------identity---------------------- X
@@ -212,30 +205,29 @@ cwd = os.getcwd()
 os.chdir("/home/michala/training")                      # Server directory michala
 
 
-#%% Specify directory
+#%% Load Data
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im_sub import load_data_sub
 
+user = 'GPU'
+data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
+data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
+data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
+data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,'Systole','NOR')
+data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,'Systole','RV')
 
-data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
-data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('GPU','Systole','HCM')
-data_im_es_MINF, data_gt_es_MINF = load_data_sub('GPU','Systole','MINF')
-data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('GPU','Systole','NOR')
-data_im_es_RV,   data_gt_es_RV   = load_data_sub('GPU','Systole','RV')
-
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU','Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU','Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU','Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU','Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU','Diastole','RV')
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
-#%% BATCH GENERATOR
+#%% BATCH GENERATOR - Concatenate data 
 num_train_sub = 12
-#num_eval_sub = num_train_sub + 2
-num_test_sub = num_train_sub + 8
+num_test_sub  = num_train_sub + 8
 
 im_train_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
@@ -263,10 +255,70 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
                                   np.concatenate(data_gt_ed_RV[num_train_sub:num_test_sub]).astype(None)))
 
 
+#%% Setting up loss function
+
+def soft_dice_loss(y_true, y_pred):
+     """ Calculate soft dice loss for each class
+        y_pred = bs x c x h x w
+        y_true = bs x c x h x w (one hot)
+     """
+     eps = 1e-6
+     
+     numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
+     denominator = torch.sum((torch.square(y_pred) + torch.square(y_true)), (2,3))
+     
+     return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
+
+
+def class_loss(y_true,y_pred):
+    eps = 1e-6
+
+    y_true_s = torch.sum(y_true, (2,3))
+    
+   # if not y_true_s.detach().numpy().all():
+    if np.count_nonzero(y_true_s) != 4:
+        loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(2,3))
+        #loss_c = torch.sum(l_c)
+    else:
+        loss_c = 0
+        """print('No L_C calculated')
+        for i in range(0,y_true.shape[0]):
+            plt.subplot(6,6,i+1)
+            plt.imshow(y_true[i,1,:,:].detach().numpy())"""
+            
+    loss_c[:,0]= 0
+    
+    return loss_c
+
+def lv_loss(y_true, y_pred):
+    Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
+    Y_RV   = y_pred[:,1,:,:]           # size([B,H,W])
+    Y_LV   = y_pred[:,3,:,:]           # size([B,H,W])
+
+    Y_LV_pad = torch.nn.functional.pad(Y_LV,(1,1,1,1),'constant', 0)
+
+    Y_up   = Y_LV_pad[:,2:130,1:129]
+    Y_down = Y_LV_pad[:,0:128,1:129]
+    
+    Y_left = Y_LV_pad[:,1:129,2:130]
+    Y_right= Y_LV_pad[:,1:129,0:128]
+    
+    Y_UpLe = Y_LV_pad[:,2:130,2:130]
+    Y_UpRi = Y_LV_pad[:,2:130,0:128]
+    
+    Y_DoRi = Y_LV_pad[:,0:128,0:128]
+    Y_DoLe = Y_LV_pad[:,0:128,2:130]
+    
+    inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
+    print('inside', inside)    
+    return torch.sum(Tensor(inside))/(128*128*32)
+
+
 #%% Training with K-folds
-k_folds    = 6
+k_folds    = 4
 num_epochs = 50
-loss_function = nn.CrossEntropyLoss()
+#loss_function = nn.CrossEntropyLoss()
+
 
 # For fold results
 results = {}
@@ -290,11 +342,7 @@ fold_train_losses = []
 fold_eval_losses  = []
 fold_train_res    = []
 fold_eval_res     = []
-fold_train_incorrect = []
-fold_eval_incorrect = []
 
-
-#%%
 # K-fold Cross Validation model evaluation
 for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     # Print
@@ -309,48 +357,39 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
     eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
    
-    
     # Init the neural network
-    #network = unet()
     unet.apply(weights_init)
     
     # Initialize optimizer
     optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, weight_decay=1e-4)
 
-
     #% Training
     train_losses  = []
     train_results = []
-    train_incorrect = []
     eval_losses   = []
     eval_results  = []
-    eval_incorrect = []
     eval_loss     = 0.0
     train_loss    = 0.0
     total         = 0.0
-    correct       = 0.0
-    incorrect     = 0.0
-    total_e         = 0.0
-    correct_e       = 0.0
-    incorrect_e     = 0.0
-
+    correct       = 0.0  
+     
     for epoch in range(num_epochs):  # loop over the dataset multiple times
-        
+    
         unet.train()
         print('Epoch train =',epoch)
         #0.0  
         for i, (train_data) in enumerate(train_dataloader):
             # get the inputs
-            #print('train_data = ', train_data.shape)
-            #inputs, labels = data
             inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
             inputs = inputs.cuda()
             
             labels = train_data[:,1,:,:]
+            labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
+            labels = labels.permute(0,3,1,2)
             labels = labels.cuda()
-            #print('i=',i)
+
             # wrap them in Variable
-            inputs, labels = Variable(inputs), Variable(labels)
+            inputs, labels = Variable(inputs), Variable(labels) 
             labels = labels.long()
             
             # Clear the gradients
@@ -359,12 +398,15 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Forward Pass
             output = unet(inputs)     
             output = output["log_softmax"]
-            #print('output shape = ', output.shape)
-            
+            output = torch.exp(output)
+                        
             # Find loss
-            loss = loss_function(output, labels)
-            #print('loss = ', loss)
-            
+            loss_d  = soft_dice_loss(labels, output)
+            #loss_c  = class_loss(labels, output)
+            #loss_lv = lv_loss(labels, output)
+    
+            loss = loss_d #+ loss_lv + loss_c
+            #print('loss', loss)
             # Calculate gradients
             loss.backward()
             
@@ -372,73 +414,65 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             optimizer.step()
     
             # Calculate loss
-            train_loss += loss.item() #.detach().cpu().numpy()
+            train_loss += loss.item()
             
             # Set total and correct
-            predicted  = torch.argmax(output, axis=1)
-            total     += (labels.shape[0])*(128*128)
-            correct   += (predicted == labels).sum().item()
-            incorrect += (predicted != labels).sum().item()
-        
-        train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
-        #print('epoch loss = ', train_losses)
-    
-        #train_losses.append(np.mean(batch_loss))
-        train_loss = 0.0 #[]
-        
-        # Print accuracy
-        #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
+            predicted = torch.argmax(output, axis=1)
+            target    = torch.argmax(labels, axis=1)
+            total    += (target.shape[0])*(128*128)
+            correct  += (predicted == target).sum().item()
+            
+        train_losses.append(train_loss/(i+1)) # This is normalised by batch size
+        print('train_losses', train_losses)
+        train_loss = 0.0 
+                
+        # Accuracy
         train_results.append(100.0 * correct / total)
-        train_incorrect.append(incorrect)
-        #print('train_results', train_results)
-        #print('--------------------------------')
-        results[fold] = 100.0 * (correct / total)
         
         unet.eval()
         print('Epoch eval=',epoch)
          
-        for j, (eval_data) in enumerate(eval_dataloader):
+        for i, (eval_data) in enumerate(eval_dataloader):
             # get the inputs
-            #inputs, labels = data
             inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
             inputs = inputs.cuda()
             labels = eval_data[:,1,:,:]
+            labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
+            labels = labels.permute(0,3,1,2)
             labels = labels.cuda()
-            #print('i=',i)
-    
+                
             # wrap them in Variable
             inputs, labels = Variable(inputs), Variable(labels)
-            labels = labels.long()
+            labels = labels.long()    
             
             # Forward pass
             output = unet(inputs)     
             output = output["log_softmax"]
-            # Find loss
-            loss = loss_function(output, labels)
+            output = torch.exp(output)
             
+            # Find loss
+            loss_d  = soft_dice_loss(labels, output)
+            #loss_c  = class_loss(labels, output)
+            #loss_lv = lv_loss(labels, output)
+    
+            loss = loss_d #+ loss_lv + loss_c
+    
             # Calculate loss
-            #eval_loss.append(loss.item())
-            eval_loss += loss.item() #.detach().cpu().numpy()
+            eval_loss += loss.item()
             
             # Set total and correct
-            predicted_e = torch.argmax(output, axis=1)
-            total_e     += (labels.shape[0])*(128*128)
-            correct_e   += (predicted_e == labels).sum().item()
-            incorrect_e += (predicted_e != labels).sum().item()
+            predicted = torch.argmax(output, axis=1)
+            target    = torch.argmax(labels, axis=1)
+            total    += (target.shape[0])*(128*128)
+            correct  += (predicted == target).sum().item()
             
-        eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
-        #eval_losses.append(np.mean(eval_loss))
+        eval_losses.append(eval_loss/(i+1)) # This is normalised by batch size
         eval_loss = 0.0
         
         # Print accuracy
-        #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
-        eval_results.append(100.0 * correct_e / total_e)
-        eval_incorrect.append(incorrect_e)
-
-        #print('eval_results', eval_results)
-
-        #print('--------------------------------')
-        results[fold] = 100.0 * (correct_e / total_e)
+        eval_results.append(100.0 * correct / total)
+        print('--------------------------------')
+        results[fold] = 100.0 * (correct / total)
     
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
@@ -452,28 +486,22 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_res.append(eval_results)
     #print('fold loss = ', fold_eval_res)
     
-    fold_train_incorrect.append(train_incorrect)
-    #print('fold loss = ', fold_train_res)
-    
-    fold_eval_incorrect.append(eval_incorrect)
-    
-    
         
 m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
+print('m_fold_train_losses', m_fold_train_losses)
 m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
 m_fold_train_res    = np.mean(fold_train_res, axis = 0)   
-m_fold_eval_res     = np.mean(fold_eval_res, axis = 0)   
-m_fold_train_incorrect    = np.mean(fold_train_res, axis = 0)   
-m_fold_eval_incorrect     = np.mean(fold_eval_res, axis = 0)       
+m_fold_eval_res     = np.mean(fold_eval_res, axis = 0)       
 
 print('Finished Training + Evaluation')
-#%% Plot loss curves
+            
 
+#%% Plot loss curves
 epochs_train = np.arange(len(train_losses))
 epochs_eval  = np.arange(len(eval_losses))
 
 plt.figure(figsize=(30, 15), dpi=200)
-plt.subplot(1,3,1)
+plt.subplot(1,2,1)
 plt.plot(epochs_train + 1 , m_fold_train_losses, 'b', label = 'Training Loss')
 plt.plot(epochs_eval  + 1 , m_fold_eval_losses,  'r', label = 'Validation Loss')
 plt.xticks(np.arange(1, num_epochs + 1, step = 5))
@@ -482,7 +510,7 @@ plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
 
-plt.subplot(1,3,2)
+plt.subplot(1,2,2)
 plt.plot(epochs_train + 1 , m_fold_train_res, 'b', label = 'Training Acc')
 plt.plot(epochs_eval  + 1 , m_fold_eval_res,  'r', label = 'Validation Acc')
 plt.xticks(np.arange(1, num_epochs + 1, step = 5))
@@ -491,47 +519,21 @@ plt.ylabel('Accuracy %')
 plt.legend(loc="upper right")
 plt.title("Accuracy")
 
-plt.subplot(1,3,3)
-plt.plot(epochs_train + 1 , m_fold_train_incorrect, 'b', label = 'Training Acc')
-plt.plot(epochs_eval  + 1 , m_fold_eval_incorrect,  'r', label = 'Validation Acc')
-plt.xticks(np.arange(1, num_epochs + 1, step = 5))
-plt.xlabel('Epochs')
-plt.ylabel('incorrect %')
-plt.legend(loc="upper right")
-plt.title("Incorrect")
-
-
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_CV_acc.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
-t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
-t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res]         # loss and accuracy for each epoch
-
-T = [t_res_mean, t_res] # listed together
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_mc01.pt"
-#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
-
-#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
-#PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
-
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_CrossVal_mc01.pt"
 torch.save(unet, PATH_model)
-#torch.save(unet.state_dict(), PATH_state)
 
-#%%
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_mc01.pt"
+#%% Save training results
+t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res] # mean loss and accuracy
+t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res]         # loss and accuracy for each epoch
+T          = [t_res_mean, t_res]                                                          # listed together
+
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_train_results_mc01.pt"
 torch.save(T, PATH_results)
-
-
-
-
-
-
-
-
-
-
 
 
