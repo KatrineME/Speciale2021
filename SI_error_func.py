@@ -67,7 +67,7 @@ def dist_trans(gt_oh, error_margin_inside, error_margin_outside):
 #%% Filter size
 def cluster_min(seg, ref, min_cluster_size):
      from scipy.ndimage import label
-     seg_error = abs(seg - ref)
+     seg_error = abs(seg - ref).astype('int32')
      cc_labels = np.zeros((seg_error.shape))
      n_cluster = np.zeros((seg_error.shape[0]))
     
