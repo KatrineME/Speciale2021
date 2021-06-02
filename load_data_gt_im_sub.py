@@ -9,6 +9,7 @@ def load_data_sub(user, phase, diagnose):
     #% Load packages
     import os
     import scipy
+    import scipy.ndimage
     import nibabel as nib
     import numpy   as np
     import matplotlib.pyplot as plt

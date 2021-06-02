@@ -320,17 +320,18 @@ def soft_dice_loss(y_true, y_pred):
 def class_loss(y_true,y_pred):
     eps = 1e-6
 
-    y_true_s = torch.sum(y_true, (2,3))
+    y_true_s   = torch.sum(y_true, (2,3))
     y_true_sin = torch.empty((y_true_s.shape))
     
     y_true_sin[y_true_s > 0]  = 0
     y_true_sin[y_true_s == 0] = 1
     
-    loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(2,3))
+    y_pred_e = torch.exp(y_pred)
+    loss_c = -1* torch.sum(torch.log(1-y_pred_e + eps),(2,3))
     
     loss_c = loss_c*y_true_sin
     loss_c = torch.sum(loss_c)
-    loss_c = loss_c/21729919.19824192
+    loss_c = loss_c/(y_pred.shape[3]*y_pred.shape[2]*y_pred.shape[1]*y_pred.shape[0])
     """
    # if not y_true_s.detach().numpy().all():
     if (np.count_nonzero(y_true_s, axis=1) != 4) == True:
@@ -382,7 +383,7 @@ optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 1
+num_epoch = 3
 
 
 #%% Training
@@ -430,13 +431,13 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #loss = criterion(output, labels)
         loss_d  = soft_dice_loss(labels, output)
         #print('loss_d = ', loss_d)
-        #loss_c  = class_loss(labels, output)
+        loss_c  = class_loss(labels, output)
         #print('loss_c shape = ', loss_c.shape)
         #loss_lv = lv_loss(labels, output)
         #print('loss_lv = ', loss_lv)
 
         #loss = loss_d + loss_lv
-        loss = loss_d 
+        loss = loss_d  + loss_c
         #print('loss = ', loss)
         
         # Calculate gradients
@@ -451,7 +452,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     train_losses.append(train_loss/train_data.shape[0]) # This is normalised by batch size
     #train_losses.append(np.mean(batch_loss))
     
-    trainer = Trainer(callbacks=[EarlyStopping(monitor=train_loss)])
+    #trainer = Trainer(callbacks=[EarlyStopping(monitor=train_loss)])
     train_loss = 0.0 #[]
     
     #l_c.append(loss_c)
@@ -481,13 +482,13 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Forward pass
         output = unet(inputs)     
-        output = output["softmax"]
+        output = output["log_softmax"]
         # Find loss
         #loss = criterion(output, labels)
         loss_d  = soft_dice_loss(labels, output)
-        #loss_c  = class_loss(labels, output)
+        loss_c  = class_loss(labels, output)
 
-        loss = loss_d #+loss_c
+        loss = loss_d +loss_c
         
         # Calculate loss
         #eval_loss.append(loss.item())
