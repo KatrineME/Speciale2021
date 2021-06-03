@@ -761,7 +761,7 @@ T_j[T_j >= 1 ] = 1
 #%% Prep data
 T = np.expand_dims(T_j, axis=1)
 
-train_amount = 58
+train_amount = 100
 
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
