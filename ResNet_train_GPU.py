@@ -696,7 +696,7 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 1
+num_epoch = 20
 
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
