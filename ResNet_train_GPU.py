@@ -873,12 +873,12 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection.png')
+plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection2.png')
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
 #%% Save model
 
-PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_dia.pt"
+PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection2.pt"
 #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
