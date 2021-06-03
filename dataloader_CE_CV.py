@@ -390,6 +390,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         train_results.append(100.0 * correct / total)
         train_incorrect.append(incorrect)
+        correct   = 0.0
+        total     = 0.0
+        incorrect = 0.0
+        
         #print('train_results', train_results)
         #print('--------------------------------')
         results[fold] = 100.0 * (correct / total)
@@ -434,7 +438,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         eval_results.append(100.0 * correct_e / total_e)
         eval_incorrect.append(incorrect_e)
-
+        correct_e   = 0.0
+        total_e     = 0.0
+        incorrect_e = 0.0
         #print('eval_results', eval_results)
 
         #print('--------------------------------')
@@ -456,8 +462,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     #print('fold loss = ', fold_train_res)
     
     fold_eval_incorrect.append(eval_incorrect)
-    
-    
+
         
 m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
 m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
@@ -468,7 +473,6 @@ m_fold_eval_incorrect     = np.mean(fold_eval_incorrect, axis = 0)
 
 print('Finished Training + Evaluation')
 #%% Plot loss curves
-
 epochs_train = np.arange(len(train_losses))
 epochs_eval  = np.arange(len(eval_losses))
 
