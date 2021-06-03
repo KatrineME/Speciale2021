@@ -661,6 +661,9 @@ im     = Tensor(im_train_es_res)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
 
+
+print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
+
 input_concat = torch.cat((im,umap,seg), dim=1)
 
 #%% Setting up training loop
