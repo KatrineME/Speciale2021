@@ -303,6 +303,8 @@ def objecive(trial):
     fold_train_incorrect = []
     fold_eval_incorrect = []
     
+     
+    
     
     #%
     # K-fold Cross Validation model evaluation
@@ -479,14 +481,14 @@ def objecive(trial):
     
         return eval_accuracy
     
-m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
-m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
-m_fold_train_accuracy    = np.mean(fold_train_accuracy, axis = 0)   
-m_fold_eval_accuracy     = np.mean(fold_eval_accuracy, axis = 0)   
-m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
-m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
-    
-print('Finished Training + Evaluation')
+    m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
+    m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
+    m_fold_train_accuracy    = np.mean(fold_train_accuracy, axis = 0)   
+    m_fold_eval_accuracy     = np.mean(fold_eval_accuracy, axis = 0)   
+    m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
+    m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
+        
+    print('Finished Training + Evaluation')
 #%% Plot loss curves
 epochs_train = np.arange(len(train_losses))
 epochs_eval  = np.arange(len(eval_losses))
