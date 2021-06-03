@@ -374,6 +374,7 @@ from load_data_gt_im_sub import load_data_sub
 user = 'GPU'
 #user = 'K' 
 print('Dataloader')
+"""
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
@@ -385,11 +386,6 @@ data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
 data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
 data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
 data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
-"""
-
-#%% BATCH GENERATOR
-num_train_sub = 16 
-num_eval_sub  = num_train_sub + 1
 
 
 num_train_res  = num_eval_sub + 2
@@ -401,43 +397,37 @@ im_train_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num
                                   np.concatenate(data_im_es_NOR[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_im_es_RV[num_eval_sub:num_train_res]).astype(None)))
 
-gt_train_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_train_res]).astype(None)))
+
+num_train_res  = num_eval_sub + 6
+num_test_res  = num_train_res + 2
+
+im_train_es_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_train_res]).astype(None)))
+
+gt_train_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_train_res]).astype(None)))
 
 
 
 
-im_test_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_im_es_HCM[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_im_es_MINF[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_im_es_NOR[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_im_es_RV[num_train_res:num_test_res]).astype(None)))
+im_test_es_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_train_res:num_test_res]).astype(None)))
 
-gt_test_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_gt_es_HCM[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_gt_es_MINF[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_gt_es_NOR[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_gt_es_RV[num_train_res:num_test_res]).astype(None)))
+gt_test_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
 
-
-
-"""
-
-im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-
-gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-"""
 
 
 #%% Load U-NET
@@ -620,23 +610,24 @@ PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_Cro
 
 # Load
 print('device = ', device)
-unet_es = torch.load(PATH_model_es, map_location=torch.device(device))
+unet_ed = torch.load(PATH_model_es, map_location=torch.device(device))
 #unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
 #%% Run model
+"""
 unet_es.eval()
 im_train_es_res = Tensor(im_train_es_res)
 im_train_es_res = im_train_es_res.cuda()
 im_train_es_res = Variable(im_train_es_res)
-out_trained_es = unet_es(im_train_es_res)
-out_image_es   = out_trained_es["softmax"]
-
+out_trained_es  = unet_es(im_train_es_res)
+out_image_es    = out_trained_es["softmax"]
+"""
 #im_flat_test_ed = im_flat_test_ed.cuda()
 
-#unet_ed.eval()
-#out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
-#out_image_ed   = out_trained_ed["softmax"]
+unet_ed.eval()
+out_trained_ed = unet_ed(Tensor(im_test_es_res))
+out_image_es   = out_trained_ed["softmax"]
 
 #%% One hot encoding
 """
@@ -674,27 +665,8 @@ emap = np.expand_dims(emap, axis=1)
 im     = Tensor(im_train_es_res)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
-"""
-image = 10
-
-plt.figure(dpi=200)
-plt.subplot(1,3,1)
-plt.subplots_adjust(wspace = 0.4)
-plt.imshow(im[image,0,:,:])
-plt.title('cMRI') 
-plt.subplot(1,3,2)
-plt.imshow(seg[image,0,:,:])
-plt.title('Segmentation') 
-plt.subplot(1,3,3)
-plt.imshow(umap[image,0,:,:])   
-plt.title('U-map') 
-"""
 
 input_concat = torch.cat((im,umap,seg), dim=1)
-#%%
-
-#out    = model(input_concat)
-#output = out['softmax'].detach().cpu().numpy()
 
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
@@ -719,16 +691,71 @@ print('Number of epochs = ',num_epoch)
 #os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
 os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 
-from SI_func_mic import SI_set
+#from SI_func_mic import SI_set
+#T_j = SI_set(user, 'sys')
 
-print('How far??')
-user = 'GPU'
-T_j = SI_set(user, 'sys').cuda()
+#%% Distance transform maps
+from SI_error_func import dist_trans, cluster_min
 
-# Prep data
+error_margin_inside  = 2
+error_margin_outside = 3
+
+# Distance transform map
+dt_es_train = dist_trans(ref_sys, error_margin_inside, error_margin_outside)
+
+#%% filter cluster size
+cluster_size = 10
+sys_new_label_train = cluster_min(seg_sys, ref_sys, cluster_size)
+
+roi_es_train = np.zeros((dt_es_train.shape))
+
+for i in range(0, dt_es_train.shape[0]):
+    for j in range(0, dt_es_train.shape[3]):
+        roi_es_train[i,:,:,j] = np.logical_and(dt_es_train[i,:,:,j], sys_new_label_train[i,:,:,j])
+        
+#%% Sample patches
+patch_size = 8
+patch_grid = int(roi_es_train.shape[1]/patch_size)
+
+lin    = np.linspace(0,roi_es_train.shape[1]-patch_size,patch_grid).astype(int)
+
+# Preallocate
+_temp  = np.zeros((patch_grid,patch_grid))
+lin    = np.linspace(0,roi_es_train.shape[1]-patch_size,patch_grid).astype(int)
+_ctemp = np.zeros((patch_grid,patch_grid,roi_es_train.shape[3]))
+T_j    = np.zeros((roi_es_train.shape[0],patch_grid,patch_grid,roi_es_train.shape[3]))
+
+for j in range (0,roi_es_train.shape[0]):
+    for c in range(0,4):
+        for pp in range(0,16):
+            for p, i in enumerate(lin):
+                _temp[pp,p] = np.count_nonzero(roi_es_train[j,lin[pp]:lin[pp]+8 , i:i+8, c])
+                #_temp[pp,p] = np.sum(~np.isnan(roi_es_train[j,lin[pp]:lin[pp]+8 , i:i+8, c]))
+        _ctemp[:,:,c] = _temp
+    T_j[j,:,:,:] = _ctemp
+
+
+# BACKGROUND SEG FAILURES ARE REMOVED
+T_j = T_j[:,:,:,1:] 
+
+# Summing all tissue channels together
+T_j = np.sum(T_j, axis = 3)
+
+# Plot a final patch
+# Binarize
+T_j[T_j >= 1 ] = 1
+
+#%% Prep data
 T = np.expand_dims(T_j, axis=1)
 
+train_amount = 58
 
+input_concat_train = input_concat[0:train_amount,:,:,:]
+input_concat_eval  = input_concat[train_amount:,:,:,:]
+
+T_train = Tensor(T[0:train_amount,:,:,:])
+T_eval  = T[train_amount:,:,:,:]
+    
 #%% Training
 train_losses = []
 eval_losses  = []
@@ -746,9 +773,9 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #inputs, labels = data
         inputs = input_concat #input_concat_train
         inputs = inputs.cuda()
-        labels = Tensor(T)#_train)
+        labels = Tensor(T) #_train)
         labels = labels.cuda()
-        #print('i=',i)
+        print('i=',i)
         
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
@@ -777,16 +804,16 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
     train_losses.append(train_loss/data_train.shape[0]) # This is normalised by batch size
     train_loss = 0.0
-"""
+
     model.eval()
     for i, data_eval in enumerate(input_concat_eval, 0):
         # get the inputs
         #inputs, labels = data
         inputs = input_concat_eval
-        #inputs = inputs.cuda()
+        inputs = inputs.cuda()
         labels = Tensor(T_eval)
-        #labels = labels.cuda()
-        #print('i=',i)
+        labels = labels.cuda()
+        print('i=',i)
         
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
@@ -813,7 +840,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
     eval_losses.append(eval_loss/data_eval.shape[0]) # This is normalised by batch size
     eval_loss = 0.0 
-"""
+
 print('Finished Training + Evaluation')
 
 #%% Plot loss curve
@@ -832,8 +859,8 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
 #%% Save model
 
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Det_dia.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Det_dia.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia.pt"
+PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
