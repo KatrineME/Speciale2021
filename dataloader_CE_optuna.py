@@ -274,7 +274,7 @@ def objective(trial):
     lr =trial.suggest_float("lr", 1e-6, 1e-2)
     optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr)
     
-    k_folds    = 1
+    k_folds    = 2
     num_epochs = 50
     
     loss_function = nn.CrossEntropyLoss()
