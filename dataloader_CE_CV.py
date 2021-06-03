@@ -396,7 +396,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         
         #print('train_results', train_results)
         #print('--------------------------------')
-        results[fold] = 100.0 * (correct / total)
+        #results[fold] = 100.0 * (correct / total)
         
         unet.eval()
         print('Epoch eval=',epoch)
@@ -444,7 +444,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #print('eval_results', eval_results)
 
         #print('--------------------------------')
-        results[fold] = 100.0 * (correct_e / total_e)
+        #results[fold] = 100.0 * (correct_e / total_e)
     
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
