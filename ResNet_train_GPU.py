@@ -668,7 +668,7 @@ emap = np.expand_dims(emap, axis=1)
 
 #%% Plot
 #% Wrap all inputs together
-im     = Tensor(im_train_es_res)
+im     = Tensor(im_train_es_res[0:126,:,:,:])
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
 
