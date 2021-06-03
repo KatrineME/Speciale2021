@@ -621,7 +621,7 @@ out_image_es    = out_trained_es["softmax"]
 #im_flat_test_ed = im_flat_test_ed.cuda()
 """
 unet_es.eval()
-out_trained_ed = unet_es(Tensor(im_test_es_res))
+out_trained_ed = unet_es(Tensor(im_train_es_res))
 out_image_es   = out_trained_ed["softmax"]
 
 #%% One hot encoding
