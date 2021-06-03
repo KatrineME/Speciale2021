@@ -468,8 +468,8 @@ m_fold_train_losses = np.mean(fold_train_losses, axis = 0)
 m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
 m_fold_train_res    = np.mean(fold_train_res, axis = 0)   
 m_fold_eval_res     = np.mean(fold_eval_res, axis = 0)   
-m_fold_train_incorrect    = np.mean(fold_train_incorrect, axis = 0)   
-m_fold_eval_incorrect     = np.mean(fold_eval_incorrect, axis = 0)       
+m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
+m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
 
 print('Finished Training + Evaluation')
 #%% Plot loss curves
