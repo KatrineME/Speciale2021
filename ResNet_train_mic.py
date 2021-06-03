@@ -704,7 +704,7 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 20
+num_epoch = 3
 
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
@@ -795,7 +795,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     for i, data_train in enumerate(trainloader, 0):
         # get the inputs
         #inputs, labels = data
-        inputs = input_concat #input_concat_train
+        inputs = input_concat 
         #inputs = inputs.cuda()
         labels = Tensor(T)#_train)
         #labels = labels.cuda()
@@ -807,6 +807,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #labels = torch.argmax(labels, dim=1)
         labels = labels.long()
         labels = np.squeeze(labels)
+        
         # Clear the gradients
         optimizer.zero_grad()
        
@@ -819,6 +820,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Calculate gradients
         loss.backward()
+        
         # Update Weights
         optimizer.step()
         
