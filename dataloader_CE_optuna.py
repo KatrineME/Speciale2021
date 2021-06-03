@@ -270,8 +270,8 @@ def objective(trial):
     
     unet = define_model(trial).to(device)
     
-    optimizer_name = trial_suggest_categorical("optimizer", ["Adam", "SGD"])
-    lr = trial_suggest_float("lr", 1e-6, 1e-2)
+    optimizer_name = trial.suggest_categorical("optimizer", ["Adam", "SGD"])
+    lr =trial.suggest_float("lr", 1e-6, 1e-2)
     optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr)
     
     k_folds    = 1
