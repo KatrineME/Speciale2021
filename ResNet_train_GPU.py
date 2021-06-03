@@ -622,18 +622,18 @@ out_image_es    = out_trained_es["softmax"]
 """
 unet_es.eval()
 out_trained_ed1 = unet_es(Tensor(im_train_es_res[0:126,:,:,:]))
-out_image_es1   = out_trained_ed1["softmax"]
+out_image_es   = out_trained_ed1["softmax"]
 
-print('out_image_es1 shape: ', out_image_es1.shape)
+print('out_image_es1 shape: ', out_image_es.shape)
 
-out_trained_ed2 = unet_es(Tensor(im_train_es_res[126:-1,:,:,:]))
-out_image_es2   = out_trained_ed2["softmax"]
+#out_trained_ed2 = unet_es(Tensor(im_train_es_res[126:-1,:,:,:]))
+#out_image_es2   = out_trained_ed2["softmax"]
 
-print('out_image_es2 shape: ', out_image_es2.shape)
+#print('out_image_es2 shape: ', out_image_es2.shape)
 
-out_image_es = np.concatenate(out_image_es1, out_image_es2)
+#out_image_es = np.concatenate(out_image_es1, out_image_es2)
 
-print('out_image_es shape: ', out_image_es.shape)
+#print('out_image_es shape: ', out_image_es.shape)
 
 #%% One hot encoding
 """
