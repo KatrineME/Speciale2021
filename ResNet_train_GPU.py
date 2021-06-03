@@ -620,7 +620,7 @@ out_image_es    = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 """
-part = 140
+part = 180
 
 unet_es.eval()
 out_trained_ed1 = unet_es(Tensor(im_train_es_res[0:part,:,:,:]))
