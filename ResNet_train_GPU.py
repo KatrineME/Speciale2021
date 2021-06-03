@@ -878,14 +878,14 @@ plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection.png')
 
 #%% Save model
 
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia.pt"
-PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia.pt"
+PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_dia.pt"
+#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
 
 torch.save(unet, PATH_model)
-torch.save(unet.state_dict(), PATH_state)
+#torch.save(unet.state_dict(), PATH_state)
 
 #%%%
 """
