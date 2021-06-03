@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 50
+num_epochs = 300
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -315,7 +315,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     unet.apply(weights_init)
     
     # Initialize optimizer
-    optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, weight_decay=1e-4)
+    optimizer = torch.optim.Adam(unet.parameters(), lr=0.0001, eps=1e-04, weight_decay=1e-4)
 
 
     #% Training
@@ -390,9 +390,13 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         train_results.append(100.0 * correct / total)
         train_incorrect.append(incorrect)
+        correct   = 0.0
+        total     = 0.0
+        incorrect = 0.0
+        
         #print('train_results', train_results)
         #print('--------------------------------')
-        results[fold] = 100.0 * (correct / total)
+        #results[fold] = 100.0 * (correct / total)
         
         unet.eval()
         print('Epoch eval=',epoch)
@@ -434,11 +438,13 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         eval_results.append(100.0 * correct_e / total_e)
         eval_incorrect.append(incorrect_e)
-
+        correct_e   = 0.0
+        total_e     = 0.0
+        incorrect_e = 0.0
         #print('eval_results', eval_results)
 
         #print('--------------------------------')
-        results[fold] = 100.0 * (correct_e / total_e)
+        #results[fold] = 100.0 * (correct_e / total_e)
     
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
@@ -456,19 +462,17 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     #print('fold loss = ', fold_train_res)
     
     fold_eval_incorrect.append(eval_incorrect)
-    
-    
+
         
 m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
 m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
 m_fold_train_res    = np.mean(fold_train_res, axis = 0)   
 m_fold_eval_res     = np.mean(fold_eval_res, axis = 0)   
-m_fold_train_incorrect    = np.mean(fold_train_res, axis = 0)   
-m_fold_eval_incorrect     = np.mean(fold_eval_res, axis = 0)       
+m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
+m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
 
 print('Finished Training + Evaluation')
 #%% Plot loss curves
-
 epochs_train = np.arange(len(train_losses))
 epochs_eval  = np.arange(len(eval_losses))
 
@@ -476,7 +480,7 @@ plt.figure(figsize=(30, 15), dpi=200)
 plt.subplot(1,3,1)
 plt.plot(epochs_train + 1 , m_fold_train_losses, 'b', label = 'Training Loss')
 plt.plot(epochs_eval  + 1 , m_fold_eval_losses,  'r', label = 'Validation Loss')
-plt.xticks(np.arange(1, num_epochs + 1, step = 5))
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
@@ -485,7 +489,7 @@ plt.title("Loss function")
 plt.subplot(1,3,2)
 plt.plot(epochs_train + 1 , m_fold_train_res, 'b', label = 'Training Acc')
 plt.plot(epochs_eval  + 1 , m_fold_eval_res,  'r', label = 'Validation Acc')
-plt.xticks(np.arange(1, num_epochs + 1, step = 5))
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy %')
 plt.legend(loc="upper right")
@@ -494,14 +498,14 @@ plt.title("Accuracy")
 plt.subplot(1,3,3)
 plt.plot(epochs_train + 1 , m_fold_train_incorrect, 'b', label = 'Training Acc')
 plt.plot(epochs_eval  + 1 , m_fold_eval_incorrect,  'r', label = 'Validation Acc')
-plt.xticks(np.arange(1, num_epochs + 1, step = 5))
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
 plt.xlabel('Epochs')
 plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc_300.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
@@ -511,7 +515,7 @@ T = [t_res_mean, t_res] # listed together
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_mc01.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_300.pt"
 #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
@@ -521,7 +525,7 @@ torch.save(unet, PATH_model)
 #torch.save(unet.state_dict(), PATH_state)
 
 #%%
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_mc01.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_300.pt"
 torch.save(T, PATH_results)
 
 
