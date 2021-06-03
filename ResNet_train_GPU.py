@@ -620,15 +620,17 @@ out_image_es    = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 """
+part = 140
+
 unet_es.eval()
-out_trained_ed1 = unet_es(Tensor(im_train_es_res[0:126,:,:,:]))
+out_trained_ed1 = unet_es(Tensor(im_train_es_res[0:part,:,:,:]))
 out_image_es   = out_trained_ed1["softmax"]
 
-gt_train_es_res = gt_train_es_res[0:126,:,:]
+gt_train_es_res = gt_train_es_res[0:part,:,:]
 
 print('out_image_es1 shape: ', out_image_es.shape)
 
-#out_trained_ed2 = unet_es(Tensor(im_train_es_res[126:-1,:,:,:]))
+#out_trained_ed2 = unet_es(Tensor(im_train_es_res[part:-1,:,:,:]))
 #out_image_es2   = out_trained_ed2["softmax"]
 
 #print('out_image_es2 shape: ', out_image_es2.shape)
@@ -670,7 +672,7 @@ emap = np.expand_dims(emap, axis=1)
 
 #%% Plot
 #% Wrap all inputs together
-im     = Tensor(im_train_es_res[0:126,:,:,:])
+im     = Tensor(im_train_es_res[0:part,:,:,:])
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
 
