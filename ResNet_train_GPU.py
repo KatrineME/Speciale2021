@@ -624,6 +624,8 @@ unet_es.eval()
 out_trained_ed1 = unet_es(Tensor(im_train_es_res[0:126,:,:,:]))
 out_image_es   = out_trained_ed1["softmax"]
 
+gt_train_es_res = gt_train_es_res[0:126,:,:]
+
 print('out_image_es1 shape: ', out_image_es.shape)
 
 #out_trained_ed2 = unet_es(Tensor(im_train_es_res[126:-1,:,:,:]))
@@ -698,7 +700,7 @@ print('Number of epochs = ',num_epoch)
 #%% Load T_j
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
-os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
+#os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 
 #from SI_func_mic import SI_set
 #T_j = SI_set(user, 'sys')
