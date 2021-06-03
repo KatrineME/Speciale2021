@@ -214,7 +214,7 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 #%% BATCH GENERATOR
 num_train_sub = 12
 num_eval_sub = num_train_sub
-num_test_sub = num_eval_sub + 8
+num_test_sub = num_eval_sub + 4
 
 """
 im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
@@ -249,10 +249,10 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal_mc01.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_CrossVal_mc01.pt'
 
 #%% Import results from training (Loss + Accuracy)
-PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_train_results_mc01.pt'
+PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_train_results_mc01.pt'
 res_ed = torch.load(PATH_res_ed, map_location=torch.device('cpu'))
 
 #%% Load model
@@ -303,20 +303,21 @@ eval_acc_3 = out_one[3][2]
 train_acc_4 = out_one[2][3]
 eval_acc_4 = out_one[3][3]
 
+
 #%% Plot function
-epochs_train = np.arange(len(train_loss))
-epochs_eval  = np.arange(len(eval_loss))
+epochs_train = np.arange(len(tl))
+epochs_eval  = np.arange(len(el))
 
 plt.figure(figsize=(10, 5),dpi=200)
 plt.subplot(1,2,1)
-plt.plot(epochs_train + 1 , train_loss, 'b', label = 'Training Loss')
-plt.plot(epochs_eval  + 1 , eval_loss , 'r', linestyle = 'dashed', label = 'Validation Loss')
-plt.xticks(np.arange(1, 100 + 1, step = 20))
+plt.plot(epochs_train + 1 , tl, 'b', label = 'Training Loss')
+plt.plot(epochs_eval  + 1 , el , 'r', linestyle = 'dashed', label = 'Validation Loss')
+plt.xticks(np.arange(1, 300 + 1, step = 100))
 plt.xlabel('Epochs')
 plt.ylabel('Cross-Entropy Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-
+"""
 plt.subplot(1,2,2)
 plt.plot(epochs_train + 1 , train_acc, 'b', label = 'Training accuracy')
 #plt.plot(epochs_train + 1 , train_acc_1, 'g' , label = 'Training Loss')
@@ -332,16 +333,16 @@ plt.plot(epochs_eval  + 1 , eval_acc,  'r' ,linestyle = 'dashed',label = 'Valida
 #plt.plot(epochs_train + 1 , eval_acc_4, 'y' ,linestyle = 'dashed', label = 'Training Loss')
 
 
-plt.xticks(np.arange(1, 100 + 1, step = 20))
+plt.xticks(np.arange(1, 500 + 1, step = 100))
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy %')
 plt.legend(loc="lower right")
 plt.title("Accuracy")
 
-
+"""
 
 #%% Plot softmax probabilities for a single slice
-test_slice = 41
+test_slice = 46
 out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
 alpha = 0.4
 
