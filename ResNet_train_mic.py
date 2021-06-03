@@ -616,7 +616,7 @@ PATH_model_ed  = 'C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_C
 #PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 # Load
-unet_es = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
+unet_es  = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 #unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
@@ -799,7 +799,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         #inputs = inputs.cuda()
         labels = Tensor(T)#_train)
         #labels = labels.cuda()
-        #print('i=',i)
+        print('epoch i =',i  ,epoch)
         
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
