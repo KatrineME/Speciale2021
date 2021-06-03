@@ -388,14 +388,9 @@ data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
 data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
-num_train_res  = num_eval_sub + 2
-num_test_res  = num_train_res + 1
-
-im_train_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_im_es_RV[num_eval_sub:num_train_res]).astype(None)))
+#%% BATCH GENERATOR
+num_train_sub = 12
+num_eval_sub  = num_train_sub
 
 
 num_train_res  = num_eval_sub + 6
