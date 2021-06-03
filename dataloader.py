@@ -322,7 +322,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     #0.0  
     for i, (train_data) in enumerate(train_dataloader):
         # get the inputs
-        #inputs, labels = data
+        #inputs, labels = data*--
         inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
         inputs = inputs.cuda()
         labels = train_data[:,1,:,:]
@@ -338,7 +338,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Forward Pass
         output = unet(inputs)     
         output = output["log_softmax"]
-        #print('output shape = ', output.shape)
+        #print('output shape = ', output.shape)0
         
         # Find loss
         loss = criterion(output, labels)
