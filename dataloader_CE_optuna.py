@@ -266,7 +266,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 
 #%% Training with K-folds
-def objecive(trial):
+def objective(trial):
     
     unet = define_model(trial).to(device)
     
