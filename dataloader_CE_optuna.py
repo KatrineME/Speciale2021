@@ -516,7 +516,14 @@ if __name__ == "__main__":
     plt.figure(figsize=(30, 15), dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "lr"])
     plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
-     
+    
+    plt.figure(figsize=(30, 15), dpi=200)
+    optuna.visualization.matplotlib.plot_param_importances(study)
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/importances_optuna.png')
+    
+    plt.figure(figsize=(30, 15), dpi=200)
+    optuna.visualization.matplotlib.plot_optimization_history(study)
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
     
 """    
 #%% Plot loss curves
