@@ -448,7 +448,7 @@ def objective(trial):
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
             eval_accuracy.append(100.0 * correct_e / total_e)
             eval_incorrect.append(incorrect_e)
-            print('float', eval_accuracy)
+            print('bf float', eval_accuracy)
 
             eval_accuracy_float = float(eval_accuracy[-1])
             print('float', eval_accuracy_float)
