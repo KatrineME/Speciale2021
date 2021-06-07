@@ -620,7 +620,7 @@ out_image_es    = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 """
-part = 110 # Memory fail
+part = 126 # Memory fail
 #part = 180 # Runs
 
 unet_es.eval()
@@ -634,7 +634,7 @@ gt_train_es_res = gt_train_es_res[0:part,:,:]
 
 print('out_image_es1 shape: ', out_image_es1.shape)
 
-out_trained_ed2 = unet_es(Tensor(im_train_es_res[part:-1,:,:,:]))
+out_trained_ed2 = unet_es(Tensor(im_train_es_res[part:-1,:,:,:]).cuda())
 out_image_es2   = out_trained_ed2["softmax"]
 
 print('out_image_es2 shape: ', out_image_es2.shape)
