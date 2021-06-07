@@ -264,11 +264,12 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
                                   np.concatenate(data_gt_ed_NOR[num_train_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_sub:num_test_sub]).astype(None)))
 
+#%% Create optimzer 
 
 def create_optimizer(trial):
     # We optimize over the type of optimizer to use (Adam or SGD with momentum).
     # We also optimize over the learning rate and weight decay of the selected optimizer.
-    weight_decay = trial.suggest_loguniform('weight_decay', 1e-10, 1e-3)
+    weight_decay   = trial.suggest_loguniform('weight_decay', 1e-10, 1e-3)
     optimizer_name = trial.suggest_categorical('optimizer', ['Adam', 'MomentumSGD'])
 
     if optimizer_name == 'Adam':
@@ -279,7 +280,7 @@ def create_optimizer(trial):
         
     else:
         momentum_sgd_lr = trial.suggest_loguniform('momentum_sgd_lr', 1e-5, 1e-1)
-        optimizer = torch.optim.SGD(unet.parameters(), lr = momentum_sgd_lr, weight_decay = weight_decay)
+        optimizer       = torch.optim.SGD(unet.parameters(), lr = momentum_sgd_lr, weight_decay = weight_decay)
         
     return optimizer
 
@@ -326,7 +327,6 @@ def objective(trial):
     fold_train_incorrect = []
     fold_eval_incorrect = []
     
-     
     
     #%
     # K-fold Cross Validation model evaluation
