@@ -590,7 +590,7 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    #unet.cuda()
+    unet.cuda()
     
 #%% Load Model
 #PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
@@ -620,28 +620,28 @@ out_image_es    = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 """
-part = 120 # Memory fail
+part = 126 # Memory fail
 #part = 180 # Runs
 
 unet_es.eval()
 
 out_trained_ed1 = unet_es(Tensor(im_train_es_res[0:part,:,:,:]).cuda())
 #out_trained_ed1 = unet_es(Tensor(im_train_es_res))
-out_image_es   = out_trained_ed1["softmax"]
+out_image_es1   = out_trained_ed1["softmax"]
 
 gt_train_es_res = gt_train_es_res[0:part,:,:]
 #gt_train_es_res = gt_train_es_res
 
-print('out_image_es1 shape: ', out_image_es.shape)
+print('out_image_es1 shape: ', out_image_es1.shape)
 
-#out_trained_ed2 = unet_es(Tensor(im_train_es_res[part:-1,:,:,:]))
-#out_image_es2   = out_trained_ed2["softmax"]
+out_trained_ed2 = unet_es(Tensor(im_train_es_res[part:-1,:,:,:]))
+out_image_es2   = out_trained_ed2["softmax"]
 
-#print('out_image_es2 shape: ', out_image_es2.shape)
+print('out_image_es2 shape: ', out_image_es2.shape)
 
-#out_image_es = np.concatenate(out_image_es1, out_image_es2)
+out_image_es = np.concatenate(out_image_es1, out_image_es2)
 
-#print('out_image_es shape: ', out_image_es.shape)
+print('out_image_es shape: ', out_image_es.shape)
 
 #%% One hot encoding
 """
