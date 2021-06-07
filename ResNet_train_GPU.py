@@ -605,7 +605,7 @@ PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_Cro
 
 # Load
 print('device = ', device)
-unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
+unet_es = torch.load(PATH_model_es, map_location=torch.device(device))
 #unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
@@ -621,7 +621,7 @@ out_image_es    = out_trained_es["softmax"]
 #im_flat_test_ed = im_flat_test_ed.cuda()
 """
 part = 185 # Memory fail
-part = 180 # Runs
+#part = 180 # Runs
 
 unet_es.eval()
 out_trained_ed1 = unet_es(Tensor(im_train_es_res[0:part,:,:,:]))
