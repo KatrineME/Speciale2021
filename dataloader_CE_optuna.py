@@ -201,7 +201,7 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (1, 128, 128))
 
 def define_model(trial):
-    drop_prob_t = trial.suggest_float("drop_prob_l{}", 0.0, 0.5) 
+    drop_prob_t = trial.suggest_float("drop_prob_l", 0.0, 0.5) 
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=drop_prob_t)
     
     return unet
@@ -275,7 +275,7 @@ def objective(trial):
     optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr)
     
     k_folds    = 2
-    num_epochs = 50
+    num_epochs = 5
     
     loss_function = nn.CrossEntropyLoss()
     
@@ -304,7 +304,6 @@ def objective(trial):
     fold_eval_incorrect = []
     
      
-    
     
     #%
     # K-fold Cross Validation model evaluation
@@ -449,8 +448,12 @@ def objective(trial):
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
             eval_accuracy.append(100.0 * correct_e / total_e)
             eval_incorrect.append(incorrect_e)
+            #print('bf float', eval_accuracy)
+
+            eval_accuracy_float = float(eval_accuracy[-1])
+            print('float', eval_accuracy_float)
             
-            trial.report(eval_accuracy, epoch)
+            trial.report(eval_accuracy_float, epoch)
        
             correct_e   = 0.0
             total_e     = 0.0
@@ -460,7 +463,6 @@ def objective(trial):
             #print('--------------------------------')
             #accuracy[fold] = 100.0 * (correct_e / total_e)
             
-        
         
         fold_train_losses.append(train_losses)
         #print('fold loss = ', fold_train_losses)
@@ -479,7 +481,7 @@ def objective(trial):
         
         fold_eval_incorrect.append(eval_incorrect)
     
-        return eval_accuracy
+        return eval_accuracy_float
     
     m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
     m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
@@ -489,65 +491,11 @@ def objective(trial):
     m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
         
     print('Finished Training + Evaluation')
-    #%% Plot loss curves
-    epochs_train = np.arange(len(train_losses))
-    epochs_eval  = np.arange(len(eval_losses))
-    
-    plt.figure(figsize=(30, 15), dpi=200)
-    plt.subplot(1,3,1)
-    plt.plot(epochs_train + 1 , m_fold_train_losses, 'b', label = 'Training Loss')
-    plt.plot(epochs_eval  + 1 , m_fold_eval_losses,  'r', label = 'Validation Loss')
-    plt.xticks(np.arange(1, num_epochs + 1, step = 50))
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend(loc="upper right")
-    plt.title("Loss function")
-    
-    plt.subplot(1,3,2)
-    plt.plot(epochs_train + 1 , m_fold_train_accuracy, 'b', label = 'Training Acc')
-    plt.plot(epochs_eval  + 1 , m_fold_eval_accuracy,  'r', label = 'Validation Acc')
-    plt.xticks(np.arange(1, num_epochs + 1, step = 50))
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy %')
-    plt.legend(loc="upper right")
-    plt.title("Accuracy")
-    
-    plt.subplot(1,3,3)
-    plt.plot(epochs_train + 1 , m_fold_train_incorrect, 'b', label = 'Training Acc')
-    plt.plot(epochs_eval  + 1 , m_fold_eval_incorrect,  'r', label = 'Validation Acc')
-    plt.xticks(np.arange(1, num_epochs + 1, step = 50))
-    plt.xlabel('Epochs')
-    plt.ylabel('incorrect %')
-    plt.legend(loc="upper right")
-    plt.title("Incorrect")
-    
-    
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc_300.png')
-    #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
-    
-    t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_accuracy, m_fold_eval_accuracy, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
-    t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res]         # loss and accuracy for each epoch
-    
-    T = [t_res_mean, t_res] # listed together
-    
-    
-    #%% Save model
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_300.pt"
-    #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
-    
-    #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
-    #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
-    
-    torch.save(unet, PATH_model)
-    #torch.save(unet.state_dict(), PATH_state)
-    
-    #%%
-    PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_300.pt"
-    torch.save(T, PATH_results)
+
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=100, timeout=400)
+    study.optimize(objective, n_trials=10, timeout=4000)
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -563,10 +511,77 @@ if __name__ == "__main__":
     print("  Params: ")
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
+        
     
+    plt.figure(figsize=(30, 15), dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "lr"])
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
     
+    plt.figure(figsize=(30, 15), dpi=200)
+    optuna.visualization.matplotlib.plot_param_importances(study)
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/importances_optuna.png')
     
+    plt.figure(figsize=(30, 15), dpi=200)
+    optuna.visualization.matplotlib.plot_optimization_history(study)
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
     
+"""    
+#%% Plot loss curves
+epochs_train = np.arange(len(train_losses))
+epochs_eval  = np.arange(len(eval_losses))
+
+plt.figure(figsize=(30, 15), dpi=200)
+plt.subplot(1,3,1)
+plt.plot(epochs_train + 1 , m_fold_train_losses, 'b', label = 'Training Loss')
+plt.plot(epochs_eval  + 1 , m_fold_eval_losses,  'r', label = 'Validation Loss')
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend(loc="upper right")
+plt.title("Loss function")
+
+plt.subplot(1,3,2)
+plt.plot(epochs_train + 1 , m_fold_train_accuracy, 'b', label = 'Training Acc')
+plt.plot(epochs_eval  + 1 , m_fold_eval_accuracy,  'r', label = 'Validation Acc')
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy %')
+plt.legend(loc="upper right")
+plt.title("Accuracy")
+
+plt.subplot(1,3,3)
+plt.plot(epochs_train + 1 , m_fold_train_incorrect, 'b', label = 'Training Acc')
+plt.plot(epochs_eval  + 1 , m_fold_eval_incorrect,  'r', label = 'Validation Acc')
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
+plt.xlabel('Epochs')
+plt.ylabel('incorrect %')
+plt.legend(loc="upper right")
+plt.title("Incorrect")
+
+
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc_optuna.png')
+#plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
+
+t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_accuracy, m_fold_eval_accuracy, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
+t_res      = [fold_train_losses, fold_eval_losses, fold_train_accuracy, fold_eval_accuracy]         # loss and accuracy for each epoch
+
+T = [t_res_mean, t_res] # listed together
+
+
+#%% Save model
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
+#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
+
+#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
+#PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
+
+torch.save(unet, PATH_model)
+#torch.save(unet.state_dict(), PATH_state)
+
+#%%
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_optuna.pt"
+torch.save(T, PATH_results)    
+"""
 
 
 
