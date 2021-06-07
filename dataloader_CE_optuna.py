@@ -469,7 +469,7 @@ def objective(trial):
             
         
         fold_train_losses.append(train_losses)
-        #print('fold loss = ', fold_train_losses)
+        print('fold loss = ', fold_train_losses)
         
         fold_eval_losses.append(eval_losses)
         #print('fold loss = ', fold_eval_losses)
