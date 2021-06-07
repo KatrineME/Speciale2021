@@ -517,7 +517,7 @@ def objective_cv(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=2, train_dataloader, eval_dataloader, timeout=4000)
+    study.optimize(objective_cv, train_dataloader, eval_dataloader, n_trials=2, timeout=4000)
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
