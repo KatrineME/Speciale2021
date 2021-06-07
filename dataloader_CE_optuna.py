@@ -269,13 +269,13 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 def create_optimizer(trial):
     # We optimize over the type of optimizer to use (Adam or SGD with momentum).
     # We also optimize over the learning rate and weight decay of the selected optimizer.
-    weight_decay   = trial.suggest_loguniform('weight_decay', 1e-10, 1e-3)
+    weight_decay   = trial.suggest_loguniform('weight_decay', 1e-6, 1e-2)
     optimizer_name = trial.suggest_categorical('optimizer', ['Adam', 'SGD'])
 
     if optimizer_name == 'Adam':
         adam_lr = trial.suggest_loguniform('adam_lr', 1e-5, 1e-1)
         adam_eps = trial.suggest_loguniform('adam_eps', 1e-8, 1e-1)
-        optimizer = torch.optim.Adam(lr=adam_lr, weight_decay = weight_decay)
+        #optimizer = torch.optim.Adam(lr=adam_lr, weight_decay = weight_decay)
         optimizer = torch.optim.Adam(unet.parameters(), lr=adam_lr, eps=adam_eps, weight_decay=weight_decay)
         
     else:
