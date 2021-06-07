@@ -201,7 +201,7 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (1, 128, 128))
 
 def define_model(trial):
-    drop_prob_t = trial.suggest_float("drop_prob_l{}", 0.0, 0.5) 
+    drop_prob_t = trial.suggest_float("drop_prob_l", 0.0, 0.5) 
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=drop_prob_t)
     
     return unet
@@ -275,7 +275,7 @@ def objective(trial):
     optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr)
     
     k_folds    = 2
-    num_epochs = 10
+    num_epochs = 5
     
     loss_function = nn.CrossEntropyLoss()
     
@@ -514,7 +514,7 @@ if __name__ == "__main__":
         
     
     plt.figure(figsize=(30, 15), dpi=200)
-    optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l0", "lr"])
+    optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "lr"])
     plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
      
     
