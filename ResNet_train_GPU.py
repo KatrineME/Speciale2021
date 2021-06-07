@@ -620,7 +620,7 @@ out_image_es    = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 """
-part = 180 # Memory fail
+part = 160 # Memory fail
 #part = 180 # Runs
 
 unet_es.eval()
