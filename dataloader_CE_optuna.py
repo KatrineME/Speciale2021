@@ -275,7 +275,7 @@ def objective(trial):
     optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr)
     
     k_folds    = 2
-    num_epochs = 10
+    num_epochs = 50
     
     loss_function = nn.CrossEntropyLoss()
     
@@ -495,7 +495,7 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=5, timeout=4000)
+    study.optimize(objective, n_trials=100, timeout=4000)
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -512,7 +512,7 @@ if __name__ == "__main__":
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
     
-    
+"""    
 #%% Plot loss curves
 epochs_train = np.arange(len(train_losses))
 epochs_eval  = np.arange(len(eval_losses))
@@ -568,7 +568,7 @@ torch.save(unet, PATH_model)
 #%%
 PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_optuna.pt"
 torch.save(T, PATH_results)    
-
+"""
 
 
 
