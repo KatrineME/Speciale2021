@@ -275,7 +275,7 @@ def objective(trial):
     optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr)
     
     k_folds    = 2
-    num_epochs = 50
+    num_epochs = 20
     
     loss_function = nn.CrossEntropyLoss()
     
