@@ -496,41 +496,7 @@ def objective(trial):
         
     print('Finished Training + Evaluation')
 
-
-if __name__ == "__main__":
-    study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=2, timeout=4000)
-
-    complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
-
-    print("Study statistics: ")
-    print("  Number of finished trials: ", len(study.trials))
-    print("  Number of complete trials: ", len(complete_trials))
-
-    print("Best trial:")
-    trial = study.best_trial
-
-    print("  Value: ", trial.value)
-
-    print("  Params: ")
-    for key, value in trial.params.items():
-        print("    {}: {}".format(key, value))
-        
-    
-    plt.figure(figsize=(30, 15), dpi=200)
-    optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "lr"])
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
-    
-    plt.figure(figsize=(30, 15), dpi=200)
-    optuna.visualization.matplotlib.plot_param_importances(study)
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/importances_optuna.png')
-    
-    plt.figure(figsize=(30, 15), dpi=200)
-    optuna.visualization.matplotlib.plot_optimization_history(study)
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
-    
-   
-    #%% Plot loss curves
+#%% Plot loss curves
     epochs_train = np.arange(len(train_losses))
     epochs_eval  = np.arange(len(eval_losses))
     
@@ -584,7 +550,43 @@ if __name__ == "__main__":
     
     #%%
     PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_optuna.pt"
-torch.save(T, PATH_results)    
+    torch.save(T, PATH_results)    
+    
+    
+#%%
+if __name__ == "__main__":
+    study = optuna.create_study(direction="maximize")
+    study.optimize(objective, n_trials=2, timeout=4000)
+
+    complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
+
+    print("Study statistics: ")
+    print("  Number of finished trials: ", len(study.trials))
+    print("  Number of complete trials: ", len(complete_trials))
+
+    print("Best trial:")
+    trial = study.best_trial
+
+    print("  Value: ", trial.value)
+
+    print("  Params: ")
+    for key, value in trial.params.items():
+        print("    {}: {}".format(key, value))
+        
+    
+    plt.figure(figsize=(30, 15), dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lr"])
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
+    
+    plt.figure(figsize=(30, 15), dpi=200)
+    optuna.visualization.matplotlib.plot_param_importances(study)
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/importances_optuna.png')
+    
+    plt.figure(figsize=(30, 15), dpi=200)
+    optuna.visualization.matplotlib.plot_optimization_history(study)
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
+    
+   
 
 
 
