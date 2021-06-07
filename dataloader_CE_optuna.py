@@ -305,7 +305,6 @@ def objective(trial):
     
      
     
-    
     #%
     # K-fold Cross Validation model evaluation
     for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
@@ -449,6 +448,7 @@ def objective(trial):
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
             eval_accuracy.append(100.0 * correct_e / total_e)
             eval_incorrect.append(incorrect_e)
+            eval_accuracy = np.array(eval_accuracy, dtype=float)
             
             trial.report(eval_accuracy, epoch)
        
@@ -460,7 +460,6 @@ def objective(trial):
             #print('--------------------------------')
             #accuracy[fold] = 100.0 * (correct_e / total_e)
             
-        
         
         fold_train_losses.append(train_losses)
         #print('fold loss = ', fold_train_losses)
@@ -522,17 +521,17 @@ def objective(trial):
     plt.title("Incorrect")
     
     
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc_300.png')
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc_optuna.png')
     #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
     
     t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_accuracy, m_fold_eval_accuracy, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
-    t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res]         # loss and accuracy for each epoch
+    t_res      = [fold_train_losses, fold_eval_losses, fold_train_accuracy, fold_eval_accuracy]         # loss and accuracy for each epoch
     
     T = [t_res_mean, t_res] # listed together
     
     
     #%% Save model
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_300.pt"
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
     #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
     
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
@@ -542,7 +541,7 @@ def objective(trial):
     #torch.save(unet.state_dict(), PATH_state)
     
     #%%
-    PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_300.pt"
+    PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_optuna.pt"
     torch.save(T, PATH_results)
 
 if __name__ == "__main__":
