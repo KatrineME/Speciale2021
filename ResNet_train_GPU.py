@@ -625,11 +625,11 @@ part = 185 # Memory fail
 
 unet_es.eval()
 
-out_trained_ed1 = unet_es(Tensor(im_train_es_res[0:part,:,:,:].cuda()))
+out_trained_ed1 = unet_es(Tensor(im_train_es_res[0:part,:,:,:]).cuda())
 #out_trained_ed1 = unet_es(Tensor(im_train_es_res))
 out_image_es   = out_trained_ed1["softmax"]
 
-gt_train_es_res = gt_train_es_res[0:part,:,:].cuda()
+gt_train_es_res = gt_train_es_res[0:part,:,:]
 #gt_train_es_res = gt_train_es_res
 
 print('out_image_es1 shape: ', out_image_es.shape)
