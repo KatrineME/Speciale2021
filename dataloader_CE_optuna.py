@@ -449,6 +449,7 @@ def objective(trial):
             eval_accuracy.append(100.0 * correct_e / total_e)
             eval_incorrect.append(incorrect_e)
             eval_accuracy_float = np.array(eval_accuracy, dtype=float)
+            print('float', eval_accuracy_float)
             
             trial.report(eval_accuracy_float, epoch)
        
