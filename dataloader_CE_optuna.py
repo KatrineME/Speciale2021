@@ -265,12 +265,12 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
                                   np.concatenate(data_gt_ed_RV[num_train_sub:num_test_sub]).astype(None)))
 
 #%% Create optimzer 
-
+"""
 def create_optimizer(trial):
     # We optimize over the type of optimizer to use (Adam or SGD with momentum).
     # We also optimize over the learning rate and weight decay of the selected optimizer.
     weight_decay   = trial.suggest_float('weight_decay', 1e-6, 1e-2)
-    optimizer_name = trial.suggest_categorical('optimizer', ['Adam', 'SGD'])
+    optimizer_name = trial.suggest_categorical('optimizer', [Adam', 'SGD'])
 
     if optimizer_name == 'Adam':
         adam_lr  = trial.suggest_float('adam_lr',  1e-5, 1e-1)
@@ -283,20 +283,19 @@ def create_optimizer(trial):
         optimizer       = torch.optim.SGD(unet.parameters(), lr = momentum_sgd_lr, weight_decay = weight_decay)
         
     return optimizer
-
+"""
 #%% Training with K-folds
 def objective(trial):
       
     unet = define_model(trial).to(device)
     
-    #optimizer_name = trial.suggest_categorical("optimizer", ["Adam", "SGD"])
-    #weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
+    optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
+    weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
 
-    #lr  = trial.suggest_float("lr",  1e-6, 1e-2)
-    #eps = trial.suggest_float("eps", 1e-8, 1e-2)
+    lr  = trial.suggest_float("lr",  1e-6, 1e-2)
+    eps = trial.suggest_float("eps", 1e-8, 1e-2)
     
-    #optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr, eps=eps, weight_decay=weight_decay)
-    optimizer = create_optimizer(trial)
+    optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr, eps=eps, weight_decay=weight_decay)
     
     k_folds    = 2
     num_epochs = 5
