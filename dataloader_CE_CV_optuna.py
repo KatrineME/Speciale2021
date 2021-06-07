@@ -476,6 +476,15 @@ def objective(trial, train_dataloader, eval_dataloader):
     fold_eval_incorrect.append(eval_incorrect)
 
     return eval_accuracy_float
+    m_fold_train_losses    = np.mean(fold_train_losses, axis = 0) 
+    m_fold_eval_losses     = np.mean(fold_eval_losses, axis = 0)   
+    m_fold_train_accuracy  = np.mean(fold_train_accuracy, axis = 0)   
+    m_fold_eval_accuracy   = np.mean(fold_eval_accuracy, axis = 0)   
+    m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
+    m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
+    
+print('Finished Training + Evaluation')
+
     
 def objective_cv(trial):
 
@@ -503,14 +512,7 @@ def objective_cv(trial):
     return np.mean(scores)
 
 
-m_fold_train_losses    = np.mean(fold_train_losses, axis = 0) 
-m_fold_eval_losses     = np.mean(fold_eval_losses, axis = 0)   
-m_fold_train_accuracy  = np.mean(fold_train_accuracy, axis = 0)   
-m_fold_eval_accuracy   = np.mean(fold_eval_accuracy, axis = 0)   
-m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
-m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
-    
-print('Finished Training + Evaluation')
+
 
 
 if __name__ == "__main__":
