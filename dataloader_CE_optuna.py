@@ -264,15 +264,39 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
                                   np.concatenate(data_gt_ed_NOR[num_train_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_sub:num_test_sub]).astype(None)))
 
+#%% Create optimzer 
+
+def create_optimizer(trial):
+    # We optimize over the type of optimizer to use (Adam or SGD with momentum).
+    # We also optimize over the learning rate and weight decay of the selected optimizer.
+    weight_decay   = trial.suggest_loguniform('weight_decay', 1e-10, 1e-3)
+    optimizer_name = trial.suggest_categorical('optimizer', ['Adam', 'SGD'])
+
+    if optimizer_name == 'Adam':
+        adam_lr = trial.suggest_loguniform('adam_lr', 1e-5, 1e-1)
+        adam_eps = trial.suggest_loguniform('adam_eps', 1e-8, 1e-1)
+        optimizer = torch.optim.Adam(lr=adam_lr, weight_decay = weight_decay)
+        optimizer = torch.optim.Adam(unet.parameters(), lr=adam_lr, eps=adam_eps, weight_decay=weight_decay)
+        
+    else:
+        momentum_sgd_lr = trial.suggest_loguniform('momentum_sgd_lr', 1e-5, 1e-1)
+        optimizer       = torch.optim.SGD(unet.parameters(), lr = momentum_sgd_lr, weight_decay = weight_decay)
+        
+    return optimizer
 
 #%% Training with K-folds
 def objective(trial):
-    
+      
     unet = define_model(trial).to(device)
     
-    optimizer_name = trial.suggest_categorical("optimizer", ["Adam", "SGD"])
-    lr =trial.suggest_float("lr", 1e-6, 1e-2)
-    optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr)
+    #optimizer_name = trial.suggest_categorical("optimizer", ["Adam", "SGD"])
+    #weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
+
+    #lr  = trial.suggest_float("lr",  1e-6, 1e-2)
+    #eps = trial.suggest_float("eps", 1e-8, 1e-2)
+    
+    #optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr, eps=eps, weight_decay=weight_decay)
+    optimizer = create_optimizer(trial)
     
     k_folds    = 2
     num_epochs = 5
@@ -303,7 +327,6 @@ def objective(trial):
     fold_train_incorrect = []
     fold_eval_incorrect = []
     
-     
     
     #%
     # K-fold Cross Validation model evaluation
@@ -483,10 +506,10 @@ def objective(trial):
     
         return eval_accuracy_float
     
-    m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
-    m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
-    m_fold_train_accuracy    = np.mean(fold_train_accuracy, axis = 0)   
-    m_fold_eval_accuracy     = np.mean(fold_eval_accuracy, axis = 0)   
+    m_fold_train_losses    = np.mean(fold_train_losses, axis = 0) 
+    m_fold_eval_losses     = np.mean(fold_eval_losses, axis = 0)   
+    m_fold_train_accuracy  = np.mean(fold_train_accuracy, axis = 0)   
+    m_fold_eval_accuracy   = np.mean(fold_eval_accuracy, axis = 0)   
     m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
     m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
         
