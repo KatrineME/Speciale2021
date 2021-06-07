@@ -620,13 +620,15 @@ out_image_es    = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 """
-part = 150
+part = 185
 
 unet_es.eval()
 out_trained_ed1 = unet_es(Tensor(im_train_es_res[0:part,:,:,:]))
+#out_trained_ed1 = unet_es(Tensor(im_train_es_res))
 out_image_es   = out_trained_ed1["softmax"]
 
 gt_train_es_res = gt_train_es_res[0:part,:,:]
+#gt_train_es_res = gt_train_es_res
 
 print('out_image_es1 shape: ', out_image_es.shape)
 
@@ -673,6 +675,7 @@ emap = np.expand_dims(emap, axis=1)
 #%% Plot
 #% Wrap all inputs together
 im     = Tensor(im_train_es_res[0:part,:,:,:])
+#im     = Tensor(im_train_es_res)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
 
@@ -684,11 +687,11 @@ input_concat = torch.cat((im,umap,seg), dim=1)
 #%% Setting up training loop
 # OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
 
-LEARNING_RATE = 0.0001 # 
+LEARNING_RATE = 0.001 # 
 criterion     = nn.CrossEntropyLoss() 
 
 # weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4, eps=1e-04)
 # torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 
 # and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
@@ -696,7 +699,7 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 50
+num_epoch = 100
 
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
@@ -863,28 +866,28 @@ print('Finished Training + Evaluation')
 
 #%% Plot loss curve
 epochs = np.arange(len(train_losses))
-#epochs_eval = np.arange(len(eval_losses))
+epochs_eval = np.arange(len(eval_losses))
 
 plt.figure(dpi=200)
 plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
-#plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
-plt.xticks(np.arange(1,num_epoch+1, step = 1))
+plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
+plt.xticks(np.arange(1,num_epoch+1, step = 10))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection2.png')
+plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection_eps.png')
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
 #%% Save model
 
-PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection2.pt"
+PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
 #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
 
-torch.save(unet, PATH_model)
+torch.save(model, PATH_model)
 #torch.save(unet.state_dict(), PATH_state)
 
 #%%%
