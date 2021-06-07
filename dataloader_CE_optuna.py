@@ -574,9 +574,9 @@ if __name__ == "__main__":
         print("    {}: {}".format(key, value))
         
     
-    plt.figure(figsize=(30, 15), dpi=200)
-    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lr"])
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
+    #plt.figure(figsize=(30, 15), dpi=200)
+    #optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lr"])
+    #plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
     
     plt.figure(figsize=(30, 15), dpi=200)
     optuna.visualization.matplotlib.plot_param_importances(study)
