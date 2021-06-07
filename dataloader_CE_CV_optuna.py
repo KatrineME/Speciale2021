@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jun  3 15:23:08 2021
+Created on Mon Jun  7 15:36:46 2021
 
 @author: michalablicher
 """
+
 #%% Load packages
 import torch
 import os
@@ -266,69 +267,70 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 
 #%% Training with K-folds
-def objective(trial):
-      
-    unet = define_model(trial).to(device)
-    
-    optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
-    weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
+k_folds    = 6
+num_epochs = 5
 
-    lr  = trial.suggest_float("lr",  1e-6, 1e-2)
-    eps = trial.suggest_float("eps", 1e-8, 1e-2)
+loss_function = nn.CrossEntropyLoss()
+
+# For fold results
+
+# Set fixed random number seed
+torch.manual_seed(42)
+
+# Define the K-fold Cross Validator
+kfold = KFold(n_splits=k_folds, shuffle=True)
+
+# Start print
+print('--------------------------------')
+
+# Prep data for dataloader
+data_train   = Tensor((np.squeeze(im_train_sub), gt_train_sub))
+data_train_n = data_train.permute(1,0,2,3)
+dataset      = data_train_n
+batch_size   = 32
+
+fold_train_losses = []
+fold_eval_losses  = []
+fold_train_accuracy    = []
+fold_eval_accuracy     = []
+fold_train_incorrect = []
+fold_eval_incorrect = []
+
+
+#%
+# K-fold Cross Validation model evaluation
+for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     
-    optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
-    
-    k_folds    = 2
-    num_epochs = 5
-    #num_epochs  = trial.suggest_float("num_epochs",  5, 100)
-    
-    loss_function = nn.CrossEntropyLoss()
-    
-    # For fold results
-    
-    # Set fixed random number seed
-    torch.manual_seed(42)
-    
-    # Define the K-fold Cross Validator
-    kfold = KFold(n_splits=k_folds, shuffle=True)
-    
-    # Start print
+    # Print
+    print(f'FOLD {fold}')
     print('--------------------------------')
     
-    # Prep data for dataloader
-    data_train   = Tensor((np.squeeze(im_train_sub), gt_train_sub))
-    data_train_n = data_train.permute(1,0,2,3)
-    dataset      = data_train_n
-    batch_size   = 32
+    # Sample elements randomly from a given list of ids, no replacement.
+    train_subsampler = torch.utils.data.SubsetRandomSampler(train_ids)
+    test_subsampler  = torch.utils.data.SubsetRandomSampler(test_ids)
     
-    fold_train_losses = []
-    fold_eval_losses  = []
-    fold_train_accuracy    = []
-    fold_eval_accuracy     = []
-    fold_train_incorrect = []
-    fold_eval_incorrect = []
+    # Define data loaders for training and testing data in this fold
+    train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
+    eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
+   
     
-    #%
-    # K-fold Cross Validation model evaluation
-    for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
-        # Print
-        print(f'FOLD {fold}')
-        print('--------------------------------')
-        
-        # Sample elements randomly from a given list of ids, no replacement.
-        train_subsampler = torch.utils.data.SubsetRandomSampler(train_ids)
-        test_subsampler  = torch.utils.data.SubsetRandomSampler(test_ids)
-        
-        # Define data loaders for training and testing data in this fold
-        train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
-        eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
-       
-        
-        # Init the neural network
-        #network = unet()
-        unet.apply(weights_init)
-        
-        # Initialize optimizer
+    # Init the neural network
+    #network = unet()
+    unet.apply(weights_init)
+    
+    # Initialize optimizer
+    def objective(trial):
+      
+        unet = define_model(trial).to(device)
+    
+        optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
+        weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
+
+        lr  = trial.suggest_float("lr",  1e-6, 1e-2)
+        eps = trial.suggest_float("eps", 1e-8, 1e-2)
+    
+        optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
+    
         #optimizer = torch.optim.Adam(unet.parameters(), lr=0.0001, eps=1e-04, weight_decay=1e-4)
     
         #% Training
@@ -452,7 +454,7 @@ def objective(trial):
             eval_accuracy.append(100.0 * correct_e / total_e)
             eval_incorrect.append(incorrect_e)
             #print('bf float', eval_accuracy)
-
+    
             eval_accuracy_float = float(eval_accuracy[-1])
             print('float', eval_accuracy_float)
             
@@ -468,7 +470,7 @@ def objective(trial):
             
         
         fold_train_losses.append(train_losses)
-        print('fold loss = ', fold_train_losses)
+        #print('fold loss = ', fold_train_losses)
         
         fold_eval_losses.append(eval_losses)
         #print('fold loss = ', fold_eval_losses)
@@ -484,78 +486,21 @@ def objective(trial):
         
         fold_eval_incorrect.append(eval_incorrect)
     
-        return eval_accuracy_float, fold_train_losses, fold_eval_losses, fold_train_accuracy, fold_eval_accuracy, fold_train_incorrect, fold_eval_incorrect
-    
-    m_fold_train_losses    = np.mean(fold_train_losses, axis = 0) 
-    m_fold_eval_losses     = np.mean(fold_eval_losses, axis = 0)   
-    m_fold_train_accuracy  = np.mean(fold_train_accuracy, axis = 0)   
-    m_fold_eval_accuracy   = np.mean(fold_eval_accuracy, axis = 0)   
-    m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
-    m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
-        
-    print('Finished Training + Evaluation')
+        return eval_accuracy_float
 
-#%% Plot loss curves
-    epochs_train = np.arange(len(train_losses))
-    epochs_eval  = np.arange(len(eval_losses))
+m_fold_train_losses    = np.mean(fold_train_losses, axis = 0) 
+m_fold_eval_losses     = np.mean(fold_eval_losses, axis = 0)   
+m_fold_train_accuracy  = np.mean(fold_train_accuracy, axis = 0)   
+m_fold_eval_accuracy   = np.mean(fold_eval_accuracy, axis = 0)   
+m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
+m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
     
-    plt.figure(figsize=(30, 15), dpi=200)
-    plt.subplot(1,3,1)
-    plt.plot(epochs_train + 1 , m_fold_train_losses, 'b', label = 'Training Loss')
-    plt.plot(epochs_eval  + 1 , m_fold_eval_losses,  'r', label = 'Validation Loss')
-    plt.xticks(np.arange(1, num_epochs + 1, step = 50))
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend(loc="upper right")
-    plt.title("Loss function")
-    
-    plt.subplot(1,3,2)
-    plt.plot(epochs_train + 1 , m_fold_train_accuracy, 'b', label = 'Training Acc')
-    plt.plot(epochs_eval  + 1 , m_fold_eval_accuracy,  'r', label = 'Validation Acc')
-    plt.xticks(np.arange(1, num_epochs + 1, step = 50))
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy %')
-    plt.legend(loc="upper right")
-    plt.title("Accuracy")
-    
-    plt.subplot(1,3,3)
-    plt.plot(epochs_train + 1 , m_fold_train_incorrect, 'b', label = 'Training Acc')
-    plt.plot(epochs_eval  + 1 , m_fold_eval_incorrect,  'r', label = 'Validation Acc')
-    plt.xticks(np.arange(1, num_epochs + 1, step = 50))
-    plt.xlabel('Epochs')
-    plt.ylabel('incorrect %')
-    plt.legend(loc="upper right")
-    plt.title("Incorrect")
-    
-    
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc_optuna.png')
-    #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
-    
-    t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_accuracy, m_fold_eval_accuracy, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
-    t_res      = [fold_train_losses, fold_eval_losses, fold_train_accuracy, fold_eval_accuracy]         # loss and accuracy for each epoch
-    
-    T = [t_res_mean, t_res] # listed together
-    
-    
-    #%% Save model
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
-    #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
-    
-    #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
-    #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
-    
-    torch.save(unet, PATH_model)
-    #torch.save(unet.state_dict(), PATH_state)
-    
-    #%%
-    PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_optuna.pt"
-    torch.save(T, PATH_results)    
+print('Finished Training + Evaluation')
 
 
-#%%
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=4, timeout=4000)
+    study.optimize(objective, n_trials=2, timeout=4000)
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -573,20 +518,75 @@ if __name__ == "__main__":
         print("    {}: {}".format(key, value))
         
     
-    plt.figure(dpi=200)
-    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lr"])
+    plt.figure(figsize=(30, 15), dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "lr"])
     plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
     
-    plt.figure(dpi=200)
+    plt.figure(figsize=(30, 15), dpi=200)
     optuna.visualization.matplotlib.plot_param_importances(study)
     plt.savefig('/home/michala/Speciale2021/Speciale2021/importances_optuna.png')
     
-    plt.figure(dpi=200)
+    plt.figure(figsize=(30, 15), dpi=200)
     optuna.visualization.matplotlib.plot_optimization_history(study)
     plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
     
-   
+"""    
+#%% Plot loss curves
+epochs_train = np.arange(len(train_losses))
+epochs_eval  = np.arange(len(eval_losses))
 
+plt.figure(figsize=(30, 15), dpi=200)
+plt.subplot(1,3,1)
+plt.plot(epochs_train + 1 , m_fold_train_losses, 'b', label = 'Training Loss')
+plt.plot(epochs_eval  + 1 , m_fold_eval_losses,  'r', label = 'Validation Loss')
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend(loc="upper right")
+plt.title("Loss function")
+
+plt.subplot(1,3,2)
+plt.plot(epochs_train + 1 , m_fold_train_accuracy, 'b', label = 'Training Acc')
+plt.plot(epochs_eval  + 1 , m_fold_eval_accuracy,  'r', label = 'Validation Acc')
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy %')
+plt.legend(loc="upper right")
+plt.title("Accuracy")
+
+plt.subplot(1,3,3)
+plt.plot(epochs_train + 1 , m_fold_train_incorrect, 'b', label = 'Training Acc')
+plt.plot(epochs_eval  + 1 , m_fold_eval_incorrect,  'r', label = 'Validation Acc')
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
+plt.xlabel('Epochs')
+plt.ylabel('incorrect %')
+plt.legend(loc="upper right")
+plt.title("Incorrect")
+
+
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc_optuna.png')
+#plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
+
+t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_accuracy, m_fold_eval_accuracy, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
+t_res      = [fold_train_losses, fold_eval_losses, fold_train_accuracy, fold_eval_accuracy]         # loss and accuracy for each epoch
+
+T = [t_res_mean, t_res] # listed together
+
+
+#%% Save model
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
+#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
+
+#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
+#PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
+
+torch.save(unet, PATH_model)
+#torch.save(unet.state_dict(), PATH_state)
+
+#%%
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_optuna.pt"
+torch.save(T, PATH_results)    
+"""
 
 
 
