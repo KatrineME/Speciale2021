@@ -275,7 +275,7 @@ def objective(trial):
     optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr)
     
     k_folds    = 2
-    num_epochs = 50
+    num_epochs = 10
     
     loss_function = nn.CrossEntropyLoss()
     
@@ -448,7 +448,7 @@ def objective(trial):
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
             eval_accuracy.append(100.0 * correct_e / total_e)
             eval_incorrect.append(incorrect_e)
-            print('bf float', eval_accuracy)
+            #print('bf float', eval_accuracy)
 
             eval_accuracy_float = float(eval_accuracy[-1])
             print('float', eval_accuracy_float)
@@ -495,7 +495,7 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=100, timeout=4000)
+    study.optimize(objective, n_trials=10, timeout=4000)
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -511,6 +511,12 @@ if __name__ == "__main__":
     print("  Params: ")
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
+        
+    
+    plt.figure(figsize=(30, 15), dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l0", "lr"])
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
+     
     
 """    
 #%% Plot loss curves
