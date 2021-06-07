@@ -499,7 +499,7 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=10, timeout=4000)
+    study.optimize(objective, n_trials=2, timeout=4000)
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
