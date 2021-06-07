@@ -487,8 +487,11 @@ print('Finished Training + Evaluation')
 
     
 def objective_cv(trial):
+    k_folds    = 6
 
-    fold = KFold(n_splits=6, shuffle=True, random_state=0)
+    kfold = KFold(n_splits=k_folds, shuffle=True)
+    # Start print
+    print('--------------------------------')
     scores = []
     # Prep data for dataloader
     data_train   = Tensor((np.squeeze(im_train_sub), gt_train_sub))
@@ -497,6 +500,10 @@ def objective_cv(trial):
     batch_size   = 32
     
     for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
+        # Print
+        print(f'FOLD {fold}')
+        print('--------------------------------')
+        
         # Get the MNIST dataset.
         train_subsampler = torch.utils.data.SubsetRandomSampler(train_ids)
         test_subsampler  = torch.utils.data.SubsetRandomSampler(test_ids)
@@ -510,7 +517,6 @@ def objective_cv(trial):
         scores.append(accuracy)
         
     return np.mean(scores)
-
 
 
 
