@@ -448,9 +448,9 @@ def objective(trial):
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
             eval_accuracy.append(100.0 * correct_e / total_e)
             eval_incorrect.append(incorrect_e)
-            eval_accuracy = np.array(eval_accuracy, dtype=float)
+            eval_accuracy_float = np.array(eval_accuracy, dtype=float)
             
-            trial.report(eval_accuracy, epoch)
+            trial.report(eval_accuracy_float, epoch)
        
             correct_e   = 0.0
             total_e     = 0.0
@@ -478,7 +478,7 @@ def objective(trial):
         
         fold_eval_incorrect.append(eval_incorrect)
     
-        return eval_accuracy
+        return eval_accuracy_float
     
     m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
     m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
