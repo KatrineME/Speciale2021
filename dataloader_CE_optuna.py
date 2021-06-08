@@ -484,7 +484,52 @@ def objective(trial):
         fold_eval_incorrect.append(eval_incorrect)
     
         return eval_accuracy_float
+
+
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
+#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
+
+#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
+#PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
+
+torch.save(unet, PATH_model)
+#torch.save(unet.state_dict
+
+#%%
+if __name__ == "__main__":
+    study = optuna.create_study(direction="maximize")
+    study.optimize(objective, n_trials=100, timeout=4000)
+
+    complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
+
+    print("Study statistics: ")
+    print("  Number of finished trials: ", len(study.trials))
+    print("  Number of complete trials: ", len(complete_trials))
+
+    print("Best trial:")
+    trial = study.best_trial
+
+    print("  Value: ", trial.value)
+
+    print("  Params: ")
+    for key, value in trial.params.items():
+        print("    {}: {}".format(key, value))
+        
     
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lr"])
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_param_importances(study)
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/importances_optuna.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_optimization_history(study)
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
+    
+   
+
 m_fold_train_losses    = np.mean(fold_train_losses, axis = 0) 
 m_fold_eval_losses     = np.mean(fold_eval_losses, axis = 0)   
 m_fold_train_accuracy  = np.mean(fold_train_accuracy, axis = 0)   
@@ -549,43 +594,6 @@ torch.save(unet, PATH_model)
 #%%
 PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_optuna.pt"
 torch.save(T, PATH_results)    
-
-
-#%%
-if __name__ == "__main__":
-    study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=100, timeout=4000)
-
-    complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
-
-    print("Study statistics: ")
-    print("  Number of finished trials: ", len(study.trials))
-    print("  Number of complete trials: ", len(complete_trials))
-
-    print("Best trial:")
-    trial = study.best_trial
-
-    print("  Value: ", trial.value)
-
-    print("  Params: ")
-    for key, value in trial.params.items():
-        print("    {}: {}".format(key, value))
-        
-    
-    plt.figure(dpi=200)
-    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lr"])
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
-    
-    plt.figure(dpi=200)
-    optuna.visualization.matplotlib.plot_param_importances(study)
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/importances_optuna.png')
-    
-    plt.figure(dpi=200)
-    optuna.visualization.matplotlib.plot_optimization_history(study)
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
-    
-   
-
 
 
 
