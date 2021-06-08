@@ -530,6 +530,7 @@ torch.save(unet, PATH_model)
 #torch.save(unet.state_dict
 
 print('Model saved')   
+
 """
 m_fold_train_losses    = np.mean(fold_train_losses, axis = 0) 
 m_fold_eval_losses     = np.mean(fold_eval_losses, axis = 0)   
@@ -596,7 +597,7 @@ torch.save(unet, PATH_model)
 PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_optuna.pt"
 torch.save(T, PATH_results)    
 
-
+"""
 
 
 
