@@ -636,7 +636,7 @@ im = next(iter(im_data))
 unet_es.eval()
 #print('inference i =',i)
 im = Tensor.numpy(im)
-im = Tensor(n).cuda()
+im = Tensor(im).cuda()
 out_trained_es = unet_es(im)
 out_image_es[i,:,:,:] = out_trained_es["softmax"]
 
