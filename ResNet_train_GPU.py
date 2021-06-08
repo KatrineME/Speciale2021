@@ -666,7 +666,7 @@ emap = np.zeros((out_image_es.shape[0],out_image_es.shape[2],out_image_es.shape[
 
 for i in range(0, emap.shape[0]):
 
-    out_img = (out_image_es[i,:,:]#.detach().cpu().numpy())
+    out_img = out_image_es[i,:,:]#.detach().cpu().numpy())
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
