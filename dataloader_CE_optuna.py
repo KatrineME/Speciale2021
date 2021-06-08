@@ -487,39 +487,38 @@ def objective(trial):
         return eval_accuracy_float
 
 
-#%%
-if __name__ == "__main__":
-    study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=5, timeout=4000)
-
-    complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
-
-    print("Study statistics: ")
-    print("  Number of finished trials: ", len(study.trials))
-    print("  Number of complete trials: ", len(complete_trials))
-
-    print("Best trial:")
-    trial = study.best_trial
-
-    print("  Value: ", trial.value)
-
-    print("  Params: ")
-    for key, value in trial.params.items():
-        print("    {}: {}".format(key, value))
+        if __name__ == "__main__":
+            study = optuna.create_study(direction="maximize")
+            study.optimize(objective, n_trials=5, timeout=4000)
         
-    
-    plt.figure(dpi=200)
-    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lr"])
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
-    
-    plt.figure(dpi=200)
-    optuna.visualization.matplotlib.plot_param_importances(study)
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/importances_optuna.png')
-    
-    plt.figure(dpi=200)
-    optuna.visualization.matplotlib.plot_optimization_history(study)
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
-
+            complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
+        
+            print("Study statistics: ")
+            print("  Number of finished trials: ", len(study.trials))
+            print("  Number of complete trials: ", len(complete_trials))
+        
+            print("Best trial:")
+            trial = study.best_trial
+        
+            print("  Value: ", trial.value)
+        
+            print("  Params: ")
+            for key, value in trial.params.items():
+                print("    {}: {}".format(key, value))
+                
+            
+            plt.figure(dpi=200)
+            optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lr"])
+            plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
+            
+            plt.figure(dpi=200)
+            optuna.visualization.matplotlib.plot_param_importances(study)
+            plt.savefig('/home/michala/Speciale2021/Speciale2021/importances_optuna.png')
+            
+            plt.figure(dpi=200)
+            optuna.visualization.matplotlib.plot_optimization_history(study)
+            plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
+        
 
 
 """    
