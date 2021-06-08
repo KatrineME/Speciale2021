@@ -269,7 +269,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 #%% Training with K-folds
 def objective(trial):
       
-    unet = define_model(trial).to(device)
+    model_unet = define_model(trial).to(device)
     
     optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
     weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
@@ -277,7 +277,7 @@ def objective(trial):
     lr  = trial.suggest_float("lr",  1e-6, 1e-2)
     eps = trial.suggest_float("eps", 1e-8, 1e-2)
     
-    optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
+    optimizer = getattr(optim, optimizer_name)(model_unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
     
     k_folds    = 2
     num_epochs = 50
@@ -327,7 +327,7 @@ def objective(trial):
         
         # Init the neural network
         #network = unet()
-        unet.apply(weights_init)
+        model_unet.apply(weights_init)
         
         # Initialize optimizer
         #optimizer = torch.optim.Adam(unet.parameters(), lr=0.0001, eps=1e-04, weight_decay=1e-4)
@@ -350,7 +350,7 @@ def objective(trial):
     
         for epoch in range(num_epochs):  # loop over the dataset multiple times
             
-            unet.train()
+            model_unet.train()
             print('Epoch train =',epoch)
             #0.0  
             for i, (train_data) in enumerate(train_dataloader):
@@ -371,7 +371,7 @@ def objective(trial):
                 optimizer.zero_grad()
                
                 # Forward Pass
-                output = unet(inputs)     
+                output = model_unet(inputs)     
                 output = output["log_softmax"]
                 #print('output shape = ', output.shape)
                 
@@ -412,7 +412,7 @@ def objective(trial):
             #print('--------------------------------')
             #accuracy[fold] = 100.0 * (correct / total)
             
-            unet.eval()
+            model_unet.eval()
             print('Epoch eval=',epoch)
              
             for j, (eval_data) in enumerate(eval_dataloader):
@@ -429,7 +429,7 @@ def objective(trial):
                 labels = labels.long()
                 
                 # Forward pass
-                output = unet(inputs)     
+                output = model_unet(inputs)     
                 output = output["log_softmax"]
                 # Find loss
                 loss = loss_function(output, labels)
