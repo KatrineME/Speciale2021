@@ -641,7 +641,7 @@ for i, (im) in enumerate(im_data):
     out_image_es[i,:,:,:] = out_trained_es["softmax"]
     #out_image_es.append(out_trained_es["softmax"])
     
-out_image_es = torch.cat(out_image_es)
+#out_image_es = torch.cat(out_image_es)
 
 
 
