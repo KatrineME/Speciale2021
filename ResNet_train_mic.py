@@ -620,10 +620,25 @@ unet_es  = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 #unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
+#%% Data loader
+from torch.utils.data import DataLoader
+
+im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=False, sampler=None,
+           batch_sampler=None, num_workers=0, collate_fn=None,
+           pin_memory=False, drop_last=False, timeout=0,
+           worker_init_fn=None, prefetch_factor=2,
+           persistent_workers=False)
+    
+
 #%% Run model
 unet_es.eval()
-out_trained_es = unet_es(Tensor(im_train_es_res))
-out_image_es   = out_trained_es["softmax"]
+out_image_es = torch.empty((im_train_es_res.shape[0],4,128,128))
+
+for i, (im) in enumerate(im_data):
+    print('im shape',im.shape)
+    im = Tensor.numpy(im)
+    out_trained_es = unet_es(Tensor(im))
+    out_image_es[i,:,:,:]   = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 
