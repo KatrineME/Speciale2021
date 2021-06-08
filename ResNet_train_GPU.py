@@ -16,8 +16,10 @@ from torch.autograd import Variable
 import matplotlib.pyplot as plt
 from torch import Tensor
 import torch.utils.model_zoo as model_zoo
+from torch.utils.data import DataLoader
+
 BatchNorm = nn.BatchNorm2d
-DropOut = nn.Dropout2d
+DropOut   = nn.Dropout2d
 
 if torch.cuda.is_available():
     # Tensor = torch.cuda.FloatTensor
@@ -373,7 +375,7 @@ os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021")
 from load_data_gt_im_sub import load_data_sub
 user = 'GPU'
 #user = 'K' 
-print('Dataloader')
+
 """
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
@@ -381,6 +383,7 @@ data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
 data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,'Systole','NOR')
 data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,'Systole','RV')
 """
+
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
 data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
@@ -407,8 +410,6 @@ gt_train_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num
                                   np.concatenate(data_gt_ed_MINF[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_train_res]).astype(None)))
-
-
 
 
 im_test_es_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_res:num_test_res]).astype(None),
@@ -589,16 +590,12 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.5)
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     unet.cuda()
     
 #%% Load Model
 #PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
-
-#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-#PATH_model_ed  = 'C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_sub_batch_100.pt'
-#PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_mc01.pt'
 #PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
@@ -608,21 +605,7 @@ print('device = ', device)
 unet_es = torch.load(PATH_model_es, map_location=torch.device(device))
 #unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
-#im_flat_test_es = im_flat_test_es.cuda()
-#%% Run model
-"""
-unet_es.eval()
-im_train_es_res = Tensor(im_train_es_res)
-im_train_es_res = im_train_es_res.cuda()
-im_train_es_res = Variable(im_train_es_res)
-out_trained_es  = unet_es(im_train_es_res)
-out_image_es    = out_trained_es["softmax"]
-
-#im_flat_test_ed = im_flat_test_ed.cuda()"""
-
-
-from torch.utils.data import DataLoader
-
+#%% Dataloader - Run model
 im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
@@ -768,7 +751,7 @@ T_j[T_j >= 1 ] = 1
 #%% Prep data
 T = np.expand_dims(T_j, axis=1)
 
-train_amount = 100
+train_amount = 200
 
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
@@ -800,7 +783,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         labels = Tensor(T) #_train)
         labels = labels.cuda()
-        print('i=',i)
+        #print('i=',i)
         
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
@@ -831,6 +814,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     train_loss = 0.0
 
     model.eval()
+    print('Epoch eval =',epoch)
     for i, data_eval in enumerate(input_concat_eval, 0):
         # get the inputs
         #inputs, labels = data
@@ -838,7 +822,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         labels = Tensor(T_eval)
         labels = labels.cuda()
-        print('i=',i)
+        #print('i=',i)
         
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
