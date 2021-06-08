@@ -280,7 +280,7 @@ def objective(trial):
     optimizer = getattr(optim, optimizer_name)(model_unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
     
     k_folds    = 2
-    num_epochs = 20
+    num_epochs = 2
     #num_epochs  = trial.suggest_float("num_epochs",  5, 100)
     
     loss_function = nn.CrossEntropyLoss()
@@ -484,7 +484,7 @@ def objective(trial):
         
         fold_eval_incorrect.append(eval_incorrect)
     
-        return eval_accuracy_float
+    return eval_accuracy_float
 
 
 #%%
@@ -521,16 +521,16 @@ if __name__ == "__main__":
     plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
 
     
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
-#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
-
-#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
-#PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
-
-torch.save(unet, PATH_model)
-#torch.save(unet.state_dict
-
-print('Model saved')   
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
+    #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
+    
+    #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
+    #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
+    
+    torch.save(unet, PATH_model)
+    #torch.save(unet.state_dict
+    
+    print('Model saved')   
 
 """
 m_fold_train_losses    = np.mean(fold_train_losses, axis = 0) 
