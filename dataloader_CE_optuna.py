@@ -193,16 +193,17 @@ class BayesUNet(UNet):
         etc.
         """
         return self.train(False, mc_dropout=mc_dropout)
-
+"""
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
-
+"""
 def define_model(trial):
     drop_prob_t = trial.suggest_float("drop_prob_l", 0.0, 0.5) 
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=drop_prob_t)
+    unet.cuda()
     
     return unet
 
