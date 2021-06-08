@@ -484,7 +484,7 @@ def objective(trial):
         
         fold_eval_incorrect.append(eval_incorrect)
     
-    return eval_accuracy_float
+        return eval_accuracy_float
 
 
 #%%
@@ -520,19 +520,21 @@ if __name__ == "__main__":
     optuna.visualization.matplotlib.plot_optimization_history(study)
     plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
 
-    
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
-    #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
-    
-    #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
-    #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
-    
-    torch.save(unet, PATH_model)
-    #torch.save(unet.state_dict
-    
-    print('Model saved')   
 
-"""
+
+"""    
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
+#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
+
+#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
+#PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
+
+torch.save(unet, PATH_model)
+#torch.save(unet.state_dict
+
+print('Model saved')   
+
+
 m_fold_train_losses    = np.mean(fold_train_losses, axis = 0) 
 m_fold_eval_losses     = np.mean(fold_eval_losses, axis = 0)   
 m_fold_train_accuracy  = np.mean(fold_train_accuracy, axis = 0)   
