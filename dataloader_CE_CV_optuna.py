@@ -518,6 +518,7 @@ if __name__ == "__main__":
     plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
 
 
+print('cha cha cha')
 
 """    
 PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
