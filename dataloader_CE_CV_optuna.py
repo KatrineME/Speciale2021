@@ -312,7 +312,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
     eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
    
-    def objective(trial):
+    def objective(trial, fold):
       
         model_unet = define_model(trial).to(device)
     
@@ -487,7 +487,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=5, timeout=4000)
+    study.optimize(objective, fold, n_trials=5, timeout=4000)
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
