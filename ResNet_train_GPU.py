@@ -557,7 +557,7 @@ class BayesUNet(UNet):
 
     def train(self, mode=True, mc_dropout=False):
         """ Sets the module in training mode.
-            !!! OVERWRITING STANDARD PYTORCH METHOD for nn.Module
+             OVERWRITING STANDARD PYTORCH METHOD for nn.Module
 
             OR
                 if mc_dropout=True and mode=False (use dropout during inference) we set all modules
@@ -688,7 +688,7 @@ emap = np.expand_dims(emap, axis=1)
 
 #%% Plot
 #% Wrap all inputs together
-im     = Tensor(im_train_es_res[0:part,:,:,:])
+im     = Tensor(im_train_es_res)
 #im     = Tensor(im_train_es_res)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
