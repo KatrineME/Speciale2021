@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jun  7 15:36:46 2021
+Created on Thu Jun  3 15:23:08 2021
 
 @author: michalablicher
 """
-
 #%% Load packages
 import torch
 import os
@@ -194,16 +193,17 @@ class BayesUNet(UNet):
         etc.
         """
         return self.train(False, mc_dropout=mc_dropout)
-
+"""
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
-
+"""
 def define_model(trial):
     drop_prob_t = trial.suggest_float("drop_prob_l", 0.0, 0.5) 
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=drop_prob_t)
+    unet.cuda()
     
     return unet
 
@@ -266,264 +266,229 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
                                   np.concatenate(data_gt_ed_RV[num_train_sub:num_test_sub]).astype(None)))
 
 
-#%% Training with K-folds
-def objective(trial, train_dataloader, eval_dataloader):
-      
-    unet = define_model(trial).to(device)
-    
-    optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
-    weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
+#%% Training with K-folds    
+k_folds    = 6
+num_epochs = 2
+#num_epochs  = trial.suggest_float("num_epochs",  5, 100)
 
-    lr  = trial.suggest_float("lr",  1e-6, 1e-2)
-    eps = trial.suggest_float("eps", 1e-8, 1e-2)
-    
-    optimizer = getattr(optim, optimizer_name)(unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
-    
-    #k_folds    = 2
-    num_epochs = 5
-    
-    loss_function = nn.CrossEntropyLoss()
-    
-    # For fold results
-    
-    # Set fixed random number seed
-    torch.manual_seed(42)
-    
-    # Define the K-fold Cross Validator
-    #kfold = KFold(n_splits=k_folds, shuffle=True)
-    # Start print
-    print('--------------------------------')
-    
-    fold_train_losses = []
-    fold_eval_losses  = []
-    fold_train_accuracy    = []
-    fold_eval_accuracy     = []
-    fold_train_incorrect = []
-    fold_eval_incorrect = []
-    
+loss_function = nn.CrossEntropyLoss()
+
+# For fold results
+
+# Set fixed random number seed
+torch.manual_seed(42)
+
+# Define the K-fold Cross Validator
+kfold = KFold(n_splits=k_folds, shuffle=True)
+
+# Start print
+print('--------------------------------')
+
+# Prep data for dataloader
+data_train   = Tensor((np.squeeze(im_train_sub), gt_train_sub))
+data_train_n = data_train.permute(1,0,2,3)
+dataset      = data_train_n
+batch_size   = 32
+
+fold_train_losses = []
+fold_eval_losses  = []
+fold_train_accuracy    = []
+fold_eval_accuracy     = []
+fold_train_incorrect = []
+fold_eval_incorrect = []
+
 #%
 # K-fold Cross Validation model evaluation
-#for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
+for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     # Print
-    #print(f'FOLD {fold}')
-    #print('--------------------------------')
+    print(f'FOLD {fold}')
+    print('--------------------------------')
     
     # Sample elements randomly from a given list of ids, no replacement.
-    #train_subsampler = torch.utils.data.SubsetRandomSampler(train_ids)
-    #test_subsampler  = torch.utils.data.SubsetRandomSampler(test_ids)
+    train_subsampler = torch.utils.data.SubsetRandomSampler(train_ids)
+    test_subsampler  = torch.utils.data.SubsetRandomSampler(test_ids)
     
     # Define data loaders for training and testing data in this fold
-    #train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
-    #eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
+    train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
+    eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
+   
+    def objective(trial):
+      
+        model_unet = define_model(trial).to(device)
+    
+        optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
+        weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
+
+        lr  = trial.suggest_float("lr",  1e-6, 1e-2)
+        eps = trial.suggest_float("eps", 1e-8, 1e-2)
+    
+        optimizer = getattr(optim, optimizer_name)(model_unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
+        # Init the neural network
+        #network = unet()
+        model_unet.apply(weights_init)
+        
+        # Initialize optimizer
+        #optimizer = torch.optim.Adam(unet.parameters(), lr=0.0001, eps=1e-04, weight_decay=1e-4)
+    
+        #% Training
+        train_losses  = []
+        train_accuracy = []
+        train_incorrect = []
+        eval_losses   = []
+        eval_accuracy  = []
+        eval_incorrect = []
+        eval_loss     = 0.0
+        train_loss    = 0.0
+        total         = 0.0
+        correct       = 0.0
+        incorrect     = 0.0
+        total_e         = 0.0
+        correct_e       = 0.0
+        incorrect_e     = 0.0
+    
+        for epoch in range(num_epochs):  # loop over the dataset multiple times
+            
+            model_unet.train()
+            print('Epoch train =',epoch)
+            #0.0  
+            for i, (train_data) in enumerate(train_dataloader):
+                # get the inputs
+                #print('train_data = ', train_data.shape)
+                #inputs, labels = data
+                inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
+                inputs = inputs.cuda()
+                
+                labels = train_data[:,1,:,:]
+                labels = labels.cuda()
+                #print('i=',i)
+                # wrap them in Variable
+                inputs, labels = Variable(inputs), Variable(labels)
+                labels = labels.long()
+                
+                # Clear the gradients
+                optimizer.zero_grad()
+               
+                # Forward Pass
+                output = model_unet(inputs)     
+                output = output["log_softmax"]
+                #print('output shape = ', output.shape)
+                
+                # Find loss
+                loss = loss_function(output, labels)
+                #print('loss = ', loss)
+                
+                # Calculate gradients
+                loss.backward()
+                
+                # Update Weights
+                optimizer.step()
+        
+                # Calculate loss
+                train_loss += loss.item() #.detach().cpu().numpy()
+                
+                # Set total and correct
+                predicted  = torch.argmax(output, axis=1)
+                total     += (labels.shape[0])*(128*128)
+                correct   += (predicted == labels).sum().item()
+                incorrect += (predicted != labels).sum().item()
+            
+            train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
+            #print('epoch loss = ', train_losses)
+        
+            #train_losses.append(np.mean(batch_loss))
+            train_loss = 0.0 #[]
+            
+            # Print accuracy
+            #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
+            train_accuracy.append(100.0 * correct / total)
+            train_incorrect.append(incorrect)
+            correct   = 0.0
+            total     = 0.0
+            incorrect = 0.0
+            
+            #print('train_accuracy', train_accuracy)
+            #print('--------------------------------')
+            #accuracy[fold] = 100.0 * (correct / total)
+            
+            model_unet.eval()
+            print('Epoch eval=',epoch)
+             
+            for j, (eval_data) in enumerate(eval_dataloader):
+                # get the inputs
+                #inputs, labels = data
+                inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
+                inputs = inputs.cuda()
+                labels = eval_data[:,1,:,:]
+                labels = labels.cuda()
+                #print('i=',i)
+        
+                # wrap them in Variable
+                inputs, labels = Variable(inputs), Variable(labels)
+                labels = labels.long()
+                
+                # Forward pass
+                output = model_unet(inputs)     
+                output = output["log_softmax"]
+                # Find loss
+                loss = loss_function(output, labels)
+                
+                # Calculate loss
+                #eval_loss.append(loss.item())
+                eval_loss += loss.item() #.detach().cpu().numpy()
+                
+                # Set total and correct
+                predicted_e = torch.argmax(output, axis=1)
+                total_e     += (labels.shape[0])*(128*128)
+                correct_e   += (predicted_e == labels).sum().item()
+                incorrect_e += (predicted_e != labels).sum().item()
+                
+            eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
+            #eval_losses.append(np.mean(eval_loss))
+            eval_loss = 0.0
+            
+            # Print accuracy
+            #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
+            eval_accuracy.append(100.0 * correct_e / total_e)
+            eval_incorrect.append(incorrect_e)
+            #print('bf float', eval_accuracy)
+
+            eval_accuracy_float = float(eval_accuracy[-1])
+            print('float', eval_accuracy_float)
+            
+            trial.report(eval_accuracy_float, epoch)
        
-    # Init the neural network
-    #network = unet()
-    unet.apply(weights_init)
+            correct_e   = 0.0
+            total_e     = 0.0
+            incorrect_e = 0.0
+            #print('eval_accuracy', eval_accuracy)
     
-    # Initialize optimizer
-    #optimizer = torch.optim.Adam(unet.parameters(), lr=0.0001, eps=1e-04, weight_decay=1e-4)
-
-    #% Training
-    train_losses  = []
-    train_accuracy = []
-    train_incorrect = []
-    eval_losses   = []
-    eval_accuracy  = []
-    eval_incorrect = []
-    eval_loss     = 0.0
-    train_loss    = 0.0
-    total         = 0.0
-    correct       = 0.0
-    incorrect     = 0.0
-    total_e         = 0.0
-    correct_e       = 0.0
-    incorrect_e     = 0.0
-
-    for epoch in range(num_epochs):  # loop over the dataset multiple times
-        
-        unet.train()
-        print('Epoch train =',epoch)
-        #0.0  
-        for i, (train_data) in enumerate(train_dataloader):
-            # get the inputs
-            #print('train_data = ', train_data.shape)
-            #inputs, labels = data
-            inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
-            inputs = inputs.cuda()
+            #print('--------------------------------')
+            #accuracy[fold] = 100.0 * (correct_e / total_e)
             
-            labels = train_data[:,1,:,:]
-            labels = labels.cuda()
-            #print('i=',i)
-            # wrap them in Variable
-            inputs, labels = Variable(inputs), Variable(labels)
-            labels = labels.long()
-            
-            # Clear the gradients
-            optimizer.zero_grad()
-           
-            # Forward Pass
-            output = unet(inputs)     
-            output = output["log_softmax"]
-            #print('output shape = ', output.shape)
-            
-            # Find loss
-            loss = loss_function(output, labels)
-            #print('loss = ', loss)
-            
-            # Calculate gradients
-            loss.backward()
-            
-            # Update Weights
-            optimizer.step()
-    
-            # Calculate loss
-            train_loss += loss.item() #.detach().cpu().numpy()
-            
-            # Set total and correct
-            predicted  = torch.argmax(output, axis=1)
-            total     += (labels.shape[0])*(128*128)
-            correct   += (predicted == labels).sum().item()
-            incorrect += (predicted != labels).sum().item()
+        fold_train_losses.append(train_losses)
+        #print('fold loss = ', fold_train_losses)
         
-        train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
-        #print('epoch loss = ', train_losses)
-    
-        #train_losses.append(np.mean(batch_loss))
-        train_loss = 0.0 #[]
+        fold_eval_losses.append(eval_losses)
+        #print('fold loss = ', fold_eval_losses)
         
-        # Print accuracy
-        #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
-        train_accuracy.append(100.0 * correct / total)
-        train_incorrect.append(incorrect)
-        correct   = 0.0
-        total     = 0.0
-        incorrect = 0.0
+        fold_train_accuracy.append(train_accuracy)
+        #print('fold loss = ', fold_train_accuracy)
         
-        #print('train_accuracy', train_accuracy)
-        #print('--------------------------------')
-        #accuracy[fold] = 100.0 * (correct / total)
+        fold_eval_accuracy.append(eval_accuracy)
+        #print('fold loss = ', fold_eval_accuracy)
         
-        unet.eval()
-        print('Epoch eval=',epoch)
-         
-        for j, (eval_data) in enumerate(eval_dataloader):
-            # get the inputs
-            #inputs, labels = data
-            inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
-            inputs = inputs.cuda()
-            labels = eval_data[:,1,:,:]
-            labels = labels.cuda()
-            #print('i=',i)
-    
-            # wrap them in Variable
-            inputs, labels = Variable(inputs), Variable(labels)
-            labels = labels.long()
-            
-            # Forward pass
-            output = unet(inputs)     
-            output = output["log_softmax"]
-            # Find loss
-            loss = loss_function(output, labels)
-            
-            # Calculate loss
-            #eval_loss.append(loss.item())
-            eval_loss += loss.item() #.detach().cpu().numpy()
-            
-            # Set total and correct
-            predicted_e = torch.argmax(output, axis=1)
-            total_e     += (labels.shape[0])*(128*128)
-            correct_e   += (predicted_e == labels).sum().item()
-            incorrect_e += (predicted_e != labels).sum().item()
-            
-        eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
-        #eval_losses.append(np.mean(eval_loss))
-        eval_loss = 0.0
+        fold_train_incorrect.append(train_incorrect)
+        #print('fold loss = ', fold_train_accuracy)
         
-        # Print accuracy
-        #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
-        eval_accuracy.append(100.0 * correct_e / total_e)
-        eval_incorrect.append(incorrect_e)
-        #print('bf float', eval_accuracy)
-
-        eval_accuracy_float = float(eval_accuracy[-1])
-        print('float', eval_accuracy_float)
-        
-        trial.report(eval_accuracy_float, epoch)
-   
-        correct_e   = 0.0
-        total_e     = 0.0
-        incorrect_e = 0.0
-        #print('eval_accuracy', eval_accuracy)
-
-        #print('--------------------------------')
-        #accuracy[fold] = 100.0 * (correct_e / total_e)
-        
-    fold_train_losses.append(train_losses)
-    print('fold loss = ', fold_train_losses)
+        fold_eval_incorrect.append(eval_incorrect)
     
-    fold_eval_losses.append(eval_losses)
-    #print('fold loss = ', fold_eval_losses)
-    
-    fold_train_accuracy.append(train_accuracy)
-    #print('fold loss = ', fold_train_accuracy)
-    
-    fold_eval_accuracy.append(eval_accuracy)
-    #print('fold loss = ', fold_eval_accuracy)
-    
-    fold_train_incorrect.append(train_incorrect)
-    #print('fold loss = ', fold_train_accuracy)
-    
-    fold_eval_incorrect.append(eval_incorrect)
-
-    return eval_accuracy_float
-    m_fold_train_losses    = np.mean(fold_train_losses, axis = 0) 
-    m_fold_eval_losses     = np.mean(fold_eval_losses, axis = 0)   
-    m_fold_train_accuracy  = np.mean(fold_train_accuracy, axis = 0)   
-    m_fold_eval_accuracy   = np.mean(fold_eval_accuracy, axis = 0)   
-    m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
-    m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
-    
-print('Finished Training + Evaluation')
-
-    
-def objective_cv(trial):
-    k_folds    = 6
-
-    kfold = KFold(n_splits=k_folds, shuffle=True)
-    # Start print
-
-    scores = []
-    # Prep data for dataloader
-    data_train   = Tensor((np.squeeze(im_train_sub), gt_train_sub))
-    data_train_n = data_train.permute(1,0,2,3)
-    dataset      = data_train_n
-    batch_size   = 32
-    
-    for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
-        # Print
-        print('--------------------------------')
-        print(f'FOLD {fold}')
-        print('--------------------------------')
-        
-        # Get the MNIST dataset.
-        train_subsampler = torch.utils.data.SubsetRandomSampler(train_ids)
-        test_subsampler  = torch.utils.data.SubsetRandomSampler(test_ids)
-    
-        # Define data loaders for training and testing data in this fold
-        train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
-        eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
-   
-        accuracy = objective(trial, train_dataloader, eval_dataloader)
-        scores.append(accuracy)
-        
-    return np.mean(scores)
-
+        return eval_accuracy_float
 
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective_cv, n_trials=10, timeout=4000)
-    
+    study.optimize(objective, n_trials=5, timeout=4000)
+
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
     print("Study statistics: ")
@@ -540,21 +505,42 @@ if __name__ == "__main__":
         print("    {}: {}".format(key, value))
         
     
-    plt.figure(figsize=(30, 15), dpi=200)
-    optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "lr"])
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lr"])
     plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
     
-    plt.figure(figsize=(30, 15), dpi=200)
+    plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_param_importances(study)
     plt.savefig('/home/michala/Speciale2021/Speciale2021/importances_optuna.png')
     
-    plt.figure(figsize=(30, 15), dpi=200)
+    plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_optimization_history(study)
     plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
-    
-    
-    
+
+
+
 """    
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
+#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
+
+#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
+#PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
+
+torch.save(unet, PATH_model)
+#torch.save(unet.state_dict
+
+print('Model saved')   
+
+
+m_fold_train_losses    = np.mean(fold_train_losses, axis = 0) 
+m_fold_eval_losses     = np.mean(fold_eval_losses, axis = 0)   
+m_fold_train_accuracy  = np.mean(fold_train_accuracy, axis = 0)   
+m_fold_eval_accuracy   = np.mean(fold_eval_accuracy, axis = 0)   
+m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
+m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
+    
+print('Finished Training + Evaluation')
+
 #%% Plot loss curves
 epochs_train = np.arange(len(train_losses))
 epochs_eval  = np.arange(len(eval_losses))
@@ -610,9 +596,8 @@ torch.save(unet, PATH_model)
 #%%
 PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_optuna.pt"
 torch.save(T, PATH_results)    
+
 """
-
-
 
 
 
