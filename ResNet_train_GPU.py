@@ -638,7 +638,7 @@ unet_es.eval()
 im = Tensor.numpy(im)
 im = Tensor(im).cuda()
 out_trained_es = unet_es(im)
-out_image_es[i,:,:,:] = out_trained_es["softmax"]
+out_image_es = out_trained_es["softmax"]
 
 #%%
 """
