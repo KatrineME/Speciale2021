@@ -623,14 +623,14 @@ out_image_es    = out_trained_es["softmax"]
 
 from torch.utils.data import DataLoader
 
-im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=2, shuffle=False, sampler=None,
+im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, num_workers=0, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None, prefetch_factor=2,
            persistent_workers=False)
     
-#out_image_es = torch.empty((im_train_es_res.shape[0],4,128,128))
-out_image_es = []
+out_image_es = torch.empty((im_train_es_res.shape[0],4,128,128))
+#out_image_es = []
 
 unet_es.eval()
 for i, (im) in enumerate(im_data):
@@ -638,7 +638,8 @@ for i, (im) in enumerate(im_data):
     im = Tensor.numpy(im)
     im = Tensor(im).cuda()
     out_trained_es = unet_es(im)
-    out_image_es.append(out_trained_es["softmax"])
+    out_image_es[i,:,:,:] = out_trained_es["softmax"]
+    #out_image_es.append(out_trained_es["softmax"])
     
 out_image_es = torch.cat(out_image_es)
 
