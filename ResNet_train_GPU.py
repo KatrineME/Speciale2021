@@ -631,17 +631,7 @@ im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=Fal
 out_image_es = torch.empty((im_train_es_res.shape[0],4,128,128))
 #out_image_es = []
 
-im = next(iter(im_data))
-
-unet_es.eval()
-#print('inference i =',i)
-im = Tensor.numpy(im)
-im = Tensor(im).cuda()
-out_trained_es = unet_es(im)
-out_image_es = out_trained_es["softmax"]
-
 #%%
-"""
 for i, (im) in enumerate(im_data):
     unet_es.eval()
     print('inference i =',i)
@@ -652,7 +642,6 @@ for i, (im) in enumerate(im_data):
     #out_image_es.append(out_trained_es["softmax"])
     
 #out_image_es = torch.cat(out_image_es)
-"""
 
 
 #%% One hot encoding
