@@ -280,7 +280,7 @@ def objective(trial):
     optimizer = getattr(optim, optimizer_name)(model_unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
     
     k_folds    = 2
-    num_epochs = 50
+    num_epochs = 20
     #num_epochs  = trial.suggest_float("num_epochs",  5, 100)
     
     loss_function = nn.CrossEntropyLoss()
