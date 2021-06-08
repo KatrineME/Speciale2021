@@ -631,7 +631,7 @@ im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=Fal
 out_image_es = torch.empty((im_train_es_res.shape[0],4,128,128))
 #out_image_es = []
 
-n = next(iter(train_dataloader))
+n = next(iter(im_data))
 
 unet_es.eval()
 #print('inference i =',i)
