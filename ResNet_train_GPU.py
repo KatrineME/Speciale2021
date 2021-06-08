@@ -652,7 +652,7 @@ seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
 """
-seg_met_sys = np.argmax(out_image_es.detach().cpu().numpy(), axis=1)
+seg_met_sys = np.argmax(out_image_es, axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
 ref_sys = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
@@ -666,7 +666,7 @@ emap = np.zeros((out_image_es.shape[0],out_image_es.shape[2],out_image_es.shape[
 
 for i in range(0, emap.shape[0]):
 
-    out_img = (out_image_es[i,:,:].detach().cpu().numpy())
+    out_img = (out_image_es[i,:,:]#.detach().cpu().numpy())
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
