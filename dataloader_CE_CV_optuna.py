@@ -459,7 +459,7 @@ def objective(trial, train_dataloader, eval_dataloader):
         #accuracy[fold] = 100.0 * (correct_e / total_e)
         
     fold_train_losses.append(train_losses)
-    #print('fold loss = ', fold_train_losses)
+    print('fold loss = ', fold_train_losses)
     
     fold_eval_losses.append(eval_losses)
     #print('fold loss = ', fold_eval_losses)
@@ -491,7 +491,7 @@ def objective_cv(trial):
 
     kfold = KFold(n_splits=k_folds, shuffle=True)
     # Start print
-    print('--------------------------------')
+
     scores = []
     # Prep data for dataloader
     data_train   = Tensor((np.squeeze(im_train_sub), gt_train_sub))
@@ -501,6 +501,7 @@ def objective_cv(trial):
     
     for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         # Print
+        print('--------------------------------')
         print(f'FOLD {fold}')
         print('--------------------------------')
         
@@ -512,7 +513,6 @@ def objective_cv(trial):
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
         eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
    
-
         accuracy = objective(trial, train_dataloader, eval_dataloader)
         scores.append(accuracy)
         
@@ -520,11 +520,10 @@ def objective_cv(trial):
 
 
 
-
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective_cv, n_trials=2, timeout=4000)
-
+    study.optimize(objective_cv, n_trials=10, timeout=4000)
+    
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
     print("Study statistics: ")
