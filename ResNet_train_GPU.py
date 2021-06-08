@@ -634,8 +634,9 @@ out_image_es = torch.empty((im_train_es_res.shape[0],4,128,128))
 unet_es.eval()
 for i, (im) in enumerate(im_data):
     print('inference i =',i)
-    im = Tensor.numpy(im).cuda()
-    out_trained_es = unet_es(Tensor(im))
+    im = Tensor.numpy(im)
+    im = Tensor(im).cuda()
+    out_trained_es = unet_es(im)
     out_image_es[i,:,:,:]   = out_trained_es["softmax"]
 
 
