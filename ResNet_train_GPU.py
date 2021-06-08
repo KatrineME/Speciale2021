@@ -629,7 +629,7 @@ im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=Fal
            worker_init_fn=None, prefetch_factor=2,
            persistent_workers=False)
     
-out_image_es = torch.empty((im_train_es_res.shape[0],4,128,128))
+out_image_es = torch.empty((im_train_es_res.shape[0],4,128,128)).cuda()
 #out_image_es = []
 
 unet_es.eval()
