@@ -231,7 +231,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 
 print('Data loaded+concat')
 #%%
-out_soft = np.zeros((6, 182, 4, 128, 128))
+out_soft = np.zeros((6, 183, 4, 128, 128))
 
 im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
