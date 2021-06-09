@@ -362,8 +362,8 @@ if __name__ == "__main__":
 
     n_channels = 3  # 3
     n_classes  = 2
-    model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    #model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
+    #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
+    model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
     
@@ -604,7 +604,7 @@ unet_es = torch.load(PATH_model_es, map_location=torch.device(device))
 im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
-           worker_init_fn=None, prefetch_factor=2)
+           worker_init_fn=None, prefetch_factor=2, num_workers=0)
     
 out_image_es = np.zeros((im_train_es_res.shape[0],4,128,128))
 
@@ -833,10 +833,22 @@ PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_stat
 torch.save(model, PATH_model)
 
 #%%%
-"""
+
 
 #%%%%%%%%%%%%%%%%%%%%%%% TESTING MODEL %%%%%%%%%%%%%%%%%%%%%
 #%% Run model
+
+#%% Load Model
+#PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
+#PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
+
+#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
+PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Detection_dia_state.pt'
+
+#%% Load model
+#unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
+unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
+
 unet_es.eval()
 out_trained_es = unet_es(Tensor(im_test_es_res))
 out_image_es   = out_trained_es["softmax"]
@@ -849,12 +861,10 @@ out_image_es   = out_trained_es["softmax"]
 
 #%% One hot encoding
 """
-"""
 seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
-"""
 """
 seg_met_sys = np.argmax(out_image_es.detach().cpu().numpy(), axis=1)
 
@@ -994,7 +1004,7 @@ for i in range(0,36):
     plt.xticks(fontsize = 6)
     plt.yticks(fontsize = 6)
 
-"""
+
 
 
 
