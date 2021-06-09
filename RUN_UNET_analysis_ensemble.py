@@ -229,6 +229,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
 
+print('Data loaded+concat')
 #%%
 out_soft = np.zeros((6, 182, 4, 128, 128))
 
@@ -241,6 +242,7 @@ for fold in range(0,6):
     out_soft[fold,:,:,:,:] = out["softmax"].detach().cpu().numpy() 
     
     del path_model, model, out
+    print('Done for fold',fold)
 
 """
 #%% Run model0
