@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 10
+num_epochs = 300
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -293,7 +293,7 @@ fold_eval_losses  = []
 fold_train_res    = []
 fold_eval_res     = []
 fold_train_incorrect = []
-fold_eval_incorrect = []
+fold_eval_incorrect  = []
 
 
 #%% Traning with cross validation
@@ -318,10 +318,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     unet.apply(weights_init)
     
     # Initialize optimizer
-    optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
+    optimizer = torch.optim.Adam(unet.parameters(), lr=0.01, eps=1e-4, weight_decay=1e-4) #LR 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
-    #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100)
-    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=2, factor=0.1)
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)
+    #lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=2, factor=0.1)
     
     #% Training
     train_losses  = []
@@ -457,8 +457,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #lr_get   = lr_scheduler.get_lr()[0]
         #lr_param = optimizer.param_groups[0]['lr']
         #print(i, lr_get, lr_param)
-        lr_scheduler.step(eval_losses)
-        print(f"Cost at epoch {epoch} is {eval_losses}")
+        lr_scheduler.step()
+
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
     
