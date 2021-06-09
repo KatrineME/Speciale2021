@@ -159,3 +159,12 @@ optuna.visualization.matplotlib.plot_optimization_history(study)
 #%%
 
 optuna.visualization.matplotlib.plot_parallel_coordinate(study, params=["n_layers", "dropout_l0"])
+
+
+    
+    
+    
+    
+    
+    
+    

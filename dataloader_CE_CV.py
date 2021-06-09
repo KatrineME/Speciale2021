@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 500
+num_epochs = 50
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -319,7 +319,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     
     # Initialize optimizer
     optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
-
+    #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
+    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5)
+    
     #% Training
     train_losses  = []
     train_results = []
@@ -337,7 +339,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     incorrect_e     = 0.0
 
     for epoch in range(num_epochs):  # loop over the dataset multiple times
-        
+    
         unet.train()
         print('Epoch train =',epoch)
         #0.0  
@@ -372,6 +374,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Update Weights
             optimizer.step()
+
     
             # Calculate loss
             train_loss += loss.item() #.detach().cpu().numpy()
@@ -447,7 +450,13 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
 
         #print('--------------------------------')
         #results[fold] = 100.0 * (correct_e / total_e)
-    
+        
+        
+        # Learning rate scheduler
+        lr_scheduler.step()
+        #lr_scheduler.get_lt()[0]
+        optimizer.param_groups[0]['lr']
+        
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
     
@@ -464,6 +473,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     #print('fold loss = ', fold_train_res)
     
     fold_eval_incorrect.append(eval_incorrect)
+    
+    #Save model for each fold
+    #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
+    PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
+    torch.save(unet, PATH_model)
 
         
 m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
@@ -517,13 +531,13 @@ T = [t_res_mean, t_res] # listed together
 
 
 #%% Save model
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_500.pt"
+#PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_500.pt"
 #PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_batch_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
 
-torch.save(unet, PATH_model)
+#torch.save(unet, PATH_model)
 #torch.save(unet.state_dict(), PATH_state)
 
 #%%
