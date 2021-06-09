@@ -618,7 +618,6 @@ out_image_es = np.zeros((im_train_es_res.shape[0],4,128,128))
 
 for i, (im) in enumerate(im_data):
     unet_es.eval()
-    print('inference i =',i)
     im = Tensor.numpy(im)
     im = Tensor(im).cuda()
     out_trained_es = unet_es(im)
@@ -640,7 +639,7 @@ seg_met_sys = np.argmax(out_image_es, axis=1)
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
 ref_sys = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
-
+#%% Create input for ResNet
 #%% E-map
 import scipy.stats
 
@@ -659,43 +658,14 @@ for i in range(0, emap.shape[0]):
 
 emap = np.expand_dims(emap, axis=1)
 
-#%% Plot
 #% Wrap all inputs together
 im     = Tensor(im_train_es_res)
-#im     = Tensor(im_train_es_res)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
-
 
 print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
 input_concat = torch.cat((im,umap,seg), dim=1)
-
-#%% Setting up training loop
-# OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
-
-LEARNING_RATE = 0.001 # 
-criterion     = nn.CrossEntropyLoss() 
-
-# weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4, eps=1e-04)
-# torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
-
-# and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
-#lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-#                                               step_size=3,
-#                                               gamma=0.1)
-
-num_epoch = 2
-
-print('Number of epochs = ',num_epoch)
-#%% Load T_j
-#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
-#os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
-
-#from SI_func_mic import SI_set
-#T_j = SI_set(user, 'sys')
 
 #%% Distance transform maps
 from SI_error_func import dist_trans, cluster_min
@@ -706,7 +676,7 @@ error_margin_outside = 3
 # Distance transform map
 dt_es_train = dist_trans(ref_sys, error_margin_inside, error_margin_outside)
 
-#%% filter cluster size
+#%% Filter cluster size
 cluster_size = 10
 sys_new_label_train = cluster_min(seg_sys, ref_sys, cluster_size)
 
@@ -763,7 +733,15 @@ T_eval  = T[train_amount:,:,:,:]
 #im_train , lab_train = next(iter(train_dataloader))
 #im_eval , lab_eval   = next(iter(eval_dataloader))
 
+#%% Setting up training loop
+LEARNING_RATE = 0.0001 # 
+criterion     = nn.CrossEntropyLoss() 
 
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4, eps=1e-04)
+
+num_epoch = 2
+
+print('Number of epochs = ',num_epoch)
 #%% Training
 train_losses = []
 eval_losses  = []
@@ -788,10 +766,8 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
-        #labels = torch.argmax(labels, dim=1)
         labels = labels.long()
         labels = np.squeeze(labels)
-        # Clear the gradients
         optimizer.zero_grad()
        
         # Forward Pass
@@ -799,7 +775,6 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
 
         loss = criterion(output, labels)
-        #loss = loss #+ fn_penalty_weight * fn_soft + fp_penalty_weight * fp_soft
         
         # Calculate gradients
         loss.backward()
@@ -808,7 +783,6 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Calculate loss
         train_loss += loss.item()
-        #train_loss.append(loss.item()) #.detach().cpu().numpy()
         
     train_losses.append(train_loss/data_train.shape[0]) # This is normalised by batch size
     train_loss = 0.0
