@@ -404,7 +404,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #results[fold] = 100.0 * (correct / total)
         
         unet.eval()
-        print('Epoch eval=',epoch)
+        #print('Epoch eval=',epoch)
          
         for j, (eval_data) in enumerate(eval_dataloader):
             # get the inputs
