@@ -243,7 +243,8 @@ for fold in range(0,6):
     model = torch.load(path_model, map_location=torch.device(device))
     model.eval()
     for i, (im) in enumerate(im_data):
-        out = model(Tensor.numpy(im).cuda())
+        im = Tensor.numpy(im)
+        out = model(Tensor(im).cuda())
         out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
     
     del path_model, model, out
