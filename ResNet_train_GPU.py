@@ -769,7 +769,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Calculate loss
         train_loss += loss.item()
         
-    train_losses.append(train_loss/data_train.shape[0]) # This is normalised by batch size
+    train_losses.append(train_loss/(i+1))#data_train.shape[0]) # This is normalised by batch size
     print('train losses', train_losses)
     train_loss = 0.0
 
@@ -805,7 +805,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Calculate loss
         eval_loss += loss.item()#.detach().cpu().numpy()
         
-    eval_losses.append(eval_loss/data_eval.shape[0]) # This is normalised by batch size
+    eval_losses.append(eval_loss/(i+1)) # This is normalised by batch size
     print('eval losses', eval_losses)
     eval_loss = 0.0 
 
