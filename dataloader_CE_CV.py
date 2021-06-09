@@ -457,8 +457,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         #lr_get   = lr_scheduler.get_lr()[0]
         #lr_param = optimizer.param_groups[0]['lr']
         #print(i, lr_get, lr_param)
-        #lr_scheduler.step(eval_losses)
-        print(f"Cost at epoch {epoch} is {mean_loss}")
+        lr_scheduler.step(eval_losses)
+        print(f"Cost at epoch {epoch} is {eval_losses}")
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
     
