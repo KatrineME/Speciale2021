@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jun  9 10:46:28 2021
+Created on Wed Jun 9 14:55:28 2021
 
 @author: michalablicher
 """
+
 import torch
 import torch.nn as nn
 import math
@@ -292,7 +293,6 @@ class SimpleRSN(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         y = self.classifier(x)
-        
         return {'log_softmax': self.log_softmax_layer(y), 'softmax': self.softmax_layer(y)}
 
     def _make_conv_layers(self, channels, stride=1, dilation=1):
@@ -362,17 +362,17 @@ if __name__ == "__main__":
 
     n_channels = 3  # 3
     n_classes  = 2
-    model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    #model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    #model.cuda()
+    #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
+    model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.1)
+    model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
-os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 #os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
-#os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
+os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 from load_data_gt_im_sub import load_data_sub
-user = 'M'
+user = 'GPU'
 #user = 'K' 
 
 """
@@ -589,33 +589,31 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-
+    unet.cuda()
+    
 #%% Load Model
-#PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
-#PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
-
-#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-
-PATH_unet_ed =  '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal_500.pt'
-PATH_resnet_ed = '/Users/michalablicher/Desktop/Trained_Detection_dia_state.pt'
+PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_500.pt'
+#PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 # Load
 print('device = ', device)
-unet_ed   = torch.load(PATH_unet_ed,   map_location=torch.device(device))
-resnet_ed = torch.load(PATH_resnet_ed, map_location=torch.device(device))
+unet_es = torch.load(PATH_model_es, map_location=torch.device(device))
+#unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
+#%% Dataloader - Run model
+im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=False, sampler=None,
+           batch_sampler=None, collate_fn=None,
+           pin_memory=False, drop_last=False, timeout=0,
+           worker_init_fn=None, prefetch_factor=2, num_workers=0)
+    
+out_image_es = np.zeros((im_train_es_res.shape[0],4,128,128))
 
-#%% Run model
-#unet_es = torch.load(PATH_unet_es, map_location=torch.device('cpu'))
-unet_es = torch.load(PATH_unet_ed, map_location=torch.device('cpu'))
-
-#unet_es.eval()
-#out_trained_es = unet_es(Tensor(im_test_es_res))
-#out_image_es   = out_trained_es["softmax"]
-
-unet_ed.eval()
-out_trained_ed = unet_ed(Tensor(im_test_es_res))
-out_image_ed   = out_trained_ed["softmax"]
+for i, (im) in enumerate(im_data):
+    unet_es.eval()
+    im = Tensor.numpy(im)
+    im = Tensor(im).cuda()
+    out_trained_es = unet_es(im)
+    out_image_es[i,:,:,:] = out_trained_es["softmax"].detach().cpu().numpy()    
 
 #%% One hot encoding
 """
@@ -623,21 +621,20 @@ seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
-
 """
-seg_met_sys = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
+seg_met_sys = np.argmax(out_image_es, axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
-ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+ref_sys = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
+#%%%%%%%%%%%%%%%% Create input for ResNet %%%%%%%%%%%%%%%%
 
 #%% E-map
-emap = np.zeros((out_image_ed.shape[0],out_image_ed.shape[2],out_image_ed.shape[3]))
-#emap = np.zeros((out_image_es.shape[0],out_image_es.shape[2],out_image_es.shape[3]))
+emap = np.zeros((out_image_es.shape[0],out_image_es.shape[2],out_image_es.shape[3]))
 
 for i in range(0, emap.shape[0]):
 
-    out_img = (out_image_ed[i,:,:].detach().cpu().numpy())
+    out_img = out_image_es[i,:,:]#.detach().cpu().numpy())
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
@@ -647,121 +644,323 @@ for i in range(0, emap.shape[0]):
 
 emap = np.expand_dims(emap, axis=1)
 
-#%% Plot
 #% Wrap all inputs together
-im     = Tensor(im_test_es_res)
+im     = Tensor(im_train_es_res)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
-ref_1  = Tensor(ref_sys).permute(0,3,1,2)
 
- 
-diff = ref_sys - seg_sys
-diff_max = np.argmax(diff, axis=3)
-image = 11
-
-plt.figure(dpi=200)
-plt.subplot(1,4,1)
-plt.subplots_adjust(wspace = 0.4)
-plt.imshow(im[image,0,:,:])
-plt.title('cMRI') 
-plt.subplot(1,4,2)
-plt.imshow(seg[image,0,:,:])
-plt.title('Segmentation') 
-plt.subplot(1,4,3)
-plt.imshow(umap[image,0,:,:])   
-plt.title('U-map') 
-plt.subplot(1,4,4)
-#plt.imshow(gt_test_es_res[image,:,:])
-plt.imshow(diff_max[image,:,:], alpha= 0.99)
-plt.title('Error') 
+print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
 input_concat = torch.cat((im,umap,seg), dim=1)
 
+#%% Distance transform maps
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
-out_test    = resnet_ed(input_concat)
-output_test = out_test['softmax'].detach().numpy()
+from SI_error_func import dist_trans, cluster_min
 
-#%% Visualize output from detection network
-image = 18
+error_margin_inside  = 2
+error_margin_outside = 3
 
-k = np.zeros((output_test.shape[0],2,16,16))
+# Distance transform map
+dt_es_train = dist_trans(ref_sys, error_margin_inside, error_margin_outside)
 
-for i in range (0,output_test.shape[0]):
-    k[i,:,:,:] = output_test[i,:,:,:] > 0.1
+#%% Filter cluster size
+cluster_size = 10
+sys_new_label_train = cluster_min(seg_sys, ref_sys, cluster_size)
+
+roi_es_train = np.zeros((dt_es_train.shape))
+
+for i in range(0, dt_es_train.shape[0]):
+    for j in range(0, dt_es_train.shape[3]):
+        roi_es_train[i,:,:,j] = np.logical_and(dt_es_train[i,:,:,j], sys_new_label_train[i,:,:,j])
+        
+#%% Sample patches
+patch_size = 8
+patch_grid = int(roi_es_train.shape[1]/patch_size)
+
+lin    = np.linspace(0,roi_es_train.shape[1]-patch_size,patch_grid).astype(int)
+
+# Preallocate
+_temp  = np.zeros((patch_grid,patch_grid))
+lin    = np.linspace(0,roi_es_train.shape[1]-patch_size,patch_grid).astype(int)
+_ctemp = np.zeros((patch_grid,patch_grid,roi_es_train.shape[3]))
+T_j    = np.zeros((roi_es_train.shape[0],patch_grid,patch_grid,roi_es_train.shape[3]))
+
+for j in range (0,roi_es_train.shape[0]):
+    for c in range(0,4):
+        for pp in range(0,16):
+            for p, i in enumerate(lin):
+                _temp[pp,p] = np.count_nonzero(roi_es_train[j,lin[pp]:lin[pp]+8 , i:i+8, c])
+                #_temp[pp,p] = np.sum(~np.isnan(roi_es_train[j,lin[pp]:lin[pp]+8 , i:i+8, c]))
+        _ctemp[:,:,c] = _temp
+    T_j[j,:,:,:] = _ctemp
+
+
+# BACKGROUND SEG FAILURES ARE REMOVED
+T_j = T_j[:,:,:,1:] 
+
+# Summing all tissue channels together
+T_j = np.sum(T_j, axis = 3)
+
+# Binarize
+T_j[T_j >= 1 ] = 1
+
+#%% Prep data
+T = np.expand_dims(T_j, axis=1)
+
+train_amount = 200
+
+input_concat_train = input_concat[0:train_amount,:,:,:]
+input_concat_eval  = input_concat[train_amount:,:,:,:]
+
+T_train = Tensor(T[0:train_amount,:,:,:])
+T_eval  = T[train_amount:,:,:,:]
+
+#%% Training with K-folds
+k_folds    = 6
+num_epochs = 50
+loss_function = nn.CrossEntropyLoss()
+
+# For fold results
+results = {}
+
+# Set fixed random number seed
+torch.manual_seed(42)
+
+# Define the K-fold Cross Validator
+#from sklearn.model_selection import KFold
+
+kfold = KFold(n_splits=k_folds, shuffle=True)
+
+# Start print
+print('--------------------------------')
+
+# Prep data for dataloader
+data_train   = Tensor((np.squeeze(im_train_sub), gt_train_sub))
+data_train_n = data_train.permute(1,0,2,3)
+dataset      = data_train_n
+batch_size   = 32
+
+fold_train_losses = []
+fold_eval_losses  = []
+fold_train_res    = []
+fold_eval_res     = []
+fold_train_incorrect = []
+fold_eval_incorrect = []
+
+
+#%% Traning with cross validation
+
+# K-fold Cross Validation model evaluation
+for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat_train)):
+    # Print
+    print(f'FOLD {fold}')
+    print('--------------------------------')
     
+    # Sample elements randomly from a given list of ids, no replacement.
+    train_subsampler = torch.utils.data.SubsetRandomSampler(train_ids)
+    test_subsampler  = torch.utils.data.SubsetRandomSampler(test_ids)
+    
+    # Define data loaders for training and testing data in this fold
+    train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
+    eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
+   
+    
+    # Init the neural network
+    #network = unet()
+    unet.apply(weights_init)
+    
+    # Initialize optimizer
+    optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
+    #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
+    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5)
+    
+    #% Training
+    train_losses  = []
+    train_results = []
+    train_incorrect = []
+    eval_losses   = []
+    eval_results  = []
+    eval_incorrect = []
+    eval_loss     = 0.0
+    train_loss    = 0.0
+    total         = 0.0
+    correct       = 0.0
+    incorrect     = 0.0
+    total_e         = 0.0
+    correct_e       = 0.0
+    incorrect_e     = 0.0
+
+    for epoch in range(num_epochs):  # loop over the dataset multiple times
+    
+        unet.train()
+        print('Epoch train =',epoch)
+        #0.0  
+        for i, (train_data) in enumerate(train_dataloader):
+            # get the inputs
+            #print('train_data = ', train_data.shape)
+            #inputs, labels = data
+            inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
+            inputs = inputs.cuda()
+            
+            labels = train_data[:,1,:,:]
+            labels = labels.cuda()
+            #print('i=',i)
+            # wrap them in Variable
+            inputs, labels = Variable(inputs), Variable(labels)
+            labels = labels.long()
+            
+            # Clear the gradients
+            optimizer.zero_grad()
+           
+            # Forward Pass
+            output = unet(inputs)     
+            output = output["log_softmax"]
+            #print('output shape = ', output.shape)
+            
+            # Find loss
+            loss = loss_function(output, labels)
+            #print('loss = ', loss)
+            
+            # Calculate gradients
+            loss.backward()
+            
+            # Update Weights
+            optimizer.step()
+
+    
+            # Calculate loss
+            train_loss += loss.item() #.detach().cpu().numpy()
+            
+            # Set total and correct
+            predicted  = torch.argmax(output, axis=1)
+            total     += (labels.shape[0])*(128*128)
+            correct   += (predicted == labels).sum().item()
+            incorrect += (predicted != labels).sum().item()
+        
+        train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
+        #print('epoch loss = ', train_losses)
+    
+        #train_losses.append(np.mean(batch_loss))
+        train_loss = 0.0 #[]
+        
+        # Print accuracy
+        #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
+        train_results.append(100.0 * correct / total)
+        train_incorrect.append(incorrect)
+        correct   = 0.0
+        total     = 0.0
+        incorrect = 0.0
+        
+        #print('train_results', train_results)
+        #print('--------------------------------')
+        #results[fold] = 100.0 * (correct / total)
+        
+        unet.eval()
+        print('Epoch eval=',epoch)
+         
+        for j, (eval_data) in enumerate(eval_dataloader):
+            # get the inputs
+            #inputs, labels = data
+            inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
+            inputs = inputs.cuda()
+            labels = eval_data[:,1,:,:]
+            labels = labels.cuda()
+            #print('i=',i)
+    
+            # wrap them in Variable
+            inputs, labels = Variable(inputs), Variable(labels)
+            labels = labels.long()
+            
+            # Forward pass
+            output = unet(inputs)     
+            output = output["log_softmax"]
+            # Find loss
+            loss = loss_function(output, labels)
+            
+            # Calculate loss
+            #eval_loss.append(loss.item())
+            eval_loss += loss.item() #.detach().cpu().numpy()
+            
+            # Set total and correct
+            predicted_e = torch.argmax(output, axis=1)
+            total_e     += (labels.shape[0])*(128*128)
+            correct_e   += (predicted_e == labels).sum().item()
+            incorrect_e += (predicted_e != labels).sum().item()
+            
+        eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
+        #eval_losses.append(np.mean(eval_loss))
+        eval_loss = 0.0
+        
+        # Print accuracy
+        #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
+        eval_results.append(100.0 * correct_e / total_e)
+        eval_incorrect.append(incorrect_e)
+        correct_e   = 0.0
+        total_e     = 0.0
+        incorrect_e = 0.0
+        #print('eval_results', eval_results)
+
+        #print('--------------------------------')
+        #results[fold] = 100.0 * (correct_e / total_e)
+        
+        
+        # Learning rate scheduler
+        lr_scheduler.step()
+        #lr_scheduler.get_lt()[0]
+        optimizer.param_groups[0]['lr']
+        
+    fold_train_losses.append(train_losses)
+    #print('fold loss = ', fold_train_losses)
+    
+    fold_eval_losses.append(eval_losses)
+    #print('fold loss = ', fold_eval_losses)
+    
+    fold_train_res.append(train_results)
+    #print('fold loss = ', fold_train_res)
+    
+    fold_eval_res.append(eval_results)
+    #print('fold loss = ', fold_eval_res)
+    
+    fold_train_incorrect.append(train_incorrect)
+    #print('fold loss = ', fold_train_res)
+    
+    fold_eval_incorrect.append(eval_incorrect)
+    
+    #Save model for each fold
+    #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
+    PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
+    torch.save(unet, PATH_model)
+
+        
+m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
+m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
+m_fold_train_res    = np.mean(fold_train_res, axis = 0)   
+m_fold_eval_res     = np.mean(fold_eval_res, axis = 0)   
+m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)   
+m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
+
+print('Finished Training + Evaluation')
+#%% Plot loss curve
+epochs = np.arange(len(train_losses))
+epochs_eval = np.arange(len(eval_losses))
+
 plt.figure(dpi=200)
-plt.subplot(1,3,1)
-plt.imshow(output_test[image,0,:,:])
-plt.title('no seg. failure')
-plt.colorbar(fraction=0.05)
-plt.subplots_adjust(hspace = 0.05, wspace = 0.5)
+plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
+plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
+plt.xticks(np.arange(1,num_epoch+1, step = 10))
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend(loc="upper right")
+plt.title("Loss function")
+#plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection_eps.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
-plt.subplot(1,3,2)
-plt.imshow(output_test[image,1,:,:])
-plt.title('seg. failure')
-plt.colorbar(fraction=0.05)
+#%% Save model
 
-plt.subplot(1,3,3)
-plt.imshow(k[image,1,:,:])
-plt.title('bin 0.1')
-#plt.colorbar(fraction=0.05)
+#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
+torch.save(model, PATH_model)
 
-#%% Upsample
-image = 11
-upper_image = image - 1
-lower_image = image + 1
-
-#test_im = Tensor(np.expand_dims(output_test[lower_image:upper_image,1,:,:],axis=0))
-#test_im = Tensor(np.expand_dims(output_test[upper_image:lower_image,1,:,:],axis=0))
-test_im = Tensor(np.expand_dims(k[upper_image:lower_image,1,:,:],axis=0))
-
-up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
-
-up_im = up(test_im) > 0
-
-plt.figure(dpi=200)
-plt.subplot(1,3,1)
-plt.subplots_adjust(wspace = 0.4)
-plt.imshow(input_concat[image,2,:,:])
-#plt.imshow(up_im[0,0,:,:])
-plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
-plt.title('Segmentation')
-plt.subplot(1,3,2)
-plt.imshow(up_im[0,1,:,:])
-plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
-plt.title('Error patch')
-plt.subplot(1,3,3)
-plt.imshow(up_im[0,1,:,:])
-#plt.imshow(np.argmax((ref_sys[image,:,:,:]),axis=2), alpha= 0.6)
-plt.imshow(diff_max[image,:,:], alpha= 0.6)
-plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
-plt.title('Reference w. error')
-
-#%%
-k = np.zeros((output_test.shape[0],2,16,16))
-test_im = np.zeros((output_test.shape[0],2,16,16))
-up_im = np.zeros((output_test.shape[0],2,128,128))
-
-up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
-
-for i in range (1,output_test.shape[0]):
-    k[i,:,:,:] = output_test[i,:,:,:] > 0.1
-    upper_image = i - 1
-    lower_image = i + 1
-    test_im = Tensor(np.expand_dims(k[upper_image:lower_image,1,:,:],axis=0))
-
-    up_im[i,:,:,:] = up(test_im) > 0
-
-
-#%%
-plt.figure(dpi=200)
-for i in range(0,36):
-    plt.subplot(8,6,i+1)
-    plt.subplots_adjust(wspace = 0.2)
-    plt.imshow(up_im[i,1,:,:])
-    plt.imshow(input_concat[i,0,:,:], alpha= 0.4)
-    plt.imshow(input_concat[i,2,:,:], alpha= 0.4)
-    plt.xticks(fontsize = 6)
-    plt.yticks(fontsize = 6)
 
 
