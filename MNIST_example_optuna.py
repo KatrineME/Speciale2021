@@ -163,7 +163,13 @@ optuna.visualization.matplotlib.plot_parallel_coordinate(study, params=["n_layer
 #%%
 
 
-for fold in range(0,6):
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Det_dia_{}.pt".format(fold)
-    print(PATH_model)
-    #torch.save(unet, PATH_model)
+#for fold in range(0,6):
+#    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Det_dia_{}.pt".format(fold)
+#    print(PATH_model)
+    
+    
+    
+    
+    
+    
+    
