@@ -231,7 +231,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 
 print('Data loaded+concat')
 #%%
-out_soft = np.zeros((6, 182, 4, 128, 128))
+out_soft = np.zeros((6, 337, 4, 128, 128))
 
 im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
@@ -246,10 +246,7 @@ for fold in range(0,6):
         im = Tensor.numpy(im)
         
         out = model(Tensor(im).cuda())
-        o = out["softmax"].detach().cpu().numpy()
-        
-        #out_soft[fold,i,:,:,:] = o
-        print(fold,i)
+        out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
         
     del path_model, model, out
     print('Done for fold',fold)
