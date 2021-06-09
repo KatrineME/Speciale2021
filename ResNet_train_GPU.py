@@ -10,12 +10,14 @@ import torch
 import torch.nn as nn
 import math
 import os
+import scipy.stats
 import numpy as np
 import torch.optim as optim
-from torch.autograd import Variable
-import matplotlib.pyplot as plt
-from torch import Tensor
 import torch.utils.model_zoo as model_zoo
+import matplotlib.pyplot as plt
+
+from torch.autograd import Variable
+from torch import Tensor
 from torch.utils.data import DataLoader
 
 BatchNorm = nn.BatchNorm2d
@@ -29,18 +31,16 @@ else:
     device = 'cpu'
 torch.cuda.manual_seed_all(808)
 
-
+#%%
 def weights_init(m):
     classname = m.__class__.__name__
     if classname.find('Conv2d') != -1:
         nn.init.kaiming_normal_(m.weight)
         m.bias.data.zero_()
 
-
 def conv3x3(in_planes, out_planes, stride=1, padding=1, dilation=1):
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=padding, bias=False, dilation=dilation)
-
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -76,7 +76,6 @@ class BasicBlock(nn.Module):
         out = self.relu(out)
 
         return out
-
 
 class DRN(nn.Module):
 
@@ -363,7 +362,7 @@ if __name__ == "__main__":
 
     n_channels = 3  # 3
     n_classes  = 2
-    model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.3)
+    model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     #model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
@@ -395,8 +394,7 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 num_train_sub = 12
 num_eval_sub  = num_train_sub
 
-
-num_train_res  = num_eval_sub + 6
+num_train_res = num_eval_sub + 6
 num_test_res  = num_train_res + 2
 
 im_train_es_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_train_res]).astype(None),
@@ -594,9 +592,6 @@ if __name__ == "__main__":
     unet.cuda()
     
 #%% Load Model
-#PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
-#PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
-
 PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_mc01.pt'
 #PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
 
@@ -613,19 +608,12 @@ im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=Fal
     
 out_image_es = np.zeros((im_train_es_res.shape[0],4,128,128))
 
-#out_image_es = []
-
-
 for i, (im) in enumerate(im_data):
     unet_es.eval()
     im = Tensor.numpy(im)
     im = Tensor(im).cuda()
     out_trained_es = unet_es(im)
-    out_image_es[i,:,:,:] = out_trained_es["softmax"].detach().cpu().numpy()
-    #out_image_es.append(out_trained_es["softmax"])
-    
-#out_image_es = torch.cat(out_image_es)
-
+    out_image_es[i,:,:,:] = out_trained_es["softmax"].detach().cpu().numpy()    
 
 #%% One hot encoding
 """
@@ -639,11 +627,9 @@ seg_met_sys = np.argmax(out_image_es, axis=1)
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
 ref_sys = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
-#%% Create input for ResNet
-#%% E-map
-import scipy.stats
+#%%%%%%%%%%%%%%%% Create input for ResNet %%%%%%%%%%%%%%%%
 
-#emap = np.zeros((out_image_ed.shape[0],out_image_ed.shape[2],out_image_ed.shape[3]))
+#%% E-map
 emap = np.zeros((out_image_es.shape[0],out_image_es.shape[2],out_image_es.shape[3]))
 
 for i in range(0, emap.shape[0]):
@@ -714,7 +700,6 @@ T_j = T_j[:,:,:,1:]
 # Summing all tissue channels together
 T_j = np.sum(T_j, axis = 3)
 
-# Plot a final patch
 # Binarize
 T_j[T_j >= 1 ] = 1
 
@@ -729,26 +714,25 @@ input_concat_eval  = input_concat[train_amount:,:,:,:]
 T_train = Tensor(T[0:train_amount,:,:,:])
 T_eval  = T[train_amount:,:,:,:]
 
-
-#im_train , lab_train = next(iter(train_dataloader))
-#im_eval , lab_eval   = next(iter(eval_dataloader))
-
 #%% Setting up training loop
 LEARNING_RATE = 0.0001 # 
 criterion     = nn.CrossEntropyLoss() 
 
 optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4, eps=1e-04)
 
-num_epoch = 2
+num_epoch = 10
 
 print('Number of epochs = ',num_epoch)
+
 #%% Training
 train_losses = []
 eval_losses  = []
 eval_loss    = 0.0
 train_loss   = 0.0
 
-trainloader = input_concat#_train
+trainloader = input_concat_train
+evalloader  = input_concat_eval
+
 
 for epoch in range(num_epoch):  # loop over the dataset multiple times
     
@@ -756,18 +740,18 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     print('Epoch train =',epoch)
     for i, data_train in enumerate(trainloader, 0):
         # get the inputs
-        #inputs, labels = data
-        inputs = input_concat #input_concat_train
+        inputs = input_concat_train 
         inputs = inputs.cuda()
-        labels = Tensor(T) #_train)
+        
+        labels = Tensor(T_train)
         labels = labels.cuda()
-        #print('i=',i)
         
         # wrap them in Variable
-        #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
         labels = labels.long()
         labels = np.squeeze(labels)
+        
+        # Clear the gradients
         optimizer.zero_grad()
        
         # Forward Pass
@@ -778,6 +762,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Calculate gradients
         loss.backward()
+        
         # Update Weights
         optimizer.step()
         
@@ -789,21 +774,19 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
 
     model.eval()
     print('Epoch eval =',epoch)
-    for i, data_eval in enumerate(input_concat_eval, 0):
+    for i, data_eval in enumerate(evalloader, 0):
         # get the inputs
-        #inputs, labels = data
         inputs = input_concat_eval
         inputs = inputs.cuda()
+        
         labels = Tensor(T_eval)
         labels = labels.cuda()
-        #print('i=',i)
         
         # wrap them in Variable
-        #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
-        #labels = torch.argmax(labels, dim=1)
         labels = labels.long()
         labels = np.squeeze(labels)
+        
         # Clear the gradients
         optimizer.zero_grad()
        
@@ -846,12 +829,7 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
 PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
 
-#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
-#PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
-
 torch.save(model, PATH_model)
-#torch.save(unet.state_dict(), PATH_state)
-
 #%%%
 """
 
