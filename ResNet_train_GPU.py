@@ -759,7 +759,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
 
         loss = criterion(output, labels)
-        
+        print('train loss', loss)
         # Calculate gradients
         loss.backward()
         
@@ -770,6 +770,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         train_loss += loss.item()
         
     train_losses.append(train_loss/data_train.shape[0]) # This is normalised by batch size
+    print('train losses', train_losses)
     train_loss = 0.0
 
     model.eval()
@@ -796,7 +797,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Find loss
         loss = criterion(output, labels)
-        
+        print('eval loss', loss)
         # Calculate gradients
         loss.backward()
         # Update Weights
@@ -805,6 +806,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         eval_loss += loss.item()#.detach().cpu().numpy()
         
     eval_losses.append(eval_loss/data_eval.shape[0]) # This is normalised by batch size
+    print('eval losses', eval_losses)
     eval_loss = 0.0 
 
 print('Finished Training + Evaluation')
