@@ -275,6 +275,8 @@ results = {}
 torch.manual_seed(42)
 
 # Define the K-fold Cross Validator
+#from sklearn.model_selection import KFold
+
 kfold = KFold(n_splits=k_folds, shuffle=True)
 
 # Start print
@@ -294,7 +296,7 @@ fold_train_incorrect = []
 fold_eval_incorrect = []
 
 
-#%%
+#%% Traning with cross validation
 
 # K-fold Cross Validation model evaluation
 for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
@@ -317,7 +319,6 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     
     # Initialize optimizer
     optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
-
 
     #% Training
     train_losses  = []
