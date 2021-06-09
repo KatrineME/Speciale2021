@@ -759,7 +759,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
 
         loss = criterion(output, labels)
-        #print('train loss', loss)
+        print('train loss', loss)
         # Calculate gradients
         loss.backward()
         
@@ -797,7 +797,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Find loss
         loss = criterion(output, labels)
-        #print('eval loss', loss)
+        print('eval loss', loss)
         # Calculate gradients
         loss.backward()
         # Update Weights
