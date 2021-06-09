@@ -287,8 +287,14 @@ out_one  = res_ed[1]
 train_loss = out_mean[0]
 eval_loss = out_mean[1]
 
-train_loss_1 = out_one[0][0]
-eval_loss_1 = out_one[1][0]
+train_loss_0 = out_one[0][0]
+eval_loss_0 = out_one[1][0]
+train_loss_1 = out_one[0]1]
+eval_loss_1 = out_one[1][1]
+train_loss_2 = out_one[0]2]
+eval_loss_2 = out_one[1][2]
+train_loss_3 = out_one[0]3]
+eval_loss_3 = out_one[1][3]
 
 train_acc = out_mean[2]
 eval_acc = out_mean[3]
@@ -301,9 +307,31 @@ train_acc_3 = out_one[2][2]
 eval_acc_3 = out_one[3][2]
 train_acc_4 = out_one[2][3]
 eval_acc_4 = out_one[3][3]
+train_acc_5 = out_one[2][4]
+eval_acc_5 = out_one[3][4]
+train_acc_6 = out_one[2][5]
+eval_acc_6 = out_one[3][5]
 
 train_inc = (out_mean[4])
 eval_inc = (out_mean[5])
+#%%
+t1 = np.arange(len(train_acc_1[0:100]))
+
+plt.figure(figsize=(12, 12),dpi=400)
+#plt.plot(t1, train_acc_1[0:100], 'b', label = 'Training Loss')
+#plt.plot(t1 , train_acc_2[0:100], 'g', label = 'Training Loss')
+#plt.plot(t1 , train_acc_3[0:100], 'r', label = 'Training Loss')
+#plt.plot(t1 , train_acc_4[0:100], 'y', label = 'Training Loss')
+#plt.plot(t1 , train_acc_5[0:100], 'm', label = 'Training Loss')
+plt.plot(t1 , train_acc_6[0:100], 'c', label = 'Training Loss')
+
+#plt.plot(t1, eval_acc_1[0:100], 'b' ,linestyle = 'dashed', label = 'eval Loss')
+#plt.plot(t1 , eval_acc_2[0:100], 'g',linestyle = 'dashed', label = 'eval Loss')
+#plt.plot(t1 , eval_acc_3[0:100], 'r',linestyle = 'dashed', label = 'eval Loss')
+#plt.plot(t1 , eval_acc_4[0:100], 'y',linestyle = 'dashed', label = 'eval Loss')
+#plt.plot(t1 , eval_acc_5[0:100], 'm',linestyle = 'dashed', label = 'eval Loss')
+plt.plot(t1 , eval_acc_6[0:100], 'c',linestyle = 'dashed', label = 'eval Loss')
+
 #%% Plot function
 epochs_train = np.arange(len(train_loss))
 epochs_eval  = np.arange(len(eval_loss))
