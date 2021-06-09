@@ -454,7 +454,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         
         # Learning rate scheduler
         lr_scheduler.step()
-        lr_scheduler.get_lt()[0]
+        #lr_scheduler.get_lt()[0]
         optimizer.param_groups[0]['lr']
         
     fold_train_losses.append(train_losses)
