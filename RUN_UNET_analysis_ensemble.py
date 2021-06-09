@@ -233,13 +233,18 @@ print('Data loaded+concat')
 #%%
 out_soft = np.zeros((6, 182, 4, 128, 128))
 
+im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=False, sampler=None,
+           batch_sampler=None, collate_fn=None,
+           pin_memory=False, drop_last=False, timeout=0,
+           worker_init_fn=None, prefetch_factor=2, num_workers=0)
+
 for fold in range(0,6):
     path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
-    
     model.eval()
-    out = model(Tensor(im_test_ed_sub).cuda())
-    out_soft[fold,:,:,:,:] = out["softmax"].detach().cpu().numpy() 
+    for i, (im) in enumerate(im_data):
+        out = model(Tensor(im).cuda())
+        out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
     
     del path_model, model, out
     print('Done for fold',fold)
