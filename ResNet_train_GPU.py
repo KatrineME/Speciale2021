@@ -654,6 +654,8 @@ print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 input_concat = torch.cat((im,umap,seg), dim=1)
 
 #%% Distance transform maps
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+
 from SI_error_func import dist_trans, cluster_min
 
 error_margin_inside  = 2
@@ -718,11 +720,12 @@ T_eval  = T[train_amount:,:,:,:]
 LEARNING_RATE = 0.0001 # 
 criterion     = nn.CrossEntropyLoss() 
 
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4, eps=1e-04)
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4, eps=1e-02)
 
 num_epoch = 50
 
 print('Number of epochs = ',num_epoch)
+
 
 #%% Training
 train_losses = []
@@ -832,6 +835,5 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
 torch.save(model, PATH_model)
 
-#%%%
 
 

@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 50
+num_epochs = 10
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -375,7 +375,6 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Update Weights
             optimizer.step()
 
-    
             # Calculate loss
             train_loss += loss.item() #.detach().cpu().numpy()
             
@@ -454,7 +453,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         
         # Learning rate scheduler
         lr_scheduler.step()
-        #lr_scheduler.get_lt()[0]
+        lr_scheduler.get_lr()[0]
         optimizer.param_groups[0]['lr']
         
     fold_train_losses.append(train_losses)
@@ -475,8 +474,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
+    #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
 
         
@@ -521,7 +520,7 @@ plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_acc_500.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
@@ -541,7 +540,7 @@ T = [t_res_mean, t_res] # listed together
 #torch.save(unet.state_dict(), PATH_state)
 
 #%%
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_500.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_scheduler.pt"
 torch.save(T, PATH_results)
 
 
