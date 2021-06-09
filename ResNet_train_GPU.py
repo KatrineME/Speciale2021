@@ -364,7 +364,7 @@ if __name__ == "__main__":
     n_classes  = 2
     #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.1)
-    #model.cuda()
+    model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
@@ -592,7 +592,7 @@ if __name__ == "__main__":
     unet.cuda()
     
 #%% Load Model
-PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_mc01.pt'
+PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_500.pt'
 #PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 # Load
