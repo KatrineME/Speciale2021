@@ -194,14 +194,16 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    unet.cuda()
+    if device == 'cuda':
+        unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
 
 #%% Specify directory
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 #os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from load_data_gt_im_sub import load_data_sub
-user = 'GPU'
+
+user = 'K'
 
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
@@ -230,27 +232,117 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
 
 print('Data loaded+concat')
-#%%
-out_soft = np.zeros((6, 337, 4, 128, 128))
+#%% Load models
+if device == 'cuda':
+    CV_folds = 6
+    im_test  = im_test_ed_sub.shape[0]
+    H = 128
+    W = 128
+    
+    out_soft = np.zeros((CV_folds, im_test, 4, H, W))
+    
+    im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=False, sampler=None,
+               batch_sampler=None, collate_fn=None,
+               pin_memory=False, drop_last=False, timeout=0,
+               worker_init_fn=None, prefetch_factor=2, num_workers=0)
+    
+    for fold in range(0,CV_folds):
+        path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
+        model = torch.load(path_model, map_location=torch.device(device))
+        model.eval()
+        for i, (im) in enumerate(im_data):
+            im = Tensor.numpy(im)
+            
+            out = model(Tensor(im).cuda())
+            out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
+            
+        del path_model, model, out
+        print('Done for fold',fold)
+    
+    PATH_softmax_fold = '/home/katrine/Speciale2021/Speciale2021/Fold_softmax_ensemble.pt'
+    torch.save(out_soft, PATH_softmax_fold)
+#%% Local
+if device == 'cpu':
+    out_soft = np.zeros((6, 337, 4, 128, 128))
+    
+    im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=False, sampler=None,
+               batch_sampler=None, collate_fn=None,
+               pin_memory=False, drop_last=False, timeout=0,
+               worker_init_fn=None, prefetch_factor=2, num_workers=0)
+    
+    for fold in range(0,6):
+        path_model ='C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
+        model = torch.load(path_model, map_location=torch.device(device))
+        model.eval()
+        for i, (im) in enumerate(im_data):
+            im = Tensor.numpy(im)
+            
+            out = model(Tensor(im))
+            out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
+            
+        del path_model, model, out
+        print('Done for fold',fold)
 
-im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=False, sampler=None,
-           batch_sampler=None, collate_fn=None,
-           pin_memory=False, drop_last=False, timeout=0,
-           worker_init_fn=None, prefetch_factor=2, num_workers=0)
+    PATH_softmax_fold = 'C:/Users/katrine/Documents/GitHub/Speciale2021/Fold_softmax_ensemble.pt'
+    torch.save(out_soft, PATH_softmax_fold)
 
-for fold in range(0,6):
-    path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
-    model = torch.load(path_model, map_location=torch.device(device))
-    model.eval()
-    for i, (im) in enumerate(im_data):
-        im = Tensor.numpy(im)
+#%% load all softmax probabilities
+out_soft = torch.load(PATH_softmax_fold, map_location=torch.device('cpu'))
+
+#%% mean all probabilities
+out = out_soft.mean(axis=0)
+
+fold_model = 5
+seg_met_dia = np.argmax(out, axis=1)
+#seg_met_dia = np.argmax(out_soft[fold_model,:,:,:], axis=1)
+
+seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4)
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4)
+
+
+#Plot softmax probabilities for a single slice
+test_slice = 300
+out_img_ed = np.squeeze(out[test_slice,:,:,:])
+#out_img_ed = np.squeeze(out_soft[fold_model,test_slice,:,:,:])
+alpha = 0.4
+
+fig = plt.figure()
+
+class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
+plt.figure(dpi=200, figsize=(15,15))
+for i in range(0,4):
+    plt.suptitle('Diastolic phase: test image at slice %i for ensemble' %test_slice, fontsize=20)
+    #plt.suptitle('Diastolic phase: test image at slice %i for model {}'.format(fold_model) %test_slice, fontsize=20)
+    plt.subplot(3, 4, i+1)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
+    plt.imshow(out_img_ed[i,:,:])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.title(class_title[i], fontsize =16)
+    plt.xticks(
+    rotation=40,
+    fontweight='light',
+    fontsize=7)
+    plt.yticks(
+    horizontalalignment='right',
+    fontweight='light',
+    fontsize=7)
+   
+    if i == 0:
+        plt.ylabel('Softmax probability', fontsize=14)
         
-        out = model(Tensor(im).cuda())
-        out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
-        
-    del path_model, model, out
-    print('Done for fold',fold)
-
+    plt.subplot(3, 4, i+1+4)
+    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
+    plt.imshow(seg_dia[test_slice,:,:,i])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    if i == 0:
+        plt.ylabel('Argmax', fontsize=14)
+    plt.subplot(3, 4, i+1+8)     
+    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
+    plt.imshow(ref_dia[test_slice,:,:,i])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    if i == 0:
+        plt.ylabel('Reference', fontsize=14)
+plt.show()   
 """
 #%% Run model0
 path_model_0 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold0.pt'
