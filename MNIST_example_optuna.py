@@ -159,3 +159,11 @@ optuna.visualization.matplotlib.plot_optimization_history(study)
 #%%
 
 optuna.visualization.matplotlib.plot_parallel_coordinate(study, params=["n_layers", "dropout_l0"])
+
+#%%
+
+
+for fold in range(0,6):
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Det_dia_{}.pt".format(fold)
+    print(PATH_model)
+    #torch.save(unet, PATH_model)
