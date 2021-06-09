@@ -485,9 +485,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         return eval_accuracy_float
 
 
+#%%
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, fold, n_trials=5, timeout=4000)
+    study.optimize(objective, n_trials=5, timeout=4000)
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 

@@ -16,8 +16,10 @@ from torch.autograd import Variable
 import matplotlib.pyplot as plt
 from torch import Tensor
 import torch.utils.model_zoo as model_zoo
+from torch.utils.data import DataLoader
+
 BatchNorm = nn.BatchNorm2d
-DropOut = nn.Dropout2d
+DropOut   = nn.Dropout2d
 
 if torch.cuda.is_available():
     # Tensor = torch.cuda.FloatTensor
@@ -373,7 +375,7 @@ os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021")
 from load_data_gt_im_sub import load_data_sub
 user = 'GPU'
 #user = 'K' 
-print('Dataloader')
+
 """
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
@@ -381,6 +383,7 @@ data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
 data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,'Systole','NOR')
 data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,'Systole','RV')
 """
+
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
 data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
@@ -407,8 +410,6 @@ gt_train_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num
                                   np.concatenate(data_gt_ed_MINF[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_train_res]).astype(None)))
-
-
 
 
 im_test_es_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_res:num_test_res]).astype(None),
@@ -589,16 +590,12 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.5)
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     unet.cuda()
     
 #%% Load Model
 #PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
-
-#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-#PATH_model_ed  = 'C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_sub_batch_100.pt'
-#PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_mc01.pt'
 #PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
@@ -608,21 +605,7 @@ print('device = ', device)
 unet_es = torch.load(PATH_model_es, map_location=torch.device(device))
 #unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
-#im_flat_test_es = im_flat_test_es.cuda()
-#%% Run model
-"""
-unet_es.eval()
-im_train_es_res = Tensor(im_train_es_res)
-im_train_es_res = im_train_es_res.cuda()
-im_train_es_res = Variable(im_train_es_res)
-out_trained_es  = unet_es(im_train_es_res)
-out_image_es    = out_trained_es["softmax"]
-
-#im_flat_test_ed = im_flat_test_ed.cuda()"""
-
-
-from torch.utils.data import DataLoader
-
+#%% Dataloader - Run model
 im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
@@ -635,7 +618,6 @@ out_image_es = np.zeros((im_train_es_res.shape[0],4,128,128))
 
 for i, (im) in enumerate(im_data):
     unet_es.eval()
-    print('inference i =',i)
     im = Tensor.numpy(im)
     im = Tensor(im).cuda()
     out_trained_es = unet_es(im)
@@ -657,7 +639,7 @@ seg_met_sys = np.argmax(out_image_es, axis=1)
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
 ref_sys = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
-
+#%% Create input for ResNet
 #%% E-map
 import scipy.stats
 
@@ -676,43 +658,14 @@ for i in range(0, emap.shape[0]):
 
 emap = np.expand_dims(emap, axis=1)
 
-#%% Plot
 #% Wrap all inputs together
 im     = Tensor(im_train_es_res)
-#im     = Tensor(im_train_es_res)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
-
 
 print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
 input_concat = torch.cat((im,umap,seg), dim=1)
-
-#%% Setting up training loop
-# OBS DECREASED LEARNING RATE AND EPSILON ADDED TO OPTIMIZER
-
-LEARNING_RATE = 0.001 # 
-criterion     = nn.CrossEntropyLoss() 
-
-# weight_decay is equal to L2 regularizationst
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4, eps=1e-04)
-# torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
-
-# and a learning rate scheduler which decreases the learning rate by 10x every 3 epochs
-#lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-#                                               step_size=3,
-#                                               gamma=0.1)
-
-num_epoch = 100
-
-print('Number of epochs = ',num_epoch)
-#%% Load T_j
-#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
-#os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
-
-#from SI_func_mic import SI_set
-#T_j = SI_set(user, 'sys')
 
 #%% Distance transform maps
 from SI_error_func import dist_trans, cluster_min
@@ -723,7 +676,7 @@ error_margin_outside = 3
 # Distance transform map
 dt_es_train = dist_trans(ref_sys, error_margin_inside, error_margin_outside)
 
-#%% filter cluster size
+#%% Filter cluster size
 cluster_size = 10
 sys_new_label_train = cluster_min(seg_sys, ref_sys, cluster_size)
 
@@ -768,7 +721,7 @@ T_j[T_j >= 1 ] = 1
 #%% Prep data
 T = np.expand_dims(T_j, axis=1)
 
-train_amount = 100
+train_amount = 200
 
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
@@ -780,7 +733,15 @@ T_eval  = T[train_amount:,:,:,:]
 #im_train , lab_train = next(iter(train_dataloader))
 #im_eval , lab_eval   = next(iter(eval_dataloader))
 
+#%% Setting up training loop
+LEARNING_RATE = 0.0001 # 
+criterion     = nn.CrossEntropyLoss() 
 
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4, eps=1e-04)
+
+num_epoch = 2
+
+print('Number of epochs = ',num_epoch)
 #%% Training
 train_losses = []
 eval_losses  = []
@@ -800,15 +761,13 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         labels = Tensor(T) #_train)
         labels = labels.cuda()
-        print('i=',i)
+        #print('i=',i)
         
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
         inputs, labels = Variable(inputs), Variable(labels)
-        #labels = torch.argmax(labels, dim=1)
         labels = labels.long()
         labels = np.squeeze(labels)
-        # Clear the gradients
         optimizer.zero_grad()
        
         # Forward Pass
@@ -816,7 +775,6 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         output = output["log_softmax"]
 
         loss = criterion(output, labels)
-        #loss = loss #+ fn_penalty_weight * fn_soft + fp_penalty_weight * fp_soft
         
         # Calculate gradients
         loss.backward()
@@ -825,12 +783,12 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         
         # Calculate loss
         train_loss += loss.item()
-        #train_loss.append(loss.item()) #.detach().cpu().numpy()
         
     train_losses.append(train_loss/data_train.shape[0]) # This is normalised by batch size
     train_loss = 0.0
 
     model.eval()
+    print('Epoch eval =',epoch)
     for i, data_eval in enumerate(input_concat_eval, 0):
         # get the inputs
         #inputs, labels = data
@@ -838,7 +796,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         inputs = inputs.cuda()
         labels = Tensor(T_eval)
         labels = labels.cuda()
-        print('i=',i)
+        #print('i=',i)
         
         # wrap them in Variable
         #inputs, labels = Variable(inputs, requires_grad=True), Variable(labels, requires_grad=True)
@@ -880,13 +838,13 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection_eps.png')
-#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
+#plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection_eps.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
 #%% Save model
 
-PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
-#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
+#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
