@@ -199,7 +199,7 @@ if __name__ == "__main__":
 
 #%% Specify directory
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from load_data_gt_im_sub import load_data_sub
 user = 'GPU'
 
@@ -233,7 +233,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 out_soft = np.zeros((6, 182, 4, 128, 128))
 
 for fold in range(0,6):
-    path_model ='C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
+    path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
     
     model.eval()
