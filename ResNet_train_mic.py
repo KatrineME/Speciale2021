@@ -640,8 +640,8 @@ for i, (im) in enumerate(im_data):
     im = Tensor.numpy(im)
     out_trained_es = unet_es(Tensor(im))
     out_image_es.append(out_trained_es["softmax"])
-#%%
-out_image = torch.cat(out_image_es)
+
+out_image_es = torch.cat(out_image_es)
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
 
