@@ -244,13 +244,12 @@ for fold in range(0,6):
     model.eval()
     for i, (im) in enumerate(im_data):
         im = Tensor.numpy(im)
-        print('im shape',im.shape)
         
         out = model(Tensor(im).cuda())
         o = out["softmax"].detach().cpu().numpy()
-        print('out shape',o.shape)
         
-        out_soft[fold,i,:,:,:] = o
+        #out_soft[fold,i,:,:,:] = o
+        print(fold,i)
         
     del path_model, model, out
     print('Done for fold',fold)
