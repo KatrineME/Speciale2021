@@ -192,10 +192,10 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (1, 128, 128))
 
 #%% Specify directory
-os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from load_data_gt_im_sub import load_data_sub
-user = 'M'
+user = 'K'
 """
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('M','Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('M','Systole','HCM')
