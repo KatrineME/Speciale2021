@@ -828,8 +828,8 @@ plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
 PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
-
 torch.save(model, PATH_model)
+
 #%%%
 """
 
