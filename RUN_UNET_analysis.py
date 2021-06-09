@@ -214,7 +214,7 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 #%% BATCH GENERATOR
 num_train_sub = 12
 num_eval_sub = num_train_sub
-num_test_sub = num_eval_sub + 4
+num_test_sub = num_eval_sub + 8
 
 """
 im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
@@ -241,8 +241,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-
-
+  
 
 #%% Load Model
 #PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
@@ -302,25 +301,27 @@ train_acc_3 = out_one[2][2]
 eval_acc_3 = out_one[3][2]
 train_acc_4 = out_one[2][3]
 eval_acc_4 = out_one[3][3]
-#%%
-train_inc = np.log(out_mean[4])
-eval_inc = np.log(out_mean[5])
+
+train_inc = (out_mean[4])
+eval_inc = (out_mean[5])
 #%% Plot function
 epochs_train = np.arange(len(train_loss))
 epochs_eval  = np.arange(len(eval_loss))
 
-plt.figure(figsize=(15, 5),dpi=200)
-plt.subplot(1,3,1)
+plt.figure(figsize=(17, 17),dpi=400)
+#plt.rcParams.update({'font.size': 26})
+plt.subplot(2,2,1)
 plt.plot(epochs_train + 1 , train_loss, 'b', label = 'Training Loss')
 plt.plot(epochs_eval  + 1 , eval_loss , 'r', label = 'Validation Loss')
-plt.grid(color='k', linestyle='-', linewidth=0.25)
-plt.xticks(np.arange(1, 300 + 1, step = 100))
+plt.grid(color='k', linestyle='-', linewidth=0.2)
+plt.xticks(np.arange(1, 501 + 1, step = 100), fontsize =14)
+plt.yticks(fontsize =14)
 plt.xlabel('Epochs')
 plt.ylabel('Cross-Entropy Loss')
 plt.legend(loc="upper right")
-plt.title("Loss function")
+plt.title('Loss function', fontsize =28)
 
-plt.subplot(1,3,2)
+plt.subplot(2,2,2)
 plt.plot(epochs_train + 1 , train_acc, 'b', label = 'Training accuracy')
 #plt.plot(epochs_train + 1 , train_acc_1, 'g' , label = 'Training Loss')
 #plt.plot(epochs_train + 1 , train_acc_2, 'r', label = 'Training Loss')
@@ -328,29 +329,30 @@ plt.plot(epochs_train + 1 , train_acc, 'b', label = 'Training accuracy')
 #plt.plot(epochs_train + 1 , train_acc_4, 'y', label = 'Training Loss')
 
 
-plt.plot(epochs_eval  + 1 , eval_acc,  'r' ,linestyle = 'dashed',label = 'Validation accuracy')
+plt.plot(epochs_eval  + 1 , eval_acc,  'r',label = 'Validation accuracy')
 #plt.plot(epochs_train + 1 , eval_acc_1, 'g' ,linestyle = 'dashed', label = 'Training Loss')
 #plt.plot(epochs_train + 1 , eval_acc_2, 'r' ,linestyle = 'dashed', label = 'Training Loss')
 #plt.plot(epochs_train + 1 , eval_acc_3, 'm' ,linestyle = 'dashed', label = 'Training Loss')
 #plt.plot(epochs_train + 1 , eval_acc_4, 'y' ,linestyle = 'dashed', label = 'Training Loss')
-plt.grid(color='k', linestyle='-', linewidth=0.25)
+plt.grid(color='k', linestyle='-', linewidth=0.2)
 
-
-plt.xticks(np.arange(1, 300 + 1, step = 100))
+plt.xticks(np.arange(1, 501 + 1, step = 100), fontsize =14)
+plt.yticks(fontsize =14)
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy %')
 plt.legend(loc="lower right")
-plt.title("Accuracy")
+plt.title("Accuracy", fontsize =28)
 
-plt.subplot(1,3,3)
-plt.plot(epochs_train + 1 , train_inc, 'b', label = 'Training incorrect')
-plt.plot(epochs_eval  + 1 , eval_inc,  'r' ,linestyle = 'dashed',label = 'Validation incorrect')
-plt.grid(color='k', linestyle='-', linewidth=0.25)
-plt.xticks(np.arange(1, 300 + 1, step = 100))
+plt.subplot(2,2,3)
+plt.semilogy(epochs_train + 1 , train_inc, 'b', label = 'Training incorrect')
+plt.semilogy(epochs_eval  + 1 , eval_inc,  'r' ,linestyle = 'dashed',label = 'Validation incorrect')
+plt.grid(color='k', linestyle='-', linewidth=0.2)
+plt.xticks(np.arange(1, 501 + 1, step = 100), fontsize =14)
+plt.yticks(fontsize =14)
 plt.xlabel('Epochs')
-plt.ylabel('log incorrect')
+plt.ylabel('Log #incorrect seg')
 plt.legend(loc="upper right")
-plt.title("Log Incorrect")
+plt.title("Number of Incorrect", fontsize =28)
 
 
 #%% Plot softmax probabilities for a single slice

@@ -686,7 +686,7 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4, 
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 100
+num_epoch = 2
 
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
@@ -864,13 +864,13 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection_eps.png')
-#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
+#plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection_eps.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
 #%% Save model
 
-PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
-#PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
+#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
+PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
 
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
