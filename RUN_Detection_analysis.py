@@ -368,11 +368,17 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
-os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
-#os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
+user = 'K'
+
+if user == 'M':
+    os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+if user == 'K':
+    os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+else:
+    os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
+
 from load_data_gt_im_sub import load_data_sub
-user = 'M'
+
 #user = 'K' 
 
 """
@@ -591,13 +597,14 @@ if __name__ == "__main__":
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
 
 #%% Load Model
-#PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
-#PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
 
-#PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-
-PATH_unet_ed =  '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal_500.pt'
-PATH_resnet_ed = '/Users/michalablicher/Desktop/Trained_Detection_dia_state.pt'
+if user == 'K':
+    PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
+    #PATH_state = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtestate.pt"
+if user == 'M':
+    #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
+    PATH_unet_ed =  '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal_500.pt'
+    PATH_resnet_ed = '/Users/michalablicher/Desktop/Trained_Detection_dia_state.pt'
 
 # Load
 print('device = ', device)

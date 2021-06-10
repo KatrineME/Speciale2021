@@ -194,14 +194,23 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    unet.cuda()
+    
+    if device == 'cuda':
+        unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
 
 #%% Specify directory
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
-from load_data_gt_im_sub import load_data_sub
 user = 'GPU'
+
+if user == 'M':
+    os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+if user == 'K':
+    os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+if user == 'GPU':
+    os.chdir('/home/katrine/Speciale2021/Speciale2021')
+    
+    
+from load_data_gt_im_sub import load_data_sub
 
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
@@ -231,7 +240,13 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 
 print('Data loaded+concat')
 #%%
-out_soft = np.zeros((6, 337, 4, 128, 128))
+H = 128
+W = 128
+CV_folds = 6
+data_im = im_test_ed_sub.shape[0]
+
+
+out_soft = np.zeros((CV_folds, data_im, 4, H, W))
 
 im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
@@ -250,6 +265,9 @@ for fold in range(0,6):
         
     del path_model, model, out
     print('Done for fold',fold)
+
+PATH_out_soft = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
+torch.save(out_soft, PATH_out_soft)
 
 """
 #%% Run model0
