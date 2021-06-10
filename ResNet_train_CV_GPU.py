@@ -791,7 +791,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     # Init the neural network
     #network = model()
-    model.apply(weights_init)
+    #model.apply(weights_init)
     
     # Initialize optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
