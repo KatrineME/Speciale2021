@@ -965,18 +965,18 @@ epochs_eval = np.arange(len(eval_losses))
 plt.figure(dpi=200)
 plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
 plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
-plt.xticks(np.arange(1,num_epoch +1, step = 10))
+plt.xticks(np.arange(1,num_epochs +1, step = 10))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-#plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection_eps.png')
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
+plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection_eps.png')
+#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
 #%% Save model
 
-#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
+PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
+#PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
 torch.save(model, PATH_model)
 
 
