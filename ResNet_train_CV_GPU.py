@@ -628,7 +628,7 @@ out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=to
 out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
 
 # training data after U-Net
-out_image_es = out_softmax_unet[0:253,:,:,:]
+out_image_es = out_softmax_unet[0:252,:,:,:]
 
 #%% One hot encoding
 """
