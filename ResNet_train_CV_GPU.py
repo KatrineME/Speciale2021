@@ -428,14 +428,14 @@ gt_test_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num
 #%% Load U-NET
 #% BayesUNet
 # recursive implementation of Unet
-
+"""
 def weights_init(m):
     classname = m.__class__.__name__
     if classname.find('Conv2d') != -1:
     
         nn.init.kaiming_normal_(m.weight)
         m.bias.data.zero_()
-
+"""
 
 class UNet(nn.Module):
     def __init__(self, num_classes=3, in_channels=1, initial_filter_size=64, kernel_size=3, num_downs=4,
@@ -776,7 +776,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     # Init the neural network
     #network = unet()
-    #model.apply(weights_init)
+    model.apply(weights_init)
     
     # Initialize optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
