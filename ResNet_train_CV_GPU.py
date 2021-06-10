@@ -719,7 +719,7 @@ T_eval  = T[train_amount:,:,:,:]
 """
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 1#50
+num_epochs = 10#50
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -737,7 +737,7 @@ kfold = KFold(n_splits=k_folds, shuffle=True)
 print('--------------------------------')
 
 # Prep data for dataloader
-batch_size   = 10
+batch_size   = 32
 
 fold_train_losses = []
 fold_eval_losses  = []
@@ -776,10 +776,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     # Init the neural network
     #network = unet()
-    unet.apply(weights_init)
+    #model.apply(weights_init)
     
     # Initialize optimizer
-    optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5)
     
@@ -803,7 +803,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
    
     for epoch in range(num_epochs):  # loop over the dataset multiple times
 
-        unet.train()
+        model.train()
         print('Epoch train =',epoch)
         #0.0  
         for i, train_data in enumerate(zip(ins_train, labs_train)):
@@ -867,10 +867,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
         #print('train_results', train_results)
         #print('--------------------------------')
         #results[fold] = 100.0 * (correct / total)
-        
-        unet.eval()
+      
+        model.eval()
         print('Epoch eval=',epoch)
-         
+       
         for j, (eval_data) in enumerate(zip(ins_eval, labs_eval)):
             # get the inputs
             #inputs, labels = data
@@ -879,6 +879,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             
             #inputs, labels = data
             inputs = Tensor(ims)
+            print('train_data = ', inputs.shape)
             inputs = inputs.cuda()
             
             labels = Tensor(np.squeeze(la))
@@ -945,7 +946,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
+    PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
 
         
@@ -964,7 +965,7 @@ epochs_eval = np.arange(len(eval_losses))
 plt.figure(dpi=200)
 plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
 plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
-plt.xticks(np.arange(1,num_epoch+1, step = 10))
+plt.xticks(np.arange(1,num_epoch +1, step = 10))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
