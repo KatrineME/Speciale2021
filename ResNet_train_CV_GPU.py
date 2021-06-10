@@ -578,13 +578,14 @@ class BayesUNet(UNet):
         return self
 
     def eval(self, mc_dropout=False):"""
-        """Sets the module in evaluation mode.
+"""Sets the module in evaluation mode.
 
         This has any effect only on certain modules. See documentations of
         particular modules for details of their behaviors in training/evaluation
         mode, if they are affected, e.g. :class:`Dropout`, :class:`BatchNorm`,
         etc.
-        """ """
+        """
+"""
         return self.train(False, mc_dropout=mc_dropout)
 
 if __name__ == "__main__":
