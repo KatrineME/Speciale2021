@@ -342,14 +342,12 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     for epoch in range(num_epochs):  # loop over the dataset multiple times
     
         unet.train()
-        #print('Epoch train =',epoch)
+        print('Epoch train =',epoch)
         #0.0  
         for i, (train_data) in enumerate(train_dataloader):
             # get the inputs
-            print('train_data = ', train_data.shape)
             #inputs, labels = data
             inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
-            #%%
             inputs = inputs.cuda()
             
             labels = train_data[:,1,:,:]
@@ -457,7 +455,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         
         lr_get   = lr_scheduler.get_lr()[0]
         #lr_param = optimizer.param_groups[0]['lr']
-        print(i, lr_get)
+        print('learning_rate = ', i, lr_get)
         lr_scheduler.step()
 
     fold_train_losses.append(train_losses)
