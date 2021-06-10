@@ -592,6 +592,9 @@ if __name__ == "__main__":
     unet.cuda()
     
 #%% Load Model
+
+# OBS INFERENCE IS ALREADY DONE IN OTHER SCRIPT - JUST LOAD THE OUTPUT PROBABILITIES
+"""
 PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_500.pt'
 #PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
 
@@ -614,6 +617,19 @@ for i, (im) in enumerate(im_data):
     im = Tensor(im).cuda()
     out_trained_es = unet_es(im)
     out_image_es[i,:,:,:] = out_trained_es["softmax"].detach().cpu().numpy()    
+
+"""
+# LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
+#% Load softmax from ensemble models
+PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
+out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
+
+# mean them over dim=0
+out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
+
+# training data after U-Net
+out_image_es = out_softmax_unet[0:253,:,:,:]
+
 
 #%% One hot encoding
 """
@@ -826,13 +842,14 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-#plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection_eps.png')
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
+
+plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection_eps.png')
+#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
 #%% Save model
 
-#PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
-PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
+PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_ensem.pt"
+#PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
 torch.save(model, PATH_model)
 
 

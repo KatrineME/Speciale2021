@@ -371,16 +371,17 @@ if __name__ == "__main__":
     n_classes  = 2
     model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     #model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    #model.cuda()
+    if device =='cuda':
+        model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
-os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 #os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 from load_data_gt_im_sub import load_data_sub
-user = 'M'
-#user = 'K' 
+#user = 'M'
+user = 'K' 
 
 """
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
@@ -603,26 +604,34 @@ if __name__ == "__main__":
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
 
-PATH_unet_ed =  '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal_500.pt'
-PATH_resnet_ed = '/Users/michalablicher/Desktop/Trained_Detection_dia_state.pt'
+#PATH_unet_ed =  '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal_500.pt'
+#PATH_resnet_ed = '/Users/michalablicher/Desktop/Trained_Detection_dia_state.pt'
 
 # Load
-print('device = ', device)
-unet_ed   = torch.load(PATH_unet_ed,   map_location=torch.device(device))
-resnet_ed = torch.load(PATH_resnet_ed, map_location=torch.device(device))
+#print('device = ', device)
+#unet_ed   = torch.load(PATH_unet_ed,   map_location=torch.device(device))
+#resnet_ed = torch.load(PATH_resnet_ed, map_location=torch.device(device))
 
 
 #%% Run model
 #unet_es = torch.load(PATH_unet_es, map_location=torch.device('cpu'))
-unet_es = torch.load(PATH_unet_ed, map_location=torch.device('cpu'))
+#unet_es = torch.load(PATH_unet_ed, map_location=torch.device('cpu'))
 
 #unet_es.eval()
 #out_trained_es = unet_es(Tensor(im_test_es_res))
 #out_image_es   = out_trained_es["softmax"]
 
-unet_ed.eval()
-out_trained_ed = unet_ed(Tensor(im_test_es_res))
-out_image_ed   = out_trained_ed["softmax"]
+#unet_ed.eval()
+#out_trained_ed = unet_ed(Tensor(im_test_es_res))
+#out_image_ed   = out_trained_ed["softmax"]
+
+#%% Load softmax from ensemble models
+PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg.pt'
+out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
+
+# mean them over dim=0
+out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
+
 
 #%% One hot encoding
 """
