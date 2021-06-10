@@ -392,4 +392,92 @@ model_5.eval()
 out_5 = model_5(Tensor(im_test_ed_sub))
 out_5 = out_5["softmax"].detach().numpy()
 """
+#%%
 
+#Plot softmax probabilities for a single slice
+test_slice = 300
+alpha = 0.4
+
+fig = plt.figure()
+
+class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
+plt.figure(dpi=200, figsize=(18,32))
+
+w = 0.1
+
+for fold_model in range (0,6):
+    out_img_ed = np.squeeze(out_soft[fold_model,test_slice,:,:,:])
+    seg_met_dia = np.argmax(out_soft[fold_model,:,:,:], axis=1)
+    seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4)
+    
+    #Reference annotation
+    plt.suptitle('Diastolic phase: test image at slice %i for CV folds' %test_slice, fontsize=30, y=0.9)
+    plt.subplot(7, 4, 1)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,0])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.ylabel('Reference', fontsize=16)
+    plt.title('Background', fontsize=16)
+    
+    plt.subplot(7, 4, 2)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,1])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.title('Right ventricle', fontsize=16)
+    
+    plt.subplot(7, 4, 3)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,2])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.title('Myocardium', fontsize=16)
+    
+    plt.subplot(7, 4, 4)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,3])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.title('Left ventricle', fontsize=16)
+    
+    
+    #CV model segmentations
+    plt.subplot(7, 4, 1+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(seg_dia[test_slice,:,:,0])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.ylabel('CV fold {}'.format(fold_model), fontsize=16)
+    
+    plt.subplot(7, 4, 2+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(seg_dia[test_slice,:,:,1])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    
+    plt.subplot(7, 4, 3+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(seg_dia[test_slice,:,:,2])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    
+    plt.subplot(7, 4, 4+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(seg_dia[test_slice,:,:,3])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+        
+    
+    """
+    plt.imshow(seg_dia[test_slice,:,:,i])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.title(class_title[i], fontsize =16)
+    plt.xticks(rotation=40, fontweight='light', fontsize=7)
+    plt.yticks(horizontalalignment='right',fontweight='light',fontsize=7)
+   
+    if i == 0:
+        plt.ylabel('Argmax fold {}'.format(fold_model), fontsize=14)
+        
+
+    plt.subplot(7, 4, i+1+4)     
+    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
+    plt.imshow(ref_dia[test_slice,:,:,i])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    if i == 0:
+        plt.ylabel('Reference', fontsize=14)
+        
+    """
+plt.show()  
