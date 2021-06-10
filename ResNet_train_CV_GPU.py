@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 from torch.autograd import Variable
 from torch import Tensor
 from torch.utils.data import DataLoader
+from sklearn.model_selection import KFold
 
 BatchNorm = nn.BatchNorm2d
 DropOut   = nn.Dropout2d
@@ -654,7 +655,7 @@ print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 input_concat = torch.cat((im,umap,seg), dim=1)
 
 #%% Distance transform maps
-os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from SI_error_func import dist_trans, cluster_min
 
@@ -707,7 +708,7 @@ T_j[T_j >= 1 ] = 1
 
 #%% Prep data
 T = np.expand_dims(T_j, axis=1)
-
+"""
 train_amount = 200
 
 input_concat_train = input_concat[0:train_amount,:,:,:]
@@ -715,10 +716,10 @@ input_concat_eval  = input_concat[train_amount:,:,:,:]
 
 T_train = Tensor(T[0:train_amount,:,:,:])
 T_eval  = T[train_amount:,:,:,:]
-
+"""
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 50
+num_epochs = 1#50
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -736,10 +737,7 @@ kfold = KFold(n_splits=k_folds, shuffle=True)
 print('--------------------------------')
 
 # Prep data for dataloader
-data_train   = Tensor((np.squeeze(im_train_sub), gt_train_sub))
-data_train_n = data_train.permute(1,0,2,3)
-dataset      = data_train_n
-batch_size   = 32
+batch_size   = 10
 
 fold_train_losses = []
 fold_eval_losses  = []
@@ -752,7 +750,7 @@ fold_eval_incorrect = []
 #%% Traning with cross validation
 
 # K-fold Cross Validation model evaluation
-for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat_train)):
+for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     # Print
     print(f'FOLD {fold}')
     print('--------------------------------')
@@ -762,9 +760,19 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat_train)):
     test_subsampler  = torch.utils.data.SubsetRandomSampler(test_ids)
     
     # Define data loaders for training and testing data in this fold
-    train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
-    eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
-   
+    train_dataloader_input = torch.utils.data.DataLoader(input_concat, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
+    train_dataloader_label  = torch.utils.data.DataLoader(T, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
+    
+    ins_train  = next(iter(train_dataloader_input))
+    labs_train = next(iter(train_dataloader_label))
+        
+    # Define data loaders for training and testing data in this fold
+    eval_dataloader_input = torch.utils.data.DataLoader(input_concat, batch_size=batch_size, sampler=test_subsampler, drop_last=True)
+    eval_dataloader_label  = torch.utils.data.DataLoader(T, batch_size=batch_size, sampler=test_subsampler, drop_last=True)
+    
+    ins_eval  = next(iter(eval_dataloader_input))
+    labs_eval = next(iter(eval_dataloader_label))
+       
     
     # Init the neural network
     #network = unet()
@@ -790,34 +798,38 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat_train)):
     total_e         = 0.0
     correct_e       = 0.0
     incorrect_e     = 0.0
-
+    ims = np.zeros((ins_train.shape))
+    la = np.zeros((labs_eval.shape))
+   
     for epoch in range(num_epochs):  # loop over the dataset multiple times
-    
+
         unet.train()
         print('Epoch train =',epoch)
         #0.0  
-        for i, (train_data) in enumerate(train_dataloader):
+        for i, train_data in enumerate(zip(ins_train, labs_train)):
             # get the inputs
-            #print('train_data = ', train_data.shape)
+            ims[i,:,:,:] = train_data[0]
+            la[i,:,:,:]  = train_data[1]
+            
             #inputs, labels = data
-            inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
+            inputs = Tensor(ims)
             inputs = inputs.cuda()
             
-            labels = train_data[:,1,:,:]
+            labels = Tensor(np.squeeze(la))
             labels = labels.cuda()
             #print('i=',i)
             # wrap them in Variable
             inputs, labels = Variable(inputs), Variable(labels)
             labels = labels.long()
-            
+                       
             # Clear the gradients
             optimizer.zero_grad()
            
             # Forward Pass
-            output = unet(inputs)     
+            output = model(inputs)     
             output = output["log_softmax"]
             #print('output shape = ', output.shape)
-            
+
             # Find loss
             loss = loss_function(output, labels)
             #print('loss = ', loss)
@@ -859,21 +871,25 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat_train)):
         unet.eval()
         print('Epoch eval=',epoch)
          
-        for j, (eval_data) in enumerate(eval_dataloader):
+        for j, (eval_data) in enumerate(zip(ins_eval, labs_eval)):
             # get the inputs
             #inputs, labels = data
-            inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
+            ims[i,:,:,:] = eval_data[0]
+            la[i,:,:,:]  = eval_data[1]
+            
+            #inputs, labels = data
+            inputs = Tensor(ims)
             inputs = inputs.cuda()
-            labels = eval_data[:,1,:,:]
+            
+            labels = Tensor(np.squeeze(la))
             labels = labels.cuda()
             #print('i=',i)
-    
             # wrap them in Variable
             inputs, labels = Variable(inputs), Variable(labels)
             labels = labels.long()
             
             # Forward pass
-            output = unet(inputs)     
+            output = model(inputs)     
             output = output["log_softmax"]
             # Find loss
             loss = loss_function(output, labels)
