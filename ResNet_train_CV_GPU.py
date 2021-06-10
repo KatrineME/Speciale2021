@@ -884,7 +884,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
         #results[fold] = 100.0 * (correct / total)
       
         model.eval()
-        print('Epoch eval=',epoch)
+        #print('Epoch eval=',epoch)
        
         for j, (eval_data) in enumerate(zip(ins_eval, labs_eval)):
             # get the inputs
@@ -894,7 +894,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             
             #inputs, labels = data
             inputs = Tensor(ims)
-            print('train_data = ', inputs.shape)
+            #print('train_data = ', inputs.shape)
             inputs = inputs.cuda()
             
             labels = Tensor(np.squeeze(la))
