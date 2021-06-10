@@ -194,9 +194,13 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
+<<<<<<< HEAD
     
     if device == 'cuda':
         unet.cuda()
+=======
+    unet.cuda()
+>>>>>>> parent of 1497592 (ensemble setup)
     #torchsummary.summary(model, (1, 128, 128))
 
 #%% Specify directory
@@ -211,6 +215,10 @@ if user == 'GPU':
     
     
 from load_data_gt_im_sub import load_data_sub
+<<<<<<< HEAD
+=======
+user = 'GPU'
+>>>>>>> parent of 1497592 (ensemble setup)
 
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
@@ -240,6 +248,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 
 print('Data loaded+concat')
 #%%
+<<<<<<< HEAD
 H = 128
 W = 128
 CV_folds = 6
@@ -247,6 +256,9 @@ data_im = im_test_ed_sub.shape[0]
 
 
 out_soft = np.zeros((CV_folds, data_im, 4, H, W))
+=======
+out_soft = np.zeros((6, 337, 4, 128, 128))
+>>>>>>> parent of 1497592 (ensemble setup)
 
 im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
@@ -266,9 +278,12 @@ for fold in range(0,6):
     del path_model, model, out
     print('Done for fold',fold)
 
+<<<<<<< HEAD
 PATH_out_soft = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
 torch.save(out_soft, PATH_out_soft)
 
+=======
+>>>>>>> parent of 1497592 (ensemble setup)
 """
 #%% Run model0
 path_model_0 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold0.pt'
