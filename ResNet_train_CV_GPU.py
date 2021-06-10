@@ -436,7 +436,7 @@ def weights_init(m):
         nn.init.kaiming_normal_(m.weight)
         m.bias.data.zero_()
 """
-
+"""
 class UNet(nn.Module):
     def __init__(self, num_classes=3, in_channels=1, initial_filter_size=64, kernel_size=3, num_downs=4,
                  norm_layer=nn.InstanceNorm2d, drop_prob=0.):
@@ -555,7 +555,7 @@ class BayesUNet(UNet):
         super(BayesUNet, self).__init__(num_classes, in_channels, initial_filter_size, kernel_size, num_downs,
                  norm_layer=norm_layer, drop_prob=drop_prob)
 
-    def train(self, mode=True, mc_dropout=False):
+    def train(self, mode=True, mc_dropout=False):"""
         """ Sets the module in training mode.
              OVERWRITING STANDARD PYTORCH METHOD for nn.Module
 
@@ -566,7 +566,7 @@ class BayesUNet(UNet):
 
         Returns:
             Module: self
-        """
+        """ """
         self.training = mode
         for module_name, module in self.named_modules():
             module.training = mode
@@ -577,20 +577,20 @@ class BayesUNet(UNet):
 
         return self
 
-    def eval(self, mc_dropout=False):
+    def eval(self, mc_dropout=False):"""
         """Sets the module in evaluation mode.
 
         This has any effect only on certain modules. See documentations of
         particular modules for details of their behaviors in training/evaluation
         mode, if they are affected, e.g. :class:`Dropout`, :class:`BatchNorm`,
         etc.
-        """
+        """ """
         return self.train(False, mc_dropout=mc_dropout)
 
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    unet.cuda()
+    unet.cuda() """
     
 #%% Load Model
 
@@ -789,8 +789,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
        
     
     # Init the neural network
-    network = model()
-    network.apply(weights_init)
+    #network = model()
+    model.apply(weights_init)
     
     # Initialize optimizer
     optimizer = torch.optim.Adam(network.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
