@@ -278,12 +278,9 @@ for fold in range(0,6):
     del path_model, model, out
     print('Done for fold',fold)
 
-<<<<<<< HEAD
 PATH_out_soft = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
 torch.save(out_soft, PATH_out_soft)
 
-=======
->>>>>>> parent of 1497592 (ensemble setup)
 """
 #%% Run model0
 path_model_0 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold0.pt'
