@@ -556,7 +556,7 @@ class BayesUNet(UNet):
                  norm_layer=norm_layer, drop_prob=drop_prob)
 
     def train(self, mode=True, mc_dropout=False):"""
-        """ Sets the module in training mode.
+""" Sets the module in training mode.
              OVERWRITING STANDARD PYTORCH METHOD for nn.Module
 
             OR
