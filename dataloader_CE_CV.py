@@ -320,7 +320,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     # Initialize optimizer
     optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=100, gamma=0.1)
+    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=1000, gamma=0.1)
     #lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=2, factor=0.1)
     
     #% Training
@@ -342,13 +342,14 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     for epoch in range(num_epochs):  # loop over the dataset multiple times
     
         unet.train()
-        print('Epoch train =',epoch)
+        #print('Epoch train =',epoch)
         #0.0  
         for i, (train_data) in enumerate(train_dataloader):
             # get the inputs
-            #print('train_data = ', train_data.shape)
+            print('train_data = ', train_data.shape)
             #inputs, labels = data
             inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
+            #%%
             inputs = inputs.cuda()
             
             labels = train_data[:,1,:,:]
