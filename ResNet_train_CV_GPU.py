@@ -781,7 +781,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     # Initialize optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5)
+    #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5)
     
     #% Training
     train_losses  = []
@@ -923,9 +923,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
         
         
         # Learning rate scheduler
-        lr_scheduler.step()
+        #lr_scheduler.step()
         #lr_scheduler.get_lt()[0]
-        optimizer.param_groups[0]['lr']
+        #optimizer.param_groups[0]['lr']
         
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
@@ -947,7 +947,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_fold{}.pt".format(fold)
-    torch.save(unet, PATH_model)
+    torch.save(model, PATH_model)
 
         
 m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
@@ -958,26 +958,51 @@ m_fold_train_incorrect = np.mean(fold_train_incorrect, axis = 0)
 m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)       
 
 print('Finished Training + Evaluation')
-#%% Plot loss curve
-epochs = np.arange(len(train_losses))
-epochs_eval = np.arange(len(eval_losses))
+#%% Plot loss curves
+epochs_train = np.arange(len(train_losses))
+epochs_eval  = np.arange(len(eval_losses))
 
-plt.figure(dpi=200)
-plt.plot(epochs + 1 , train_losses, 'b', label='Training Loss')
-plt.plot(epochs_eval + 1 , eval_losses, 'r', label='Validation Loss')
-plt.xticks(np.arange(1,num_epochs +1, step = 10))
+plt.figure(figsize=(30, 15), dpi=200)
+plt.subplot(1,3,1)
+plt.plot(epochs_train + 1 , m_fold_train_losses, 'b', label = 'Training Loss')
+plt.plot(epochs_eval  + 1 , m_fold_eval_losses,  'r', label = 'Validation Loss')
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
 plt.title("Loss function")
-plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_detection_eps.png')
-#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_detection.png')
 
-#%% Save model
+plt.subplot(1,3,2)
+plt.plot(epochs_train + 1 , m_fold_train_res, 'b', label = 'Training Acc')
+plt.plot(epochs_eval  + 1 , m_fold_eval_res,  'r', label = 'Validation Acc')
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy %')
+plt.legend(loc="upper right")
+plt.title("Accuracy")
 
-PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_eps.pt"
-#PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dia_state.pt"
-torch.save(model, PATH_model)
+plt.subplot(1,3,3)
+plt.plot(epochs_train + 1 , m_fold_train_incorrect, 'b', label = 'Training Acc')
+plt.plot(epochs_eval  + 1 , m_fold_eval_incorrect,  'r', label = 'Validation Acc')
+plt.xticks(np.arange(1, num_epochs + 1, step = 50))
+plt.xlabel('Epochs')
+plt.ylabel('incorrect %')
+plt.legend(loc="upper right")
+plt.title("Incorrect")
+
+#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
+plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_loss.png')
+
+#%%
+t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
+t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res]         # loss and accuracy for each epoch
+
+T = [t_res_mean, t_res] # listed together
+
+PATH_results = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
+#PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
+torch.save(T, PATH_results)
+
 
 
 
