@@ -733,7 +733,7 @@ T_eval  = T[train_amount:,:,:,:]
 """
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 10#50
+num_epochs = 100
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
