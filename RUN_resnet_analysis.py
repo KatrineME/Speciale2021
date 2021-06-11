@@ -694,7 +694,7 @@ plt.title('Error')
 input_concat = torch.cat((im,umap,seg), dim=1)
 
 
-out_test    = resnet_ed(input_concat)
+out_test    = model(input_concat)
 output_test = out_test['softmax'].detach().numpy()
 
 #%% Visualize output from detection network
