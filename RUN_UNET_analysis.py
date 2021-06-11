@@ -269,7 +269,25 @@ out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
 out_image_ed    = out_trained_ed["softmax"]
 
 #%% Argmax and one-hot encoding
-seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
+#seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
+
+
+
+
+
+
+
+
+
+
+
+#%% Load softmax from ensemble models
+PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg.pt'
+out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
+
+# mean them over dim=0
+out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
+seg_met_dia = np.argmax(out_softmax_unet, axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().numpy()
@@ -489,7 +507,8 @@ for i in range(0,len(test_index)):
     s += test_index[i].shape[0] 
      
 #%% Calculate EF        
-os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 
 from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 #%%
@@ -556,9 +575,19 @@ for i in range(0,seg_met_dia.shape[0]):
         pass 
     
 mean_dice_dia = np.mean(dice_dia, axis=0)  
+std_dice_dia = np.std(dice_dia,  axis=0)
+
 mean_haus_dia = np.mean(haus_dia, axis=0)
+std_haus_dia = np.std(haus_dia,  axis=0)
+
 print('mean dice = ',mean_dice_dia)  
+print('std dice = ', std_dice_dia) 
+
 print('mean haus = ',mean_haus_dia)
+print('std haus = ', std_haus_dia)
+
+
+
 
 #%% Calculate recall + precision
 
