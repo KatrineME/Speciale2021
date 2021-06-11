@@ -852,9 +852,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             total     += (labels.shape[0])*(16*16)
             correct   += (predicted == labels).sum().item()
             incorrect += (predicted != labels).sum().item()
-        
+            
         train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
-        #print('epoch loss = ', train_losses)
+        print('epoch loss = ', train_losses)
     
         #train_losses.append(np.mean(batch_loss))
         train_loss = 0.0 #[]
@@ -862,6 +862,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
         # Print accuracy
         #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
         train_results.append(100.0 * correct / total)
+        print('epoch accuracy = ', train_results)
         train_incorrect.append(incorrect)
         correct   = 0.0
         total     = 0.0
