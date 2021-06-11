@@ -586,6 +586,9 @@ print('std dice = ', std_dice_dia)
 print('mean haus = ',mean_haus_dia)
 print('std haus = ', std_haus_dia)
 
+
+
+
 #%% Calculate recall + precision
 
 recall_dia    = np.zeros((seg_met_dia.shape[0],3))

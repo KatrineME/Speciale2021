@@ -848,7 +848,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             train_loss += loss.item() #.detach().cpu().numpy()
             
             # Set total and correct
-            predicted  = output[:,1,:,:]
+            predicted  = torch.exp(output[:,1,:,:])
+            predicted[predicted < 0.5] = 0
+            predicted[predicted > 0.5] = 1
             total     += (labels.shape[0])*(16*16)
             correct   += (predicted == labels).sum().item()
             incorrect += (predicted != labels).sum().item()
@@ -900,7 +902,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             eval_loss += loss.item() #.detach().cpu().numpy()
             
             # Set total and correct
-            predicted_e = output[:,1,:,:]
+            predicted_e = torch.exp(output[:,1,:,:])
+            predicted_e[predicted_e < 0.5] = 0
+            predicted_e[predicted_e > 0.5] = 1
             total_e     += (labels.shape[0])*(16*16)
             correct_e   += (predicted_e == labels).sum().item()
             incorrect_e += (predicted_e != labels).sum().item()
@@ -992,7 +996,7 @@ plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
-plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_loss.png')
+plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_loss_accbin.png')
 
 #%%
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
