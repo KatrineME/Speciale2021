@@ -251,7 +251,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal_optuna.pt'
 
 #%% Import results from training (Loss + Accuracy)
-PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_train_results_500.pt'
+PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_train_results_scheduler.pt'
 res_ed = torch.load(PATH_res_ed, map_location=torch.device('cpu'))
 
 #%% Load model
@@ -307,11 +307,11 @@ eval_loss = out_mean[1]
 
 train_loss_0 = out_one[0][0]
 eval_loss_0 = out_one[1][0]
-train_loss_1 = out_one[0]1]
+train_loss_1 = out_one[0][1]
 eval_loss_1 = out_one[1][1]
-train_loss_2 = out_one[0]2]
+train_loss_2 = out_one[0][2]
 eval_loss_2 = out_one[1][2]
-train_loss_3 = out_one[0]3]
+train_loss_3 = out_one[0][3]
 eval_loss_3 = out_one[1][3]
 
 train_acc = out_mean[2]
@@ -331,73 +331,62 @@ train_acc_6 = out_one[2][5]
 eval_acc_6 = out_one[3][5]
 
 train_inc = (out_mean[4])
-eval_inc = (out_mean[5])
+eval_inc = (out_mean[5])*5
 #%%
 t1 = np.arange(len(train_acc_1[0:100]))
 
 plt.figure(figsize=(12, 12),dpi=400)
-#plt.plot(t1, train_acc_1[0:100], 'b', label = 'Training Loss')
-#plt.plot(t1 , train_acc_2[0:100], 'g', label = 'Training Loss')
-#plt.plot(t1 , train_acc_3[0:100], 'r', label = 'Training Loss')
-#plt.plot(t1 , train_acc_4[0:100], 'y', label = 'Training Loss')
-#plt.plot(t1 , train_acc_5[0:100], 'm', label = 'Training Loss')
+plt.plot(t1, train_acc_1[0:100], 'b', label = 'Training Loss')
+plt.plot(t1 , train_acc_2[0:100], 'g', label = 'Training Loss')
+plt.plot(t1 , train_acc_3[0:100], 'r', label = 'Training Loss')
+plt.plot(t1 , train_acc_4[0:100], 'y', label = 'Training Loss')
+plt.plot(t1 , train_acc_5[0:100], 'm', label = 'Training Loss')
 plt.plot(t1 , train_acc_6[0:100], 'c', label = 'Training Loss')
 
-#plt.plot(t1, eval_acc_1[0:100], 'b' ,linestyle = 'dashed', label = 'eval Loss')
-#plt.plot(t1 , eval_acc_2[0:100], 'g',linestyle = 'dashed', label = 'eval Loss')
-#plt.plot(t1 , eval_acc_3[0:100], 'r',linestyle = 'dashed', label = 'eval Loss')
-#plt.plot(t1 , eval_acc_4[0:100], 'y',linestyle = 'dashed', label = 'eval Loss')
-#plt.plot(t1 , eval_acc_5[0:100], 'm',linestyle = 'dashed', label = 'eval Loss')
+plt.plot(t1, eval_acc_1[0:100], 'b' ,linestyle = 'dashed', label = 'eval Loss')
+plt.plot(t1 , eval_acc_2[0:100], 'g',linestyle = 'dashed', label = 'eval Loss')
+plt.plot(t1 , eval_acc_3[0:100], 'r',linestyle = 'dashed', label = 'eval Loss')
+plt.plot(t1 , eval_acc_4[0:100], 'y',linestyle = 'dashed', label = 'eval Loss')
+plt.plot(t1 , eval_acc_5[0:100], 'm',linestyle = 'dashed', label = 'eval Loss')
 plt.plot(t1 , eval_acc_6[0:100], 'c',linestyle = 'dashed', label = 'eval Loss')
 
 #%% Plot function
 epochs_train = np.arange(len(train_loss))
 epochs_eval  = np.arange(len(eval_loss))
 
-plt.figure(figsize=(17, 17),dpi=400)
+plt.figure(figsize=(15, 15),dpi=400)
 #plt.rcParams.update({'font.size': 26})
 plt.subplot(2,2,1)
 plt.plot(epochs_train + 1 , train_loss, 'b', label = 'Training Loss')
 plt.plot(epochs_eval  + 1 , eval_loss , 'r', label = 'Validation Loss')
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-plt.xticks(np.arange(1, 501 + 1, step = 100), fontsize =14)
+plt.xticks(np.arange(0, len(epochs_train) + 2, step = 20), fontsize =14)
 plt.yticks(fontsize =14)
-plt.xlabel('Epochs')
-plt.ylabel('Cross-Entropy Loss')
-plt.legend(loc="upper right")
+plt.xlabel('Epochs', fontsize = 16)
+plt.ylabel('Cross-Entropy Loss',  fontsize = 16)
+plt.legend(loc="upper right", fontsize = 16)
 plt.title('Loss function', fontsize =28)
 
 plt.subplot(2,2,2)
 plt.plot(epochs_train + 1 , train_acc, 'b', label = 'Training accuracy')
-#plt.plot(epochs_train + 1 , train_acc_1, 'g' , label = 'Training Loss')
-#plt.plot(epochs_train + 1 , train_acc_2, 'r', label = 'Training Loss')
-#plt.plot(epochs_train + 1 , train_acc_3, 'm', label = 'Training Loss')
-#plt.plot(epochs_train + 1 , train_acc_4, 'y', label = 'Training Loss')
-
-
 plt.plot(epochs_eval  + 1 , eval_acc,  'r',label = 'Validation accuracy')
-#plt.plot(epochs_train + 1 , eval_acc_1, 'g' ,linestyle = 'dashed', label = 'Training Loss')
-#plt.plot(epochs_train + 1 , eval_acc_2, 'r' ,linestyle = 'dashed', label = 'Training Loss')
-#plt.plot(epochs_train + 1 , eval_acc_3, 'm' ,linestyle = 'dashed', label = 'Training Loss')
-#plt.plot(epochs_train + 1 , eval_acc_4, 'y' ,linestyle = 'dashed', label = 'Training Loss')
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-
-plt.xticks(np.arange(1, 501 + 1, step = 100), fontsize =14)
+plt.xticks(np.arange(0, len(epochs_train) + 2, step = 20), fontsize =14)
 plt.yticks(fontsize =14)
-plt.xlabel('Epochs')
-plt.ylabel('Accuracy %')
-plt.legend(loc="lower right")
+plt.xlabel('Epochs', fontsize = 16)
+plt.ylabel('Accuracy %',  fontsize = 16)
+plt.legend(loc="lower right", fontsize = 16)
 plt.title("Accuracy", fontsize =28)
 
 plt.subplot(2,2,3)
 plt.semilogy(epochs_train + 1 , train_inc, 'b', label = 'Training incorrect')
 plt.semilogy(epochs_eval  + 1 , eval_inc,  'r' ,linestyle = 'dashed',label = 'Validation incorrect')
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-plt.xticks(np.arange(1, 501 + 1, step = 100), fontsize =14)
+plt.xticks(np.arange(0, len(epochs_train) + 2, step = 20), fontsize =14)
 plt.yticks(fontsize =14)
-plt.xlabel('Epochs')
-plt.ylabel('Log #incorrect seg')
-plt.legend(loc="upper right")
+plt.xlabel('Epochs', fontsize = 16)
+plt.ylabel('Log #incorrect seg',  fontsize = 16)
+plt.legend(loc="upper right", fontsize = 16)
 plt.title("Number of Incorrect", fontsize =28)
 
 

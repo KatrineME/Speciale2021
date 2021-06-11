@@ -218,18 +218,18 @@ os.chdir("/home/michala/training")                      # Server directory micha
 
 from load_data_gt_im_sub import load_data_sub
 
-
+"""
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('GPU','Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub('GPU','Systole','MINF')
 data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('GPU','Systole','NOR')
 data_im_es_RV,   data_gt_es_RV   = load_data_sub('GPU','Systole','RV')
-
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU','Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU','Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU','Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU','Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU','Diastole','RV')
+"""
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU','Systole','DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU','Systole','HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU','Systole','MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU','Systole','NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU','Systole','RV')
 
 
 #%% BATCH GENERATOR
@@ -476,7 +476,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_fold{}.pt".format(fold)
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
 
@@ -521,7 +521,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_CV_scheduler.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -530,7 +530,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_train_results_scheduler.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_train_results_scheduler.pt"
 torch.save(T, PATH_results)
 
 
