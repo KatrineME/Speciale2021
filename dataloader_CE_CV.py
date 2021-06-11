@@ -265,7 +265,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 100
+num_epochs = 300
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -313,6 +313,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
    
     
+    #HEG
     # Init the neural network
     #network = unet()
     unet.apply(weights_init)
@@ -320,7 +321,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     # Initialize optimizer
     optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=80)
+    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100)
     #lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=2, factor=0.1)
     
     #% Training
@@ -453,7 +454,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         
         # Learning rate scheduler
         
-        lr_get   = lr_scheduler.get_lr()[0]
+        lr_get   = lr_scheduler.get_last_lr()[0]
         #lr_param = optimizer.param_groups[0]['lr']
         print('learning_rate = ', i, lr_get)
         lr_scheduler.step()
