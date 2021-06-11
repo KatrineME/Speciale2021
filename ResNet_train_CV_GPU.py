@@ -725,7 +725,7 @@ T = np.expand_dims(T_j, axis=1)
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 100
+num_epochs = 10
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
