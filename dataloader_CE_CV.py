@@ -312,7 +312,6 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler, drop_last=True)
     eval_dataloader  = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler,  drop_last=True)
    
-    
     #HEG
     # Init the neural network
     #network = unet()
