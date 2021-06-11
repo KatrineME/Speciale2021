@@ -725,7 +725,7 @@ T = np.expand_dims(T_j, axis=1)
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 10
+num_epochs = 100
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -971,7 +971,7 @@ plt.figure(figsize=(30, 15), dpi=200)
 plt.subplot(1,3,1)
 plt.plot(epochs_train + 1 , m_fold_train_losses, 'b', label = 'Training Loss')
 plt.plot(epochs_eval  + 1 , m_fold_eval_losses,  'r', label = 'Validation Loss')
-plt.xticks(np.arange(1, num_epochs + 1, step = 50))
+plt.xticks(np.arange(1, num_epochs + 1, step = int(num_epochs/10)))
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend(loc="upper right")
@@ -980,7 +980,7 @@ plt.title("Loss function")
 plt.subplot(1,3,2)
 plt.plot(epochs_train + 1 , m_fold_train_res, 'b', label = 'Training Acc')
 plt.plot(epochs_eval  + 1 , m_fold_eval_res,  'r', label = 'Validation Acc')
-plt.xticks(np.arange(1, num_epochs + 1, step = 50))
+plt.xticks(np.arange(1, num_epochs + 1, step = int(num_epochs/10)))
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy %')
 plt.legend(loc="upper right")
@@ -989,7 +989,7 @@ plt.title("Accuracy")
 plt.subplot(1,3,3)
 plt.plot(epochs_train + 1 , m_fold_train_incorrect, 'b', label = 'Training Acc')
 plt.plot(epochs_eval  + 1 , m_fold_eval_incorrect,  'r', label = 'Validation Acc')
-plt.xticks(np.arange(1, num_epochs + 1, step = 50))
+plt.xticks(np.arange(1, num_epochs + 1, step = int(num_epochs/10)))
 plt.xlabel('Epochs')
 plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
