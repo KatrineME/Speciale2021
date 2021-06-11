@@ -796,7 +796,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     # Initialize optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
-    #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5)
+    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50)
     
     #% Training
     train_losses  = []
@@ -938,8 +938,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
         
         
         # Learning rate scheduler
-        #lr_scheduler.step()
-        #lr_scheduler.get_lt()[0]
+        lr_get = lr_scheduler.get_last_lr()[0]
+        lr_scheduler.step()
+        print('lr =', lr_get)
         #optimizer.param_groups[0]['lr']
         
     fold_train_losses.append(train_losses)
@@ -1014,7 +1015,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
+PATH_results = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results_T.pt"
 #PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
 torch.save(T, PATH_results)
 
