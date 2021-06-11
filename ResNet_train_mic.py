@@ -1034,10 +1034,10 @@ plt.title('Reference w. error')
 
 
 #%% Save model
-"""
+
 PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Det_dia.pt"
 PATH_state = "/home/michala/Speciale2021/Speciale2021/Trained_Det_dia.pt"
-
+"""
 #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia.pt"
 #PATH_state = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_state.pt"
 
