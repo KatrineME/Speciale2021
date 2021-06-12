@@ -364,10 +364,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Forward Pass
             output = unet(inputs)     
             output = output["log_softmax"]
+            out_e = torch.exp(output)
             #print('output shape = ', output.shape)
             
             # Find loss
-            loss = loss_function(output, labels)
+            loss = loss_function(out_e, labels)
             #print('loss = ', loss)
             
             # Calculate gradients
@@ -380,7 +381,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             train_loss += loss.item() #.detach().cpu().numpy()
             
             # Set total and correct
-            predicted  = torch.argmax(output, axis=1)
+            predicted  = torch.argmax(out_e, axis=1)
             total     += (labels.shape[0])*(128*128)
             correct   += (predicted == labels).sum().item()
             incorrect += (predicted != labels).sum().item()
@@ -422,15 +423,17 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Forward pass
             output = unet(inputs)     
             output = output["log_softmax"]
+            out_e = torch.exp(output)
+            
             # Find loss
-            loss = loss_function(output, labels)
+            loss = loss_function(out_e, labels)
             
             # Calculate loss
             #eval_loss.append(loss.item())
             eval_loss += loss.item() #.detach().cpu().numpy()
             
             # Set total and correct
-            predicted_e = torch.argmax(output, axis=1)
+            predicted_e = torch.argmax(out_e, axis=1)
             total_e     += (labels.shape[0])*(128*128)
             correct_e   += (predicted_e == labels).sum().item()
             incorrect_e += (predicted_e != labels).sum().item()
