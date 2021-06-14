@@ -242,7 +242,26 @@ failure_per_slice = np.sum(m_patch[:,1,:,:], axis=(1,2))
 failures = (np.count_nonzero(failure_per_slice)/failure_per_slice.shape[0])*100
 print('Failures in {} % of test slices'.format(failures))
 
+p = []
 
+p.append(data_gt_ed_DCM[num_train_res:num_test_res][0].shape[0])
+p.append(data_gt_ed_DCM[num_train_res:num_test_res][1].shape[0])
+
+
+p.append(data_gt_ed_HCM[num_train_res:num_test_res][0].shape[0])
+p.append(data_gt_ed_HCM[num_train_res:num_test_res][1].shape[0])
+p.append(data_gt_ed_MINF[num_train_res:num_test_res][0].shape[0])
+p.append(data_gt_ed_MINF[num_train_res:num_test_res][1].shape[0])
+
+
+p.append(data_gt_ed_NOR[num_train_res:num_test_res][0].shape[0])
+p.append(data_gt_ed_NOR[num_train_res:num_test_res][1].shape[0])
+
+p.append(data_gt_ed_RV[num_train_res:num_test_res][0].shape[0])
+p.append(data_gt_ed_RV[num_train_res:num_test_res][1].shape[0])  
+
+failure_per_patient = 
+    
 
 #%% Upsample
 
