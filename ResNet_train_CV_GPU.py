@@ -667,7 +667,7 @@ input_concat = torch.cat((im,umap,seg), dim=1)
 
 #%% Distance transform maps
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from SI_error_func import dist_trans, cluster_min
 
 error_margin_inside  = 2
@@ -852,7 +852,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             incorrect += (predicted != labels).sum().item()
             
         train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
-        #print('epoch loss = ', train_losses)
+        #print('epoch loss = ', train_ses)
     
         #train_losses.append(np.mean(batch_loss))
         train_loss = 0.0 #[]
