@@ -200,7 +200,10 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (1, 128, 128))
 
 #%% Specify directory
-user = 'GPU'
+if device == 'cuda':
+    user = 'GPU'
+else:
+    user = 'K'
 
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -255,27 +258,30 @@ im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=Fals
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
+        path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_200_fold{}.pt'.format(fold)
     if user == 'K':
-        path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
+        path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_200_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
     model.eval()
     for i, (im) in enumerate(im_data):
         im = Tensor.numpy(im)
         
-        out = model(Tensor(im).cuda())
+        if device == 'cuda':
+            out = model(Tensor(im).cuda())
+        else:
+            out = model(Tensor(im))
         out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
         
     del path_model, model, out
     print('Done for fold',fold)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
+    PATH_out_soft = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg_200dia.pt'
 if user == 'K':
     path_model = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg.pt'
 torch.save(out_soft, PATH_out_soft)
 
-"""
+""" OUT-COMMENTED PLOT STATEMENTS
 #%% Run model0
 path_model_0 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold0.pt'
 model_0 = torch.load(path_model_0, map_location=torch.device('cpu'))
@@ -392,25 +398,112 @@ for fold_model in range (0,6):
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,3])
     plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-        
-    
-    """
-    plt.imshow(seg_dia[test_slice,:,:,i])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    plt.title(class_title[i], fontsize =16)
-    plt.xticks(rotation=40, fontweight='light', fontsize=7)
-    plt.yticks(horizontalalignment='right',fontweight='light',fontsize=7)
-   
-    if i == 0:
-        plt.ylabel('Argmax fold {}'.format(fold_model), fontsize=14)
-        
 
-    plt.subplot(7, 4, i+1+4)     
-    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
-    plt.imshow(ref_dia[test_slice,:,:,i])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    if i == 0:
-        plt.ylabel('Reference', fontsize=14)
-        
-    """
 plt.show()  
+
+#%% Mean + argmax + one hot
+
+out_soft_mean = out_soft.mean(axis=0)
+out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
+out_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
+
+ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+#%%
+w = 0.1
+h = 0.3
+
+plt.figure(dpi=200)
+plt.suptitle('Averaged model for test image at slice: {}'.format(test_slice))
+
+plt.subplot(2,2,1)
+plt.subplots_adjust(hspace = h, wspace = w)
+plt.imshow(out_seg_mean[test_slice,:,:,0])
+plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('Background', fontsize=10)
+
+plt.subplot(2,2,2)
+plt.subplots_adjust(hspace = h, wspace = w)
+plt.imshow(out_seg_mean[test_slice,:,:,1])
+plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('Right ventricle', fontsize=10)
+
+plt.subplot(2,2,3)
+plt.subplots_adjust(hspace = h, wspace = w)
+plt.imshow(out_seg_mean[test_slice,:,:,2])
+plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('Myocardium', fontsize=10)
+
+plt.subplot(2,2,4)
+plt.subplots_adjust(hspace = h, wspace = w)
+plt.imshow(out_seg_mean[test_slice,:,:,3])
+plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('Left ventricle', fontsize=10)
+
+#%% Metrics
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
+
+dice = np.zeros((out_seg_mean.shape[0],3))
+haus = np.zeros((out_seg_mean.shape[0],3))
+
+# OBS OBS OBS OBS
+# dim[0] = BG
+# dim[1] = RV
+# dim[2] = MYO
+# dim[3] = LV
+
+for i in range(0,out_seg_mean.shape[0]):
+      
+    dice[i,0] = dc(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
+    dice[i,1] = dc(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
+    dice[i,2] = dc(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
+    
+    # If there is no prediction or annotation then don't calculate Hausdorff distance and
+    # skip to calculation for next class
+    h_count = 0
+    
+    if len(np.unique(ref[i,:,:,1]))!=1 and len(np.unique(out_seg_mean[i,:,:,1]))!=1:
+        haus[i,0]    = hd(out_seg_mean[i,:,:,1],ref[i,:,:,1])  
+        h_count += 1
+    else:
+        pass
+    
+    if len(np.unique(ref_dia[i,:,:,2]))!=1 and len(np.unique(out_seg_mean[i,:,:,2]))!=1:      
+        haus[i,1]    = hd(out_seg_mean[i,:,:,2],ref[i,:,:,2])  
+        h_count += 1
+    else:
+        pass
+    
+    if len(np.unique(ref_dia[i,:,:,3]))!=1 and len(np.unique(out_seg_mean[i,:,:,3]))!=1:
+        haus[i,2]    = hd(out_seg_mean[i,:,:,3],ref[i,:,:,3])  
+        h_count += 1
+    else:
+        pass
+    
+        pass        
+    if h_count!= 3:
+        print('Haus not calculated for all classes for slice: ', i)
+    else:
+        pass 
+    
+mean_dice = np.mean(dice, axis=0)  
+std_dice = np.std(dice,  axis=0)
+
+mean_haus = np.mean(haus, axis=0)
+std_haus = np.std(haus,  axis=0)
+
+print('mean dice = ',mean_dice)  
+print('std dice = ', std_dice) 
+
+print('mean haus = ',mean_haus)
+print('std haus = ', std_haus)
+
+#%%
+
+image = 314
+
+plt.figure(dpi=200)
+#plt.imshow(out_seg_mean_am[image,:,:])
+plt.imshow(gt_test_ed_sub[image,:,:])
+plt.title('Test image slice {}'.format(image))
+
