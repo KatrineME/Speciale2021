@@ -82,16 +82,74 @@ gt_test_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num
                                   np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
 print('Data loaded+concat')
+#%% U-Net
+# LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
+#% Load softmax from ensemble models
+PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
+#PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
+out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
+
+# mean them over dim=0
+#out_softmax_unet = out_softmax_unet_fold[:,252:,:,:,:].mean(axis=0)
+out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
+
+#Argmax
+seg_met = np.argmax(out_softmax_unet, axis=1)
+
+# One hot encode
+seg_oh = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
+ref_oh = torch.nn.functional.one_hot(Tensor(gt_test_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+
+#%% E-map
+emap = np.zeros((seg_oh.shape[0],seg_oh.shape[1],seg_oh.shape[2]))
+
+for i in range(0, emap.shape[0]):
+
+    out_img = out_softmax_unet[i,:,:,:]#.detach().cpu().numpy())
+    entropy2 = scipy.stats.entropy(out_img)
+    
+    # Normalize 
+    m_entropy   = np.max(entropy2)
+    entropy     = entropy2/m_entropy
+    emap[i,:,:] = entropy
+
+emap = np.expand_dims(emap, axis=1)
 #%%
-H = 128
-W = 128
+#% Wrap all inputs together
+im     = Tensor(im_test_es_res)
+umap   = Tensor(emap)
+seg    = Tensor(np.expand_dims(seg_met, axis = 1))
+
+print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
+
+input_concat = torch.cat((im,umap,seg), dim=1)
+
+image = 2
+
+plt.figure(dpi=200)
+plt.subplot(1,4,1)
+plt.subplots_adjust(wspace = 0.4)
+plt.imshow(im[image,0,:,:])
+plt.title('cMRI') 
+plt.subplot(1,4,2)
+plt.imshow(seg[image,0,:,:])
+plt.title('Segmentation') 
+plt.subplot(1,4,3)
+plt.imshow(umap[image,0,:,:])   
+plt.title('U-map') 
+plt.subplot(1,4,4)
+plt.imshow(gt_test_es_res[image,:,:])   
+plt.title('ref') 
+
+#%%
+H = 16
+W = 16
 CV_folds = 6
-data_im = im_train_es_res.shape[0]
+data_dim = input_concat.shape[0]
 
+out_patch = np.zeros((CV_folds, data_dim, 2, H, W))
 
-out_patch = np.zeros((CV_folds, data_im, 2, H, W))
-
-im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=False, sampler=None,
+input_data = torch.utils.data.DataLoader(input_concat, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None, prefetch_factor=2, num_workers=0)
@@ -100,14 +158,15 @@ for fold in range(0,6):
     if user == 'GPU':
         path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_fold{}.pt'.format(fold)
     if user == 'K':
-        path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Detection_CE_dia_fold{}.pt'.format(fold)
+        path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Detection_CE_dia_fold_300{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
     model.eval()
     
-    for i, (im) in enumerate(im_data):
+    for i, (im) in enumerate(input_data):
         im = Tensor.numpy(im)
         
-        out = model(Tensor(im).cuda())
+        #out = model(Tensor(im).cuda())
+        out = model(Tensor(im))
         out_patch[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
         
     del path_model, model, out
@@ -116,59 +175,69 @@ for fold in range(0,6):
 if user == 'GPU':
     PATH_out_patch = '/home/katrine/Speciale2021/Speciale2021/Out_patch_fold_avg.pt'
 if user == 'K':
-    PATH_out_patch = 'C:/Users/katrine/Desktop/Optuna/Out_patch_fold_avg.pt'
+    PATH_out_patch = 'C:/Users/katrine/Desktop/Optuna/Out_patch_fold_300_avg.pt'
 torch.save(out_patch, PATH_out_patch)
 
-"""
-#%% Run model0
-path_model_0 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold0.pt'
-model_0 = torch.load(path_model_0, map_location=torch.device('cpu'))
+#%% Plot
 
-model_0.eval()
-out_0 = model_0(Tensor(im_test_ed_sub))
-out_0 = out_0["softmax"]
+plt.imshow(out_patch[5,35,1,:,:])
+plt.colorbar()
 
-#%% Run 
-path_model_1 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold1.pt'
-model_1 = torch.load(path_model_1, map_location=torch.device('cpu'))
+#%%
+mean_patch = out_patch.mean(axis=0)
 
-model_1.eval()
-out_1 = model_1(Tensor(im_test_ed_sub))
-out_1 = out_1["softmax"].detach().numpy()
+plt.imshow(mean_patch[35,1,:,:])
+plt.colorbar()
+#%%
+m_patch = mean_patch>0.8
 
-#%% Run model2
-path_model_2 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold2.pt'
-model_2 = torch.load(path_model_2, map_location=torch.device('cpu'))
+plt.imshow(m_patch[35,1,:,:])
 
-model_2.eval()
-out_2 = model_2(Tensor(im_test_ed_sub))
-out_2 = out_2["softmax"].detach().numpy()
+#%% Upsample
+k = m_patch
 
-#%% Run model3
-path_model_3 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold3.pt'
-model_3 = torch.load(path_model_3, map_location=torch.device('cpu'))
+#% Upsample
+image = 2
+upper_image = image - 1
+lower_image = image + 1
 
-model_3.eval()
-out_3 = model_3(Tensor(im_test_ed_sub))
-out_3 = out_3["softmax"].detach().numpy()
+#test_im = Tensor(np.expand_dims(output_test[lower_image:upper_image,1,:,:],axis=0))
+#test_im = Tensor(np.expand_dims(output_test[upper_image:lower_image,1,:,:],axis=0))
+test_im = Tensor(np.expand_dims(k[upper_image:lower_image,1,:,:],axis=0))
 
-#%% Run model4
-path_model_4 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold4.pt'
-model_4 = torch.load(path_model_4, map_location=torch.device('cpu'))
+up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
+up_im = up(test_im) > 0
 
-model_4.eval()
-out_4 = model_4(Tensor(im_test_ed_sub))
-out_4 = out_4["softmax"].detach().numpy()
 
-#%% Run model5
-path_model_5 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold5.pt'
-model_5 = torch.load(path_model_5, map_location=torch.device('cpu'))
+difference = (gt_test_es_res[image,:,:]-seg[image,0,:,:].detach().numpy())
 
-model_5.eval()
-out_5 = model_5(Tensor(im_test_ed_sub))
-out_5 = out_5["softmax"].detach().numpy()
-"""
+plt.figure(dpi=200)
+plt.subplot(1,4,1)
+plt.subplots_adjust(wspace = 0.4)
+plt.imshow(input_concat[image,2,:,:])
+#plt.imshow(up_im[0,0,:,:])
+plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
+plt.title('Segmentation')
 
+plt.subplot(1,4,2)
+plt.imshow(up_im[0,1,:,:])
+plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
+plt.title('Error patch')
+
+plt.subplot(1,4,3)
+plt.imshow(difference)
+plt.title('Difference between ref+seg')
+
+plt.subplot(1,4,3)
+plt.imshow(up_im[0,1,:,:])
+plt.imshow(np.argmax((ref_oh[image,:,:,:]),axis=2), alpha= 0.6)
+plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
+plt.title('Reference w. error')
+
+
+
+
+#%%
 #Plot softmax probabilities for a single slice
 test_slice = 300
 alpha = 0.4

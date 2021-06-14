@@ -365,13 +365,14 @@ if __name__ == "__main__":
     n_classes  = 2
     #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    model.cuda()
+    if device == 'cuda':
+        model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 #os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
-os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
+#os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 from load_data_gt_im_sub import load_data_sub
 user = 'GPU'
 #user = 'K' 
@@ -622,23 +623,18 @@ for i, (im) in enumerate(im_data):
 """
 # LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
 #% Load softmax from ensemble models
-PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
+
+#PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_train_ResNet.pt'
+PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg_train_ResNet.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
 # mean them over dim=0
 out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
 
-# training data after U-Net
-out_image_es = out_softmax_unet[0:252,:,:,:]
 
 #%% One hot encoding
-"""
-seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
 
-seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
-ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
-"""
-seg_met_sys = np.argmax(out_image_es, axis=1)
+seg_met_sys = np.argmax(out_softmax_unet, axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
 ref_sys = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
@@ -646,11 +642,11 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), n
 #%%%%%%%%%%%%%%%% Create input for ResNet %%%%%%%%%%%%%%%%
 
 #%% E-map
-emap = np.zeros((out_image_es.shape[0],out_image_es.shape[2],out_image_es.shape[3]))
+emap = np.zeros((out_softmax_unet.shape[0],out_softmax_unet.shape[2],out_softmax_unet.shape[3]))
 
 for i in range(0, emap.shape[0]):
 
-    out_img = out_image_es[i,:,:]#.detach().cpu().numpy())
+    out_img = out_softmax_unet[i,:,:,:]#.detach().cpu().numpy())
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
@@ -671,7 +667,7 @@ input_concat = torch.cat((im,umap,seg), dim=1)
 
 #%% Distance transform maps
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-
+os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from SI_error_func import dist_trans, cluster_min
 
 error_margin_inside  = 2
