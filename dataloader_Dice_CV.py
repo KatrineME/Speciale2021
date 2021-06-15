@@ -489,16 +489,15 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             print('correct', correct_e)
             
         eval_losses.append(eval_loss/(i+1)) # This is normalised by batch size
+        
+        eval_loss = 0.0
+        
         eval_results.append(100.0 * correct_e / total_e)
         eval_incorrect.append(incorrect_e)
         correct_e   = 0.0
         total_e     = 0.0
         incorrect_e = 0.0
-        
-        # Print accuracy
-        eval_results.append(100.0 * correct_e / total_e)
-        print('--------------------------------')
-        results[fold] = 100.0 * (correct_e / total_e)
+    
         
         lr_get   = lr_scheduler.get_last_lr()[0]
         lr_scheduler.step()
