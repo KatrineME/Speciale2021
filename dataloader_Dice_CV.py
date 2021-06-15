@@ -274,21 +274,19 @@ def soft_dice_loss(y_true, y_pred):
 def class_loss(y_true,y_pred):
     eps = 1e-6
 
-    y_true_s = torch.sum(y_true, (2,3))
+    y_true_s   = torch.sum(y_true, (2,3))
+    y_true_sin = torch.empty((y_true_s.shape))
     
-   # if not y_true_s.detach().numpy().all():
-    if np.count_nonzero(y_true_s) != 4:
-        loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(2,3))
-        #loss_c = torch.sum(l_c)
-    else:
-        loss_c = 0
-        """print('No L_C calculated')
-        for i in range(0,y_true.shape[0]):
-            plt.subplot(6,6,i+1)
-            plt.imshow(y_true[i,1,:,:].detach().numpy())"""
-            
-    loss_c[:,0]= 0
+    y_true_sin[y_true_s > 0]  = 0
+    y_true_sin[y_true_s == 0] = 1
     
+    #y_pred_e = torch.exp(y_pred)
+    loss_c = -1* torch.sum(torch.log(1 - y_pred + eps),(2,3))
+    
+    loss_c = loss_c*y_true_sin
+    loss_c = torch.sum(loss_c)
+    loss_c = loss_c/(y_pred.shape[3]*y_pred.shape[2]*y_pred.shape[1]*y_pred.shape[0])
+
     return loss_c
 
 def lv_loss(y_true, y_pred):
@@ -304,13 +302,15 @@ def lv_loss(y_true, y_pred):
     Y_left = Y_LV_pad[:,1:129,2:130]
     Y_right= Y_LV_pad[:,1:129,0:128]
     
-    Y_UpLe = Y_LV_pad[:,2:130,2:130]
-    Y_UpRi = Y_LV_pad[:,2:130,0:128]
+    #Y_UpLe = Y_LV_pad[:,2:130,2:130]
+    #Y_UpRi = Y_LV_pad[:,2:130,0:128]
     
-    Y_DoRi = Y_LV_pad[:,0:128,0:128]
-    Y_DoLe = Y_LV_pad[:,0:128,2:130]
+    #Y_DoRi = Y_LV_pad[:,0:128,0:128]
+    #Y_DoLe = Y_LV_pad[:,0:128,2:130]
     
-    inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
+    #inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
+    inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
+
     print('inside', inside)    
     return torch.sum(Tensor(inside))/(128*128*32)
 
@@ -415,10 +415,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
           
             # Find loss
             loss_d  = soft_dice_loss(labels, output)
-            #loss_c  = class_loss(labels, output)
+            loss_c  = class_loss(labels, output)
             #loss_lv = lv_loss(labels, output)
     
-            loss = loss_d #+ loss_lv + loss_c
+            loss = loss_d + loss_c
             #print('loss', loss)
             # Calculate gradients
             loss.backward()
@@ -449,7 +449,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         incorrect = 0.0
         
         unet.eval()
-        print('Epoch eval=',epoch)
+        #print('Epoch eval=',epoch)
          
         for i, (eval_data) in enumerate(eval_dataloader):
             # get the inputs
@@ -471,10 +471,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Find loss
             loss_d  = soft_dice_loss(labels, output)
-            #loss_c  = class_loss(labels, output)
+            loss_c  = class_loss(labels, output)
             #loss_lv = lv_loss(labels, output)
     
-            loss = loss_d #+ loss_lv + loss_c
+            loss = loss_d + loss_c #+ loss_lv + loss_c
     
             # Calculate loss
             eval_loss += loss.item()
@@ -518,7 +518,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_200_fold{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lc_dia_200_fold{}.pt".format(fold)
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
 
@@ -564,7 +564,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_200_CV_scheduler.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lc_dia_200_CV_scheduler.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -573,7 +573,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_200_train_results_scheduler.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lc_dia_200_train_results_scheduler.pt"
 torch.save(T, PATH_results)
 
 
