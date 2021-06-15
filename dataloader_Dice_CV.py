@@ -438,7 +438,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
 
             
         train_losses.append(train_loss/(i+1)) # This is normalised by batch size
-        print('train_losses', train_losses)
+        #print('train_losses', train_losses)
         train_loss = 0.0 
                 
         # Accuracy        
@@ -485,8 +485,6 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             total_e    += (target_e.shape[0])*(128*128)
             correct_e  += (predicted_e == target_e).sum().item()
             incorrect_e += (predicted_e != target_e).sum().item()
-            print('total', total_e)
-            print('correct', correct_e)
             
         eval_losses.append(eval_loss/(i+1)) # This is normalised by batch size
         
