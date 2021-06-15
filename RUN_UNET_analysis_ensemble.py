@@ -215,13 +215,21 @@ if user == 'GPU':
     
 from load_data_gt_im_sub import load_data_sub
 
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
+phase = 'Systole'
 
+data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,phase,'DCM')
+data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,phase,'HCM')
+data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,phase,'MINF')
+data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,phase,'NOR')
+data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,phase,'RV')
 
+phase = 'Diastole'
+
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 
 #%% BATCH GENERATOR
 num_train_sub = 12
@@ -240,6 +248,18 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
 print('Data loaded+concat')
 #%%
@@ -279,6 +299,7 @@ if user == 'GPU':
     PATH_out_soft = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg_200sys.pt'
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200sys.pt'
+    
 torch.save(out_soft, PATH_out_soft)
 
 """ OUT-COMMENTED PLOT STATEMENTS
@@ -498,12 +519,147 @@ print('std dice = ', std_dice)
 print('mean haus = ',mean_haus)
 print('std haus = ', std_haus)
 
+#%%%%%%%%%%%%%%%%%%%%%%% METRICS %%%%%%%%%%%%%%%%%%%%%
+# Slices per patient
+p = []
+
+p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][0].shape[0])
+p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][1].shape[0])
+p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][2].shape[0])
+p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][3].shape[0])
+p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][4].shape[0])
+p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][5].shape[0])
+p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][6].shape[0])
+p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][7].shape[0])
+
+
+p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][0].shape[0])
+p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][1].shape[0])
+p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][2].shape[0])
+p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][3].shape[0])
+p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][4].shape[0])
+p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][5].shape[0])
+p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][6].shape[0])
+p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][7].shape[0])
+
+p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][0].shape[0])
+p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][1].shape[0])
+p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][2].shape[0])
+p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][3].shape[0])
+p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][4].shape[0])
+p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][5].shape[0])
+p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][6].shape[0])
+p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][7].shape[0])
+
+
+p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][0].shape[0])
+p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][1].shape[0])
+p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][2].shape[0])
+p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][3].shape[0])
+p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][4].shape[0])
+p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][5].shape[0])
+p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][6].shape[0])
+p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][7].shape[0])
+
+p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][0].shape[0])
+p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][1].shape[0]) 
+p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][2].shape[0])
+p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][3].shape[0]) 
+p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][4].shape[0])
+p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][5].shape[0]) 
+p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][6].shape[0])
+p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][7].shape[0]) 
+
+
+#%% Calculate volume for diastolic phase
+#test_index = data_gt_ed[num_eval:num_test]
+
+PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia.pt'
+soft_dia_fold = torch.load(PATH_soft_dia_fold, map_location=torch.device(device))
+
+soft_dia_mean = soft_dia_fold.mean(axis=0)
+seg_dia_mean  = np.argmax(soft_dia_mean, axis=1)
+
+seg_dia_oh    = torch.nn.functional.one_hot(torch.as_tensor(seg_dia_mean), num_classes=4).detach().cpu().numpy()
+ref_dia_oh    = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+
+test_index = len(p)
+
+s = 0
+target_vol_ed = np.zeros(test_index)
+ref_vol_ed    = np.zeros(test_index)
+
+for i in range(0,test_index):
+    #print('patient nr.', i)
+    for j in range(0, p[i]):
+        #print('slice # ',j)
+        target_vol_ed[i] += np.sum(seg_dia_oh[j+s,:,:,3])
+        ref_vol_ed[i]    += np.sum(ref_dia_oh[j+s,:,:,3])
+        #print('j+s = ',j+s)
+        
+    s += p[i] 
+    #print('s= ',s)
+   
+#%% Calculate volume for systolic phase
+PATH_soft_sys_fold = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200sys.pt'
+soft_sys_fold = torch.load(PATH_soft_sys_fold, map_location=torch.device(device))
+
+soft_sys_mean = soft_sys_fold.mean(axis=0)
+seg_sys_mean  = np.argmax(soft_sys_mean, axis=1)
+
+seg_sys_oh    = torch.nn.functional.one_hot(torch.as_tensor(seg_sys_mean), num_classes=4).detach().cpu().numpy()
+ref_sys_oh    = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+
+test_index = len(p)
+
+s = 0
+target_vol_es = np.zeros(test_index)
+ref_vol_es    = np.zeros(test_index)
+
+for i in range(0,test_index):
+    #print('patient nr.', i)
+    for j in range(0, p[i]):
+        #print('slice # ',j)
+        target_vol_es[i] += np.sum(seg_sys_oh[j+s,:,:,3])
+        ref_vol_es[i]    += np.sum(ref_sys_oh[j+s,:,:,3])
+        #print('j+s = ',j+s)
+        
+    s += p[i] 
+    #print('s= ',s)
+     
+#%% Calculate EF        
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+
+from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
+
 #%%
+spacings = [1.4, 1.4, 8]
 
-image = 314
+ef_ref    = EF_calculation(ref_vol_es, ref_vol_ed, spacings)
+ef_target = EF_calculation(target_vol_es, target_vol_ed, spacings)
 
-plt.figure(dpi=200)
-#plt.imshow(out_seg_mean_am[image,:,:])
-plt.imshow(gt_test_ed_sub[image,:,:])
-plt.title('Test image slice {}'.format(image))
+
+ef_m_ref = np.mean(ef_ref[0])
+ef_m_tar = np.mean(ef_target[0])
+
+print('EF ref  = ', ef_ref[0]) 
+print('esv ref = ', ef_ref[1]) 
+print('edv ref = ', ef_ref[2]) 
+
+print('EF seg = ', ef_target[0]) 
+print('esv seg = ', ef_target[1]) 
+print('edv seg = ', ef_target[2]) 
+
+#%%
+slice = 169
+c= 3
+
+plt.imshow(seg_dia_oh[slice,:,:,c])
+plt.imshow(seg_sys_oh[slice,:,:,c], alpha =0.5)
+
+b = np.sum(ref_dia_oh[slice,:,:,c])
+
+#%%
+pier = np.corrcoef(ef_ref[2],ef_target[2])
 
