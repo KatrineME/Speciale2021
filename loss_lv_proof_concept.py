@@ -84,28 +84,32 @@ plt.imshow(Y_LVmod, alpha=0.2)
 plt.imshow(Y_RV, alpha=0.2)
 plt.title('Pixels penalized for neighbourhood')
 
+
+
+
 #%% Class loss
-y1 = labels[10:11,:,:,:] # No RV
-x1 = output[10:11,:,:,:]
-z1 = inputs[10,0,:,:]
 
-y2 = labels[1:2,:,:,:]  # All structures
-x2 = output[1:2,:,:,:]
-z2 = inputs[1,0,:,:]
+c = 1
+slice = 8
 
-y_true = y1
-y_pred = x1
+y_true = ref_sys_oh[slice:slice+1,:,:,:]
+y_pred = seg_sys_oh[slice:slice+1,:,:,:]
 
-eps = 1e-6
+plt.imshow(y_true[0,:,:,c])
+plt.imshow(y_pred[0,:,:,c], alpha=0.6)
+#%%
+eps = 0
+y_true =Tensor(y_true)
+y_pred =Tensor(y_pred)
 
-y_true_s   = torch.sum(y_true, (2,3))
+y_true_s   = torch.sum(y_true, (1,2))
 y_true_sin = torch.empty((y_true_s.shape))
     
 y_true_sin[y_true_s > 0]  = 0
 y_true_sin[y_true_s == 0] = 1
-    
-y_pred_e = torch.exp(y_pred)
-loss_c = -1* torch.sum(torch.log(1-y_pred_e + eps),(2,3))
+#%%    
+#y_pred_e = torch.exp(y_pred)
+loss_c = -1* torch.sum(torch.log(1-y_pred + eps),(1,2))
 
 loss_c = loss_c*y_true_sin
 loss_c = torch.sum(loss_c)
