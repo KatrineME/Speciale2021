@@ -438,7 +438,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
 
             
         train_losses.append(train_loss/(i+1)) # This is normalised by batch size
-        print('train_losses', train_losses)
+        #print('train_losses', train_losses)
         train_loss = 0.0 
                 
         # Accuracy        
@@ -481,22 +481,21 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Set total and correct
             predicted_e = torch.argmax(output, axis=1)
-            total_e    += (labels.shape[0])*(128*128)
-            correct_e  += (predicted_e == labels).sum().item()
-            incorrect_e += (predicted_e != labels).sum().item()
-
+            target_e    = torch.argmax(labels, axis=1)
+            total_e    += (target_e.shape[0])*(128*128)
+            correct_e  += (predicted_e == target_e).sum().item()
+            incorrect_e += (predicted_e != target_e).sum().item()
             
         eval_losses.append(eval_loss/(i+1)) # This is normalised by batch size
+        
+        eval_loss = 0.0
+        
         eval_results.append(100.0 * correct_e / total_e)
         eval_incorrect.append(incorrect_e)
         correct_e   = 0.0
         total_e     = 0.0
         incorrect_e = 0.0
-        
-        # Print accuracy
-        eval_results.append(100.0 * correct_e / total_e)
-        print('--------------------------------')
-        results[fold] = 100.0 * (correct_e / total_e)
+    
         
         lr_get   = lr_scheduler.get_last_lr()[0]
         lr_scheduler.step()
