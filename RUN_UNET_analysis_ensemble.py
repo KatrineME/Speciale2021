@@ -258,9 +258,9 @@ im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=Fals
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_200_fold{}.pt'.format(fold)
+        path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_sys_200_fold{}.pt'.format(fold)
     if user == 'K':
-        path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_200_fold{}.pt'.format(fold)
+        path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_sys_200_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
     model.eval()
     for i, (im) in enumerate(im_data):

@@ -260,7 +260,7 @@ p.append(data_gt_ed_NOR[num_train_res:num_test_res][1].shape[0])
 p.append(data_gt_ed_RV[num_train_res:num_test_res][0].shape[0])
 p.append(data_gt_ed_RV[num_train_res:num_test_res][1].shape[0])  
 
-failure_per_patient = 
+#failure_per_patient = 
     
 
 #%% Upsample
