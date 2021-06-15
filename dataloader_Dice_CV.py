@@ -275,7 +275,7 @@ def class_loss(y_true,y_pred):
     eps = 1e-6
 
     y_true_s   = torch.sum(y_true, (2,3))
-    y_true_sin = torch.empty((y_true_s.shape))
+    y_true_sin = torch.empty((y_true_s.shape)).cuda()
     
     y_true_sin[y_true_s > 0]  = 0
     y_true_sin[y_true_s == 0] = 1
