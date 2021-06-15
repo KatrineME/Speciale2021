@@ -310,10 +310,10 @@ def lv_loss(y_true, y_pred):
     
     #inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
     inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
-    inside = inside.cuda()
+    inside = inside.detach().cpu()#cuda()
 
     #print('inside', inside)    
-    return (torch.sum(Tensor(inside))/(128*128*32)).cuda()
+    return (torch.sum(Tensor(inside))/(128*128*32))#.cuda()
 
 
 #%% Training with K-folds
