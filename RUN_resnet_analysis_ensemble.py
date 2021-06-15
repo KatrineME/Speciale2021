@@ -32,7 +32,7 @@ torch.cuda.manual_seed_all(808)
 
 
 #%% Specify directory
-user = 'K'
+user = 'M'
 
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -82,18 +82,13 @@ gt_test_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num
                                   np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
 print('Data loaded+concat')
-#%%
-t = 35
-
-plt.subplot(1,2,1)
-plt.imshow(seg_oh[t,:,:,3])
-plt.subplot(1,2,2)
-plt.imshow(ref_oh[t,:,:,3])
 
 #%% U-Net
 # LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
 #% Load softmax from ensemble models
-PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
+#PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
+PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_test_ResNet.pt'
+
 #PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
@@ -109,6 +104,7 @@ seg_oh = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).de
 ref_oh = torch.nn.functional.one_hot(Tensor(gt_test_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
 #%% E-map
+import scipy.stats
 emap = np.zeros((seg_oh.shape[0],seg_oh.shape[1],seg_oh.shape[2]))
 
 for i in range(0, emap.shape[0]):
@@ -162,11 +158,14 @@ input_data = torch.utils.data.DataLoader(input_concat, batch_size=1, shuffle=Fal
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None, prefetch_factor=2, num_workers=0)
 
+
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_fold_300{}.pt'.format(fold)
+        path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_fold_500{}.pt'.format(fold)
     if user == 'K':
-        path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Detection_CE_dia_fold_300{}.pt'.format(fold)
+        path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Detection_CE_dia_fold_500{}.pt'.format(fold)
+    if user == 'M':
+        path_model = '/Users/michalablicher/Desktop/Trained_Detection_CE_dia_fold_500{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
     model.eval()
     
@@ -181,19 +180,22 @@ for fold in range(0,6):
     print('Done for fold',fold)
 
 if user == 'GPU':
-    PATH_out_patch = '/home/katrine/Speciale2021/Speciale2021/Out_patch_fold_300_avg.pt'
+    PATH_out_patch = '/home/katrine/Speciale2021/Speciale2021/Out_patch_fold_500_avg.pt'
 if user == 'K':
-    PATH_out_patch = 'C:/Users/katrine/Desktop/Optuna/Out_patch_fold_300_avg.pt'
+    PATH_out_patch = 'C:/Users/katrine/Desktop/Optuna/Out_patch_fold_500_avg.pt'
+if user == 'M':
+    PATH_out_patch = '/Users/michalablicher/Desktop/Out_patch_fold_500_avg.pt'
+    
 torch.save(out_patch, PATH_out_patch)
 
 #%% Plot
 mean_patch = out_patch.mean(axis=0)
 
-threshold = 0.8
+threshold = 0.3
 m_patch = mean_patch > threshold
 
 size = 6
-slice = 1
+slice = 32
 
 plt.figure(dpi=200)
 plt.subplot(2,4,1)
@@ -303,8 +305,6 @@ plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
 plt.title('Reference w. error',fontsize=size)
 
 
-
-
 #%%
 #Plot softmax probabilities for a single slice
 test_slice = 300
@@ -396,7 +396,7 @@ for fold_model in range (0,6):
 plt.show()  
 
 #%%
-os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
 dice = np.zeros((out_seg_mean.shape[0],3))

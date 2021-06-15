@@ -271,16 +271,18 @@ def objective(trial):
       
     model_unet = define_model(trial).to(device)
     
-    optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
+    #optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
     weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
 
     lr  = trial.suggest_float("lr",  1e-6, 1e-2)
     eps = trial.suggest_float("eps", 1e-8, 1e-2)
     
-    optimizer = getattr(optim, optimizer_name)(model_unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
+    #optimizer = getattr(optim, Adam)(model_unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
+    optimizer = torch.optim.Adam(model_unet.parameters(), lr=lr, eps=eps, weight_decay=weight_decay) #LR 
+    #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=180)
     
-    k_folds    = 2
-    num_epochs = 2
+    k_folds    = 6
+    num_epochs = 100
     #num_epochs  = trial.suggest_float("num_epochs",  5, 100)
     
     loss_function = nn.CrossEntropyLoss()
@@ -462,10 +464,9 @@ def objective(trial):
             correct_e   = 0.0
             total_e     = 0.0
             incorrect_e = 0.0
-            #print('eval_accuracy', eval_accuracy)
-    
-            #print('--------------------------------')
-            #accuracy[fold] = 100.0 * (correct_e / total_e)
+            
+            #lr_get   = lr_scheduler.get_last_lr()[0]
+            #lr_scheduler.step()
             
         fold_train_losses.append(train_losses)
         #print('fold loss = ', fold_train_losses)
@@ -494,7 +495,7 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=5, timeout=4000)
+    study.optimize(objective, n_trials=50, timeout=50000) # 50000 s = 14 h
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -605,8 +606,4 @@ PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_trai
 torch.save(T, PATH_results)    
 
 """
-
-
-
-
 
