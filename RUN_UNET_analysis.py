@@ -192,10 +192,10 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (1, 128, 128))
 
 #%% Specify directory
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from load_data_gt_im_sub import load_data_sub
-user = 'K'
+user = 'M'
 """
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('M','Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('M','Systole','HCM')
@@ -241,7 +241,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-  
+
 
 #%% Load Model
 #PATH_model = "C:/Users/katrine/Documents/GitHub/Speciale2021/trained_Unet_testtest.pt"
@@ -251,7 +251,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal_optuna.pt'
 
 #%% Import results from training (Loss + Accuracy)
-PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_train_results_scheduler.pt'
+PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_200_train_results_scheduler.pt'
 res_ed = torch.load(PATH_res_ed, map_location=torch.device('cpu'))
 
 #%% Load model
@@ -313,6 +313,10 @@ train_loss_2 = out_one[0][2]
 eval_loss_2 = out_one[1][2]
 train_loss_3 = out_one[0][3]
 eval_loss_3 = out_one[1][3]
+train_loss_4 = out_one[0][4]
+eval_loss_4 = out_one[1][4]
+train_loss_5 = out_one[0][5]
+eval_loss_5 = out_one[1][5]
 
 train_acc = out_mean[2]
 eval_acc = out_mean[3]
@@ -333,22 +337,23 @@ eval_acc_6 = out_one[3][5]
 train_inc = (out_mean[4])
 eval_inc = (out_mean[5])*5
 #%%
-t1 = np.arange(len(train_acc_1[0:100]))
+t1 = np.arange(len(train_acc_1[0:200]))
 
 plt.figure(figsize=(12, 12),dpi=400)
-plt.plot(t1, train_acc_1[0:100], 'b', label = 'Training Loss')
-plt.plot(t1 , train_acc_2[0:100], 'g', label = 'Training Loss')
-plt.plot(t1 , train_acc_3[0:100], 'r', label = 'Training Loss')
-plt.plot(t1 , train_acc_4[0:100], 'y', label = 'Training Loss')
-plt.plot(t1 , train_acc_5[0:100], 'm', label = 'Training Loss')
-plt.plot(t1 , train_acc_6[0:100], 'c', label = 'Training Loss')
+plt.plot(t1, train_acc_1[0:150], 'b', label = 'Training Loss')
+plt.plot(t1 , train_acc_2[0:150], 'g', label = 'Training Loss')
+plt.plot(t1 , train_acc_3[0:150], 'r', label = 'Training Loss')
+plt.plot(t1 , train_acc_4[0:150], 'y', label = 'Training Loss')
+plt.plot(t1 , train_acc_5[0:150], 'm', label = 'Training Loss')
+plt.plot(t1 , train_acc_6[0:150], 'c', label = 'Training Loss')
 
-plt.plot(t1, eval_acc_1[0:100], 'b' ,linestyle = 'dashed', label = 'eval Loss')
-plt.plot(t1 , eval_acc_2[0:100], 'g',linestyle = 'dashed', label = 'eval Loss')
-plt.plot(t1 , eval_acc_3[0:100], 'r',linestyle = 'dashed', label = 'eval Loss')
-plt.plot(t1 , eval_acc_4[0:100], 'y',linestyle = 'dashed', label = 'eval Loss')
-plt.plot(t1 , eval_acc_5[0:100], 'm',linestyle = 'dashed', label = 'eval Loss')
-plt.plot(t1 , eval_acc_6[0:100], 'c',linestyle = 'dashed', label = 'eval Loss')
+plt.plot(t1, eval_acc_1[0:150], 'b' ,linestyle = 'dashed', label = 'Validation Loss')
+plt.plot(t1 , eval_acc_2[0:150], 'g',linestyle = 'dashed', label = 'Validation Loss')
+plt.plot(t1 , eval_acc_3[0:150], 'r',linestyle = 'dashed', label = 'Validation Loss')
+plt.plot(t1 , eval_acc_4[0:150], 'y',linestyle = 'dashed', label = 'Validation Loss')
+plt.plot(t1 , eval_acc_5[0:150], 'm',linestyle = 'dashed', label = 'Validation Loss')
+plt.plot(t1 , eval_acc_6[0:150], 'c',linestyle = 'dashed', label = 'Validation Loss')
+
 
 #%% Plot function
 epochs_train = np.arange(len(train_loss))
@@ -357,10 +362,22 @@ epochs_eval  = np.arange(len(eval_loss))
 plt.figure(figsize=(15, 15),dpi=400)
 #plt.rcParams.update({'font.size': 26})
 plt.subplot(2,2,1)
-plt.plot(epochs_train + 1 , train_loss, 'b', label = 'Training Loss')
-plt.plot(epochs_eval  + 1 , eval_loss , 'r', label = 'Validation Loss')
+plt.plot(t1, train_loss_0[0:200], 'b', label = 'Training loss fold 0')
+plt.plot(t1 , train_loss_1[0:200], 'g', label = 'Training loss fold 1')
+plt.plot(t1 , train_loss_2[0:200], 'r', label = 'Training loss fold 2')
+plt.plot(t1 , train_loss_3[0:200], 'y', label = 'Training loss fold 3')
+plt.plot(t1 , train_loss_4[0:200], 'm', label = 'Training loss fold 4')
+plt.plot(t1 , train_loss_5[0:200], 'c', label = 'Training loss fold 5')
+
+plt.plot(t1, eval_loss_0[0:200], 'b' ,linestyle = 'dashed', label = 'Validation loss fold 0')
+plt.plot(t1 , eval_loss_1[0:200], 'g',linestyle = 'dashed', label = 'Validation loss fold 1')
+plt.plot(t1 , eval_loss_2[0:200], 'r',linestyle = 'dashed', label = 'Validation loss fold 2')
+plt.plot(t1 , eval_loss_3[0:200], 'y',linestyle = 'dashed', label = 'Validation loss fold 3')
+plt.plot(t1 , eval_loss_4[0:200], 'm',linestyle = 'dashed', label = 'Validation loss fold 4')
+plt.plot(t1 , eval_loss_5[0:200], 'c',linestyle = 'dashed', label = 'Validation loss fold 5')
+
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-plt.xticks(np.arange(0, len(epochs_train) + 2, step = 20), fontsize =14)
+plt.xticks(np.arange(0, len(t1) + 2, step = 50), fontsize =14)
 plt.yticks(fontsize =14)
 plt.xlabel('Epochs', fontsize = 16)
 plt.ylabel('Cross-Entropy Loss',  fontsize = 16)
@@ -368,25 +385,79 @@ plt.legend(loc="upper right", fontsize = 16)
 plt.title('Loss function', fontsize =28)
 
 plt.subplot(2,2,2)
-plt.plot(epochs_train + 1 , train_acc, 'b', label = 'Training accuracy')
-plt.plot(epochs_eval  + 1 , eval_acc,  'r',label = 'Validation accuracy')
+plt.plot(t1, train_acc_1[0:200], 'b', label = 'Training accuracy fold 0')
+plt.plot(t1 , train_acc_2[0:200], 'g', label = 'Training accuracy fold 1')
+plt.plot(t1 , train_acc_3[0:200], 'r', label = 'Training accuracy fold 2')
+plt.plot(t1 , train_acc_4[0:200], 'y', label = 'Training accuracy fold 3')
+plt.plot(t1 , train_acc_5[0:200], 'm', label = 'Training accuracy fold 4')
+plt.plot(t1 , train_acc_6[0:200], 'c', label = 'Training accuracy fold 5')
+
+plt.plot(t1, eval_acc_1[0:200], 'b' ,linestyle = 'dashed', label = 'Validation accuracy fold 0')
+plt.plot(t1 , eval_acc_2[0:200], 'g',linestyle = 'dashed', label = 'Validation accuracy fold 1')
+plt.plot(t1 , eval_acc_3[0:200], 'r',linestyle = 'dashed', label = 'Validation accuracy fold 2')
+plt.plot(t1 , eval_acc_4[0:200], 'y',linestyle = 'dashed', label = 'Validation accuracy fold 3')
+plt.plot(t1 , eval_acc_5[0:200], 'm',linestyle = 'dashed', label = 'Validation accuracy fold 4')
+plt.plot(t1 , eval_acc_6[0:200], 'c',linestyle = 'dashed', label = 'Validation accuracy fold 5')
+
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-plt.xticks(np.arange(0, len(epochs_train) + 2, step = 20), fontsize =14)
+plt.xticks(np.arange(0, len(t1) + 2, step = 50), fontsize =14)
 plt.yticks(fontsize =14)
 plt.xlabel('Epochs', fontsize = 16)
 plt.ylabel('Accuracy %',  fontsize = 16)
 plt.legend(loc="lower right", fontsize = 16)
 plt.title("Accuracy", fontsize =28)
 
+#%%
 plt.subplot(2,2,3)
 plt.semilogy(epochs_train + 1 , train_inc, 'b', label = 'Training incorrect')
 plt.semilogy(epochs_eval  + 1 , eval_inc,  'r' ,linestyle = 'dashed',label = 'Validation incorrect')
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-plt.xticks(np.arange(0, len(epochs_train) + 2, step = 20), fontsize =14)
+plt.xticks(np.arange(0, len(epochs_train) + 2, step = 50), fontsize =14)
 plt.yticks(fontsize =14)
 plt.xlabel('Epochs', fontsize = 16)
 plt.ylabel('Log #incorrect seg',  fontsize = 16)
 plt.legend(loc="upper right", fontsize = 16)
+plt.title("Number of Incorrect", fontsize =28)
+
+
+
+#%% Plot function
+epochs_train = np.arange(len(train_loss))
+epochs_eval  = np.arange(len(eval_loss))
+
+plt.figure(figsize=(30, 10),dpi=400)
+#plt.rcParams.update({'font.size': 26})
+plt.subplot(1,3,1)
+plt.plot(epochs_train + 1 , train_loss, 'b', label = 'Training Loss')
+plt.plot(epochs_eval  + 1 , eval_loss, 'r', label = 'Validation Loss')
+plt.grid(color='k', linestyle='-', linewidth=0.2)
+plt.xticks(np.arange(0, len(epochs_train) + 2, step = 50), fontsize =18)
+plt.yticks(fontsize =18)
+plt.xlabel('Epochs', fontsize = 20)
+plt.ylabel('Cross-Entropy Loss',  fontsize = 20)
+plt.legend(loc="upper right", fontsize = 20)
+plt.title('Loss function', fontsize =28)
+
+plt.subplot(1,3,2)
+plt.plot(epochs_train + 1 , train_acc, 'b', label = 'Training accuracy')
+plt.plot(epochs_eval  + 1 , eval_acc,  'r',label = 'Validation accuracy')
+plt.grid(color='k', linestyle='-', linewidth=0.2)
+plt.xticks(np.arange(0, len(epochs_train) + 2, step = 50), fontsize =18)
+plt.yticks(fontsize =18)
+plt.xlabel('Epochs', fontsize = 20)
+plt.ylabel('Accuracy %',  fontsize = 20)
+plt.legend(loc="lower right", fontsize = 20)
+plt.title("Accuracy", fontsize =28)
+
+plt.subplot(1,3,3)
+plt.semilogy(epochs_train + 1 , train_inc, 'b', label = 'Training incorrect')
+plt.semilogy(epochs_eval  + 1 , eval_inc,  'r' ,linestyle = 'dashed',label = 'Validation incorrect')
+plt.grid(color='k', linestyle='-', linewidth=0.2)
+plt.xticks(np.arange(0, len(epochs_train) + 2, step = 50), fontsize =18)
+plt.yticks(fontsize =18)
+plt.xlabel('Epochs', fontsize = 20)
+plt.ylabel('Log #incorrect seg',  fontsize = 20)
+plt.legend(loc="upper right", fontsize = 20)
 plt.title("Number of Incorrect", fontsize =28)
 
 
@@ -511,6 +582,7 @@ for i in range(0,len(test_index)):
 os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 
 from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
+
 #%%
 spacings = [1.4, 1.4, 8]
 

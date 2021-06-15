@@ -322,7 +322,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
     #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=180)
-    lr_scheduler =     torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.01, last_epoch=-1, verbose=False)
+    lr_scheduler =     torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1, last_epoch=-1)
 
     
     #% Training
