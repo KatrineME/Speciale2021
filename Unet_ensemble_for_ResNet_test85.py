@@ -267,7 +267,7 @@ im_data = torch.utils.data.DataLoader(im_test_es_res, batch_size=1, shuffle=Fals
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
+        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
@@ -275,15 +275,15 @@ for fold in range(0,6):
     for i, (im) in enumerate(im_data):
         im = Tensor.numpy(im)
         
-        #out = model(Tensor(im).cuda())
-        out = model(Tensor(im))
+        out = model(Tensor(im).cuda())
+        #out = model(Tensor(im))
         out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
         
     del path_model, model, out
     print('Done for fold',fold)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/katrine/Speciale2021/Speciale2021/OOut_softmax_fold_avg_test_ResNet.pt'
+    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/OOut_softmax_fold_avg_test_ResNet.pt'
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
 torch.save(out_soft, PATH_out_soft)
