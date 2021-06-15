@@ -413,7 +413,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             output = output["log_softmax"]
             output = torch.exp(output)
             print(output.shape)
-                        
+            print(labels.shape)            
             # Find loss
             loss_d  = soft_dice_loss(labels, output)
             #loss_c  = class_loss(labels, output)
