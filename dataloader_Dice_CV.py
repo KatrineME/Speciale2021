@@ -481,9 +481,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Set total and correct
             predicted_e = torch.argmax(output, axis=1)
-            total_e    += (labels.shape[0])*(128*128)
-            correct_e  += (predicted_e == labels).sum().item()
-            incorrect_e += (predicted_e != labels).sum().item()
+            target_e    = torch.argmax(labels, axis=1)
+            total_e    += (target_e.shape[0])*(128*128)
+            correct_e  += (predicted_e == target_e).sum().item()
+            incorrect_e += (predicted_e != target_e).sum().item()
 
             
         eval_losses.append(eval_loss/(i+1)) # This is normalised by batch size
