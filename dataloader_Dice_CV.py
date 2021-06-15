@@ -313,7 +313,7 @@ def lv_loss(y_true, y_pred):
     inside = inside.cuda()
 
     #print('inside', inside)    
-    return torch.sum(Tensor(inside))/(128*128*32)
+    return (torch.sum(Tensor(inside))/(128*128*32)).cuda()
 
 
 #%% Training with K-folds
