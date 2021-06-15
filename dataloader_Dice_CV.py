@@ -412,8 +412,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             output = unet(inputs)     
             output = output["log_softmax"]
             output = torch.exp(output)
-            print(output.shape)
-            print(labels.shape)            
+          
             # Find loss
             loss_d  = soft_dice_loss(labels, output)
             #loss_c  = class_loss(labels, output)
@@ -432,9 +431,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Set total and correct
             predicted = torch.argmax(output, axis=1)
-            target    = torch.argmax(labels, axis=1)
             total    += (target.shape[0])*(128*128)
-            correct  += (predicted == target).sum().item()
+            correct  += (predicted == labels).sum().item()
             incorrect += (predicted != labels).sum().item()
 
             
@@ -482,9 +480,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             
             # Set total and correct
             predicted_e = torch.argmax(output, axis=1)
-            target    = torch.argmax(labels, axis=1)
             total_e    += (target.shape[0])*(128*128)
-            correct_e  += (predicted_e == target).sum().item()
+            correct_e  += (predicted_e == labels).sum().item()
             incorrect_e += (predicted_e != labels).sum().item()
 
             
