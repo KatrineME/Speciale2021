@@ -276,9 +276,9 @@ for fold in range(0,6):
     print('Done for fold',fold)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg_200dia.pt'
+    PATH_out_soft = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg_200sys.pt'
 if user == 'K':
-    path_model = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg.pt'
+    PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200sys.pt'
 torch.save(out_soft, PATH_out_soft)
 
 """ OUT-COMMENTED PLOT STATEMENTS
@@ -350,7 +350,7 @@ for fold_model in range (0,6):
     seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4)
     
     #Reference annotation
-    plt.suptitle('Diastolic phase: test image at slice %i for CV folds' %test_slice, fontsize=30, y=0.9)
+    plt.suptitle('Systolic phase: test image at slice %i for CV folds' %test_slice, fontsize=30, y=0.9)
     plt.subplot(7, 4, 1)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,0])
@@ -413,7 +413,7 @@ w = 0.1
 h = 0.3
 
 plt.figure(dpi=200)
-plt.suptitle('Averaged model for test image at slice: {}'.format(test_slice))
+plt.suptitle('Systolic - Averaged model for test image at slice: {}'.format(test_slice))
 
 plt.subplot(2,2,1)
 plt.subplots_adjust(hspace = h, wspace = w)
