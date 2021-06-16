@@ -278,7 +278,7 @@ im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=Fals
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_200_fold{}.pt'.format(fold)
+        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lc_dia_200_fold{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_sys_200_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
@@ -296,7 +296,7 @@ for fold in range(0,6):
     print('Done for fold',fold)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_200dia_dice.pt'
+    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_200dia_dice_lc.pt'
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200sys.pt'
     
@@ -351,10 +351,16 @@ model_5.eval()
 out_5 = model_5(Tensor(im_test_ed_sub))
 out_5 = out_5["softmax"].detach().numpy()
 """
-#%%
+#%% Load model if avergared on GPU
 """
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice.pt'
+#path_out_soft = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
+
+out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
+
+#%%
 #Plot softmax probabilities for a single slice
-test_slice = 300
+test_slice = 45
 alpha = 0.4
 
 fig = plt.figure()
@@ -429,9 +435,14 @@ out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+
+test_slice = 314
+plt.imshow(out_seg_mean_am[test_slice,:,:])
 #%%
 w = 0.1
 h = 0.3
+
+
 
 plt.figure(dpi=200)
 plt.suptitle('Systolic - Averaged model for test image at slice: {}'.format(test_slice))
@@ -461,7 +472,8 @@ plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Left ventricle', fontsize=10)
 
 #%% Metrics
-os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
 from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
 dice = np.zeros((out_seg_mean.shape[0],3))
