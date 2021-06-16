@@ -298,7 +298,7 @@ for fold in range(0,6):
 if user == 'GPU':
     PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_200dia_dice_lc.pt'
 if user == 'K':
-    PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200sys.pt'
+    PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_lc.pt'
     
 torch.save(out_soft, PATH_out_soft)
 
