@@ -354,13 +354,13 @@ out_5 = out_5["softmax"].detach().numpy()
 #%% Load model if avergared on GPU
 """
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_lc.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_lv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
 #%%
 #Plot softmax probabilities for a single slice
-test_slice = 10
+test_slice = 300
 alpha = 0.4
 
 fig = plt.figure()
@@ -436,7 +436,7 @@ out_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 
-test_slice = 300
+test_slice = 264
 plt.imshow(out_seg_mean_am[test_slice,:,:])
 #%%
 w = 0.1
