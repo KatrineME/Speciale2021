@@ -302,23 +302,18 @@ def lv_loss(y_true, y_pred):
     Y_left = Y_LV_pad[:,1:129,2:130]
     Y_right= Y_LV_pad[:,1:129,0:128]
     
-    #Y_UpLe = Y_LV_pad[:,2:130,2:130]
-    #Y_UpRi = Y_LV_pad[:,2:130,0:128]
-    
-    #Y_DoRi = Y_LV_pad[:,0:128,0:128]
-    #Y_DoLe = Y_LV_pad[:,0:128,2:130]
-    
-    #inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
+
     inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
     inside = inside.detach().cpu()#cuda()
 
     #print('inside', inside)    
-    return (torch.sum(Tensor(inside))/(128*128*32))#.cuda()
+    return torch.sum(Tensor(inside))/(128*128*32)#.cuda()
 
-
+    
 #%% Training with K-folds
 k_folds    = 6
 num_epochs = 200
+
 #loss_function = nn.CrossEntropyLoss()
 
 
@@ -420,8 +415,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_lv = lv_loss(labels, output)
     
             loss = loss_d + loss_c + 10*loss_lv
-            #print('loss', loss)
-            #print('loss', loss)
+
             # Calculate gradients
             loss.backward()
             
