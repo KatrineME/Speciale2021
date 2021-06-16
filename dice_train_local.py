@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Tue Jun 15 11:14:47 2021
+
+@author: michalablicher
+"""
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Jun  2 09:00:59 2021
 
 @author: michalablicher
@@ -196,23 +203,23 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    unet.cuda()
+    #unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
 #%% Specify directory
 cwd = os.getcwd()
 #os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")   # Local directory katrine
 #os.chdir('/Users/michalablicher/Desktop/training')     # Local directory michala
-os.chdir("/home/michala/training")                      # Server directory michala
+#os.chdir("/home/michala/training")                      # Server directory michala
 
 
 #%% Load Data
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im_sub import load_data_sub
 
-user = 'GPU'
+user = 'M'
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
@@ -275,13 +282,13 @@ def class_loss(y_true,y_pred):
     eps = 1e-6
 
     y_true_s   = torch.sum(y_true, (2,3))
-    y_true_sin = torch.empty((y_true_s.shape)).cuda()
+    y_true_sin = torch.empty((y_true_s.shape))
     
     y_true_sin[y_true_s > 0]  = 0
     y_true_sin[y_true_s == 0] = 1
     
-    #y_pred_e = torch.exp(y_pred)
-    loss_c = -1* torch.sum(torch.log(1 - y_pred + eps),(2,3))
+    y_pred_e = torch.exp(y_pred)
+    loss_c = -1* torch.sum(torch.log(1-y_pred_e + eps),(2,3))
     
     loss_c = loss_c*y_true_sin
     loss_c = torch.sum(loss_c)
@@ -310,15 +317,14 @@ def lv_loss(y_true, y_pred):
     
     #inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
     inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
-    inside = inside.detach().cpu()#cuda()
 
     #print('inside', inside)    
-    return (torch.sum(Tensor(inside))/(128*128*32))#.cuda()
+    return torch.sum(Tensor(inside))/(128*128*32)
 
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 200
+num_epochs = 10
 #loss_function = nn.CrossEntropyLoss()
 
 
@@ -367,7 +373,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     # Initialize optimizer
     optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=180)
+    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5)
     #lr_scheduler =     torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1, last_epoch=-1)
 
 
@@ -395,12 +401,12 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         for i, (train_data) in enumerate(train_dataloader):
             # get the inputs
             inputs = Tensor(np.expand_dims(train_data[:,0,:,:], axis = 1))
-            inputs = inputs.cuda()
+            #inputs = inputs.cuda()
             
             labels = train_data[:,1,:,:]
             labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
             labels = labels.permute(0,3,1,2)
-            labels = labels.cuda()
+            #labels = labels.cuda()
 
             # wrap them in Variable
             inputs, labels = Variable(inputs), Variable(labels) 
@@ -417,9 +423,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Find loss
             loss_d  = soft_dice_loss(labels, output)
             loss_c  = class_loss(labels, output)
-            loss_lv = lv_loss(labels, output)
+            loss_v  = lv_loss(labels, output)
     
-            loss = loss_d + loss_c + loss_lv
+            loss = loss_d + loss_v
+            print('train loss', loss)
             #print('loss', loss)
             # Calculate gradients
             loss.backward()
@@ -450,16 +457,16 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         incorrect = 0.0
         
         unet.eval()
-        #print('Epoch eval=',epoch)
+        print('Epoch eval=',epoch)
          
         for i, (eval_data) in enumerate(eval_dataloader):
             # get the inputs
             inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
-            inputs = inputs.cuda()
+            #inputs = inputs.cuda()
             labels = eval_data[:,1,:,:]
             labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
             labels = labels.permute(0,3,1,2)
-            labels = labels.cuda()
+            #labels = labels.cuda()
                 
             # wrap them in Variable
             inputs, labels = Variable(inputs), Variable(labels)
@@ -473,9 +480,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Find loss
             loss_d  = soft_dice_loss(labels, output)
             loss_c  = class_loss(labels, output)
-            loss_lv = lv_loss(labels, output)
+            loss_v = lv_loss(labels, output)
     
-            loss = loss_d + loss_c + loss_lv #+ loss_lv + loss_c
+            loss = loss_d + loss_v
+            print('eval loss', loss)
     
             # Calculate loss
             eval_loss += loss.item()
@@ -519,11 +527,12 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_200_fold{}.pt".format(fold)
+    PATH_model = "/Users/michalablicher/Desktop/Trained_Unet_dice_dia_200_fold{}.pt".format(fold)
+    #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_200_fold{}.pt".format(fold)
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
 
-        
+        #%%
 m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
 m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
 m_fold_train_res    = np.mean(fold_train_res, axis = 0)   
@@ -534,8 +543,8 @@ m_fold_eval_incorrect  = np.mean(fold_eval_incorrect, axis = 0)
 print('Finished Training + Evaluation')
 
 #%% Plot loss curves
-epochs_train = np.arange(len(train_losses))
-epochs_eval  = np.arange(len(eval_losses))
+epochs_train = np.arange(10)#len(train_losses))
+epochs_eval  = np.arange(10)#len(eval_losses))
 
 plt.figure(figsize=(30, 15), dpi=200)
 plt.subplot(1,3,1)
@@ -565,7 +574,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_200_CV_scheduler.png')
+#plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_200_CV_scheduler.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -574,7 +583,25 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_200_train_results_scheduler.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_200_train_results_scheduler.pt"
 torch.save(T, PATH_results)
+
+#%%
+
+path_dice_lv = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_200_fold0.pt'
+
+#PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
+out_softmax_unet_dice = torch.load(path_dice_lv ,  map_location=torch.device(device))
+
+#%%
+
+test_unet_dice_lv = out_softmax_unet_dice(Tensor(im_test_sub))
+out_image_es_dice    = test_unet_dice_lv["softmax"].detach().numpy()
+
+#%%
+
+seg_met_dia = np.argmax(out_image_es_dice, axis=1)
+
+
 
 

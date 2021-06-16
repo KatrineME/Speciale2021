@@ -519,6 +519,10 @@ plt.title("Loss function")
 
 
 #%%
+unet_dice = torch.load(Trained_Unet_dice_dia_200_fold0.pt)
+
+
+
 out_trained_es = unet(Tensor(im_test_sub))
 out_image_es    = out_trained_es["softmax"]
 

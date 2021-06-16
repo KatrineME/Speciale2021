@@ -210,7 +210,7 @@ if user == 'M':
 if user == 'K':
     os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 if user == 'GPU':
-    os.chdir('/home/katrine/Speciale2021/Speciale2021')
+    os.chdir('/home/michala/Speciale2021/Speciale2021')
     
     
 from load_data_gt_im_sub import load_data_sub
@@ -278,7 +278,7 @@ im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=Fals
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_sys_200_fold{}.pt'.format(fold)
+        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_200_fold{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_sys_200_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
@@ -296,7 +296,7 @@ for fold in range(0,6):
     print('Done for fold',fold)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg_200sys.pt'
+    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_200dia_dice.pt'
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200sys.pt'
     
@@ -352,7 +352,7 @@ out_5 = model_5(Tensor(im_test_ed_sub))
 out_5 = out_5["softmax"].detach().numpy()
 """
 #%%
-
+"""
 #Plot softmax probabilities for a single slice
 test_slice = 300
 alpha = 0.4
@@ -663,3 +663,4 @@ b = np.sum(ref_dia_oh[slice,:,:,c])
 #%%
 pier = np.corrcoef(ef_ref[2],ef_target[2])
 
+"""
