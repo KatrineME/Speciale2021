@@ -290,7 +290,7 @@ im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=Fals
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_200_fold{}.pt'.format(fold)
+        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_200_fold{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_sys_200_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
@@ -311,7 +311,7 @@ for fold in range(0,6):
 out_soft_mean = out_soft.mean(axis=0)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_200dia_dice_lclv_TRAININGDATA.pt'
+    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_200dia_dice_TRAININGDATA.pt'
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_lc.pt'
     
@@ -366,10 +366,10 @@ model_5.eval()
 out_5 = model_5(Tensor(im_test_ed_sub))
 out_5 = out_5["softmax"].detach().numpy()
 """
-#%% Load model if avergared on GPU
-"""
+#%% Load model if averagered on GPU
+
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_lclv.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_lclv_TRAININGDATA.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -445,14 +445,21 @@ plt.show()
 
 #%% Mean + argmax + one hot
 
-out_soft_mean = out_soft.mean(axis=0)
-out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
+#out_soft_mean = out_soft.mean(axis=0)
+out_seg_mean_am = np.argmax(out_soft, axis=1)
 out_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+#%%
+test_slice = 10
+plt.figure(dpi=200)
 
-test_slice = 314
-plt.imshow(out_seg_mean_am[test_slice,:,:])
+j = 25*20
+
+for i in range(0,25):
+    plt.subplot(5,5,i+1)
+    plt.imshow(out_seg_mean_am[i+j,:,:])
+    
 #%%
 w = 0.1
 h = 0.3
