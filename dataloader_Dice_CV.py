@@ -289,7 +289,7 @@ def class_loss(y_true,y_pred):
 
     return loss_c
 
-def lv_loss(y_true, y_pred):
+def lv_loss(y_pred):
     Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
     Y_RV   = y_pred[:,1,:,:]           # size([B,H,W])
     Y_LV   = y_pred[:,3,:,:]           # size([B,H,W])
@@ -302,23 +302,17 @@ def lv_loss(y_true, y_pred):
     Y_left = Y_LV_pad[:,1:129,2:130]
     Y_right= Y_LV_pad[:,1:129,0:128]
     
-    #Y_UpLe = Y_LV_pad[:,2:130,2:130]
-    #Y_UpRi = Y_LV_pad[:,2:130,0:128]
-    
-    #Y_DoRi = Y_LV_pad[:,0:128,0:128]
-    #Y_DoLe = Y_LV_pad[:,0:128,2:130]
-    
-    #inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
+
     inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
     inside = inside.detach().cpu()#cuda()
 
     #print('inside', inside)    
-    return (torch.sum(Tensor(inside))/(128*128*32))#.cuda()
+    return torch.sum(Tensor(inside))/(128*128*32)#.cuda()
 
-
+    
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 100
+num_epochs = 50
 #loss_function = nn.CrossEntropyLoss()
 
 
@@ -419,9 +413,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
     
-            loss = loss_d + loss_c + 2*loss_lv
-            #print('loss', loss)
-            #print('loss', loss)
+            loss = loss_d + loss_c + 10*loss_lv
+
             # Calculate gradients
             loss.backward()
             
@@ -476,7 +469,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
     
-            loss = loss_d + loss_c + 2*loss_lv #+ loss_lv + loss_c
+            loss = loss_d + loss_c + 10*loss_lv #+ loss_lv + loss_c
     
             # Calculate loss
             eval_loss += loss.item()
@@ -520,7 +513,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_2lclv_dia_200_fold{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_10lclv_dia_200_fold{}.pt".format(fold)
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
 
@@ -566,7 +559,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_2lclv_dia_200_CV_scheduler.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_10lclv_dia_200_CV_scheduler.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -575,7 +568,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_2lclv_dia_200_train_results_scheduler.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_10lclv_dia_200_train_results_scheduler.pt"
 torch.save(T, PATH_results)
 
 
