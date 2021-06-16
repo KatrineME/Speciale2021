@@ -37,10 +37,11 @@ Y_LV  = Y[:,:,3]
 
 Y_LVmod = Y_LV
 # Modify a GT to include an error where LV is in contact with BGR
-Y_LVmod[50:56,20:39] = 1
+#Y_LVmod[50:56,20:39] = 0
 # Modify a GT to include an error where LV is in contact with RV
-Y_LVmod[15:33,50:55] = 1
+#Y_LVmod[15:33,50:55] = 0
 
+Y_LVmod[10:20,20:25] = 1
 
 H = 128
 W = 128
@@ -63,7 +64,7 @@ Y_right = Y_LV_pad[1:129,0:128]
 
 #inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
 inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
-inside[inside > 0] = 1
+#inside[inside > 0] = 1
 #inside = ndimage.binary_erosion(inside).astype(inside.dtype)  # OBS: fjerner noget på inderside
 
 loss = np.sum(inside) #/(128*128)

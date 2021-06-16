@@ -367,9 +367,9 @@ out_5 = model_5(Tensor(im_test_ed_sub))
 out_5 = out_5["softmax"].detach().numpy()
 """
 #%% Load model if averagered on GPU
-"""
+
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_TRAININGDATA.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -445,20 +445,54 @@ plt.show()
 
 #%% Mean + argmax + one hot
 
-#out_soft_mean = out_soft.mean(axis=0)
-out_seg_mean_am = np.argmax(out_soft, axis=1)
+out_soft_mean = out_soft.mean(axis=0)
+out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 #%%
-test_slice = 10
+test_slice = 314
+plt.figure(dpi=200)
+plt.imshow(out_seg_mean_am[test_slice,:,:])
+#%%
+
+def lv_loss(y_pred):
+    Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
+    Y_RV   = y_pred[:,1,:,:]           # size([B,H,W])
+    Y_LV   = y_pred[:,3,:,:]           # size([B,H,W])
+
+    Y_LV_pad = torch.nn.functional.pad(Y_LV,(1,1,1,1),'constant', 0)
+
+    Y_up   = Y_LV_pad[:,2:130,1:129]
+    Y_down = Y_LV_pad[:,0:128,1:129]
+    
+    Y_left = Y_LV_pad[:,1:129,2:130]
+    Y_right= Y_LV_pad[:,1:129,0:128]
+    
+    #Y_UpLe = Y_LV_pad[:,2:130,2:130]
+    #Y_UpRi = Y_LV_pad[:,2:130,0:128]
+    
+    #Y_DoRi = Y_LV_pad[:,0:128,0:128]
+    #Y_DoLe = Y_LV_pad[:,0:128,2:130]
+    
+    #inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
+    inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
+    inside = inside.detach().cpu()#cuda()
+
+    #print('inside', inside)    
+    return inside #(torch.sum(Tensor(inside))) #/(128*128*32))#.cuda()
+
+te = lv_loss(Tensor(out_seg_mean).permute(0,3,1,2))
+
+
 plt.figure(dpi=200)
 
-j = 25*20
+j = 25*0
 
 for i in range(0,25):
     plt.subplot(5,5,i+1)
-    plt.imshow(out_seg_mean_am[i+j,:,:])
+    #plt.imshow(out_seg_mean_am[i+j,:,:])
+    plt.imshow(te[i+j,:,:])
     
 #%%
 w = 0.1
