@@ -318,7 +318,7 @@ def lv_loss(y_true, y_pred):
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 200
+num_epochs = 100
 #loss_function = nn.CrossEntropyLoss()
 
 
@@ -419,7 +419,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
     
-            loss = loss_d + loss_c + loss_lv
+            loss = loss_d + loss_c + 2*loss_lv
+            print('loss', loss)
             #print('loss', loss)
             # Calculate gradients
             loss.backward()
@@ -475,7 +476,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
     
-            loss = loss_d + loss_c + loss_lv #+ loss_lv + loss_c
+            loss = loss_d + loss_c + 2*loss_lv #+ loss_lv + loss_c
     
             # Calculate loss
             eval_loss += loss.item()
