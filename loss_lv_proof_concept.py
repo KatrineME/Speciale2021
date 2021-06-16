@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 #%%
 
-y = gt_train_sub[2,:,:]
+y = gt_test_ed_sub[2,:,:]
 
 Y = torch.nn.functional.one_hot(Tensor(y).to(torch.int64), num_classes=4).detach().numpy()
 
@@ -42,6 +42,9 @@ Y_LVmod[50:56,20:39] = 1
 Y_LVmod[15:33,50:55] = 1
 
 
+H = 128
+W = 128
+
 # Shift
 # Top, bottom, left,right
 Y_LV_pad = np.pad(Y_LVmod,((1,1),(1,1)),'constant', constant_values=0)
@@ -52,17 +55,18 @@ Y_down = Y_LV_pad[0:128,1:129]
 Y_left  = Y_LV_pad[1:129,2:130]
 Y_right = Y_LV_pad[1:129,0:128]
 
-Y_UpLe = Y_LV_pad[2:130,2:130]
-Y_UpRi = Y_LV_pad[2:130,0:128]
+#Y_UpLe = Y_LV_pad[2:130,2:130]
+#Y_UpRi = Y_LV_pad[2:130,0:128]
 
-Y_DoRi = Y_LV_pad[0:128,0:128]
-Y_DoLe = Y_LV_pad[0:128,2:130]
+#Y_DoRi = Y_LV_pad[0:128,0:128]
+#Y_DoLe = Y_LV_pad[0:128,2:130]
 
-inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
+#inside = (Y_up + Y_down + Y_left + Y_right + Y_UpLe + Y_UpRi + Y_DoRi + Y_DoLe) * (Y_BGR + Y_RV)
+inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
 inside[inside > 0] = 1
 #inside = ndimage.binary_erosion(inside).astype(inside.dtype)  # OBS: fjerner noget på inderside
 
-loss = np.sum(inside)
+loss = np.sum(inside) #/(128*128)
 print('loss = ', loss)
 
 #plt.figure(dpi=200)
@@ -73,7 +77,7 @@ plt.figure(dpi=200)
 plt.imshow(Y_LVmod)
 plt.imshow(Y_MYO, alpha=0.2)
 plt.imshow(Y_RV, alpha=0.2)
-plt.imshow(inside, alpha=0.2)
+#plt.imshow(inside, alpha=0.2)
 plt.title('Pixels penalized for neighbourhood')
 
 #%%
