@@ -236,7 +236,19 @@ num_train_sub = 12
 num_eval_sub = num_train_sub
 num_test_sub = num_eval_sub + 8
 
+im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[0:num_train_sub]).astype(None)))
 
+gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
+
+"""
 im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
@@ -260,7 +272,7 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
-
+"""
 print('Data loaded+concat')
 #%%
 H = 128
@@ -290,17 +302,20 @@ for fold in range(0,6):
             out = model(Tensor(im).cuda())
         else:
             out = model(Tensor(im))
-        out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
+        out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy()
+        
         
     del path_model, model, out
     print('Done for fold',fold)
 
+out_soft_mean = out_soft.mean(axis=0)
+
 if user == 'GPU':
-    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_200dia_dice_lclv.pt'
+    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_200dia_dice_lclv_TRAININGDATA.pt'
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_lc.pt'
     
-torch.save(out_soft, PATH_out_soft)
+torch.save(out_soft_mean, PATH_out_soft)
 
 """ OUT-COMMENTED PLOT STATEMENTS
 #%% Run model0
