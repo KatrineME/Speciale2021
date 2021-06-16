@@ -420,7 +420,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_lv = lv_loss(labels, output)
     
             loss = loss_d + loss_c + 2*loss_lv
-            print('loss', loss)
+            #print('loss', loss)
             #print('loss', loss)
             # Calculate gradients
             loss.backward()
