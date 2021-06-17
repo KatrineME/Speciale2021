@@ -204,15 +204,15 @@ if device == 'cuda':
     user = 'GPU'
 else:
     user = 'K'
-
+#%%
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 if user == 'K':
     os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 if user == 'GPU':
     os.chdir('/home/michala/Speciale2021/Speciale2021')
-    
-    
+
+user = 'M'    
 from load_data_gt_im_sub import load_data_sub
 
 phase = 'Systole'
@@ -367,15 +367,15 @@ out_5 = model_5(Tensor(im_test_ed_sub))
 out_5 = out_5["softmax"].detach().numpy()
 """
 #%% Load model if averagered on GPU
-"""
-#path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
+
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice_10lclv.pt'
+#path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
 #%%
 #Plot softmax probabilities for a single slice
-test_slice = 300
+test_slice = 10
 alpha = 0.4
 
 fig = plt.figure()
@@ -451,7 +451,7 @@ out_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 #%%
-test_slice = 314
+test_slice = 271
 plt.figure(dpi=200)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
 #%%
