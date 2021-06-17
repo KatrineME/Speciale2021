@@ -114,7 +114,7 @@ def load_data_sub(user, phase, diagnose):
         gt   = n_gt.get_fdata()
         """
         img, spacing = load_itk(frame_im[i])
-        gt, _        = load_itk(frame_gt[i])
+        gt, _      = load_itk(frame_gt[i])
         
         img = Tensor(img).permute(2,0,1).detach().numpy()
         original_spacing = [spacing[2],spacing[0],spacing[1]]
@@ -125,9 +125,10 @@ def load_data_sub(user, phase, diagnose):
         out_im_space = apply_2d_zoom_3d(img, original_spacing, new_spacing, order=1, do_blur=False) #, as_type=np.float32)
         out_gt_space = apply_2d_zoom_3d(gt, original_spacing, new_spacing, order=1, do_blur=False) #, as_type=np.float32)
         
-        gt = out_gt_space
+        img_space = (out_im_space- np.mean(out_im_space))/np.std(out_im_space)
         
-        img = (out_im_space- np.mean(out_im_space))/np.std(out_im_space)
+        gt = Tensor(out_gt_space).permute(1,2,0).detach().numpy()
+        img = Tensor(img_space).permute(1,2,0).detach().numpy()
         
         im_slices  = img.shape[2]-1
         gt_slices  = gt.shape[2]-1     # OBS: appical slices removed
