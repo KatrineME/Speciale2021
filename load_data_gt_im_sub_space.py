@@ -76,6 +76,35 @@ def load_data_sub(user, phase, diagnose):
         
         return image, spacing
     
+    def apply_2d_zoom_3d(arr3d, spacing, new_spacing, order=1, do_blur=False, as_type=np.float32):
+        """
+        :param arr3d: [#slices, IH, IW]
+        :param spacing: spacing has shape [#slices, IH, IW]
+        :param new_vox_size: tuple(x, y)
+        :param order: of B-spline
+        :param do_blur: boolean (see below)
+        :param as_type: return type of np array. We use this to indicate binary/integer labels which we'll round off
+                        to prevent artifacts
+        :return:
+        """
+        if len(spacing) > 2:
+            spacing = spacing[int(len(spacing) - 2):]
+    
+        if len(new_spacing) > 2:
+            new_spacing = new_spacing[int(len(new_spacing) - 2):]
+    
+        zoom = np.array(spacing, float) / new_spacing
+        if do_blur:
+            for z in range(arr3d.shape[0]):
+                sigma = .25 / zoom
+                arr3d[z, :, :] = scipy.ndimage.gaussian_filter(arr3d[z, :, :], sigma)
+    
+        resized_img = scipy.ndimage.interpolation.zoom(arr3d, tuple((1,)) + tuple(zoom), order=order)
+        if as_type == np.int:
+            # binary/integer labels
+            resized_img = np.round(resized_img).astype(as_type)
+        return resized_img
+    
     for i in sub:
         """
         nimg = nib.load(frame_im[i])   # Load nii image
@@ -85,8 +114,21 @@ def load_data_sub(user, phase, diagnose):
         gt   = n_gt.get_fdata()
         """
         img, spacing = load_itk(frame_im[i])
-        gt, _  = load_itk(frame_gt[i])
-
+        gt, _        = load_itk(frame_gt[i])
+        
+        img = Tensor(img).permute(2,0,1).detach().numpy()
+        original_spacing = [spacing[2],spacing[0],spacing[1]]
+            
+        new_spacing = np.array([original_spacing[0], 1.4, 1.4]).astype(np.float32)
+        #print('New spacing = ', new_spacing)    
+        
+        out_im_space = apply_2d_zoom_3d(img, original_spacing, new_spacing, order=1, do_blur=False) #, as_type=np.float32)
+        out_gt_space = apply_2d_zoom_3d(gt, original_spacing, new_spacing, order=1, do_blur=False) #, as_type=np.float32)
+        
+        gt = out_gt_space
+        
+        img = (out_im_space- np.mean(out_im_space))/np.std(out_im_space)
+        
         im_slices  = img.shape[2]-1
         gt_slices  = gt.shape[2]-1     # OBS: appical slices removed
         
@@ -126,7 +168,7 @@ def load_data_sub(user, phase, diagnose):
         gt_crop.append(in_gt)
         
     
-    return im_crop, gt_crop, spacing
+    return im_crop, gt_crop
 
 
 
