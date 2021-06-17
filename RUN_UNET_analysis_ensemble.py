@@ -205,6 +205,8 @@ if device == 'cuda':
 else:
     user = 'K'
 #%%
+user = 'M'   
+
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 if user == 'K':
@@ -212,7 +214,7 @@ if user == 'K':
 if user == 'GPU':
     os.chdir('/home/michala/Speciale2021/Speciale2021')
 
-user = 'M'    
+ 
 from load_data_gt_im_sub_space import load_data_sub
 
 phase = 'Systole'
@@ -230,6 +232,7 @@ data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
 data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
 data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,phase,'NOR')
 data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
+
 
 #%% BATCH GENERATOR
 num_train_sub = 12
