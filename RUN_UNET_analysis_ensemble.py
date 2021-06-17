@@ -373,7 +373,7 @@ out_5 = model_5(Tensor(im_test_ed_sub))
 out_5 = out_5["softmax"].detach().numpy()
 """
 #%% Load model if averagered on GPU
-
+"""
 path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice_lclv_new.pt'
 #path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
 
