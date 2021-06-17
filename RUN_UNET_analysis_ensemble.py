@@ -212,7 +212,7 @@ if user == 'K':
 if user == 'GPU':
     os.chdir('/home/michala/Speciale2021/Speciale2021')
 
-user = 'M'    
+user = 'K'    
 from load_data_gt_im_sub_space import load_data_sub
 
 phase = 'Systole'

@@ -116,7 +116,12 @@ def load_data_sub(user, phase, diagnose):
         img, spacing = load_itk(frame_im[i])
         gt, _      = load_itk(frame_gt[i])
         
+        print('gt load ',gt.shape)
+        print('im load ',img.shape)       
+        
         img = Tensor(img).permute(2,0,1).detach().numpy()
+        gt = Tensor(gt).permute(2,0,1).detach().numpy()
+        
         original_spacing = [spacing[2],spacing[0],spacing[1]]
             
         new_spacing = np.array([original_spacing[0], 1.4, 1.4]).astype(np.float32)
@@ -125,15 +130,21 @@ def load_data_sub(user, phase, diagnose):
         out_im_space = apply_2d_zoom_3d(img, original_spacing, new_spacing, order=1, do_blur=False) #, as_type=np.float32)
         out_gt_space = apply_2d_zoom_3d(gt, original_spacing, new_spacing, order=1, do_blur=False) #, as_type=np.float32)
         
+        print('gt SPACE ',out_gt_space.shape)
+        print('im SPACE ',out_im_space.shape)
+        
         img_space = (out_im_space- np.mean(out_im_space))/np.std(out_im_space)
         
         gt = Tensor(out_gt_space).permute(1,2,0).detach().numpy()
         img = Tensor(img_space).permute(1,2,0).detach().numpy()
         
+        print('gt slice ',gt.shape)
+        print('im slice ',img.shape)
+        
         im_slices  = img.shape[2]-1
         gt_slices  = gt.shape[2]-1     # OBS: appical slices removed
         
-        pad = 5                        # padding added to ensure correct cropping
+        pad = 50                       # padding added to ensure correct cropping
     
         gt_p  = np.zeros((gt.shape[0]+pad,  gt.shape[1]+pad,  gt_slices))
         img_p = np.zeros((img.shape[0]+pad, img.shape[1]+pad, gt_slices))
