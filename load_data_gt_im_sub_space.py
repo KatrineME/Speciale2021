@@ -125,8 +125,8 @@ def load_data_sub(user, phase, diagnose):
         new_spacing = np.array([original_spacing[0], 1.4, 1.4]).astype(np.float32)
         #print('New spacing = ', new_spacing)    
         
-        out_im_space = apply_2d_zoom_3d(img, original_spacing, new_spacing, order=1, do_blur=False) #, as_type=np.float32)
-        out_gt_space = apply_2d_zoom_3d(gt, original_spacing, new_spacing, order=1, do_blur=False) #, as_type=np.float32)
+        out_im_space = apply_2d_zoom_3d(img, original_spacing, new_spacing, order=1, do_blur=False , as_type=np.float32)
+        out_gt_space = apply_2d_zoom_3d(gt, original_spacing, new_spacing, order=0, do_blur=False , as_type=np.int)
         
         img_space = (out_im_space- np.mean(out_im_space))/np.std(out_im_space)
         
@@ -136,7 +136,7 @@ def load_data_sub(user, phase, diagnose):
         im_slices  = img.shape[2]-1
         gt_slices  = gt.shape[2]-1     # OBS: appical slices removed
         
-        pad = 50                       # padding added to ensure correct cropping
+        pad = 5                     # padding added to ensure correct cropping
     
         gt_p  = np.zeros((gt.shape[0]+pad,  gt.shape[1]+pad,  gt_slices))
         img_p = np.zeros((img.shape[0]+pad, img.shape[1]+pad, gt_slices))
