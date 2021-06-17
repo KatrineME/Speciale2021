@@ -4,6 +4,7 @@ Created on Tue May 11 13:04:26 2021
 
 @author: katrine
 """
+
 def load_data_sub(user, phase, diagnose):
 
     #% Load packages
@@ -14,6 +15,7 @@ def load_data_sub(user, phase, diagnose):
     import numpy   as np
     import matplotlib.pyplot as plt
     import glob2
+    import SimpleITK as sitk
         
     from torch import Tensor
     
@@ -66,15 +68,25 @@ def load_data_sub(user, phase, diagnose):
         sub = NOR
     else:
         sub = RV
-    
+        
+    def load_itk(filename):
+        itkimage = sitk.ReadImage(filename)
+        image    = np.transpose(sitk.GetArrayFromImage(itkimage))
+        spacing  = np.array(itkimage.GetSpacing())
+        
+        return image, spacing
     
     for i in sub:
+        """
         nimg = nib.load(frame_im[i])   # Load nii image
         img  = nimg.get_fdata()
     
         n_gt = nib.load(frame_gt[i])   # Load nii labels
         gt   = n_gt.get_fdata()
-                
+        """
+        img, spacing = load_itk(frame_im[i])
+        gt, _  = load_itk(frame_gt[i])
+
         im_slices  = img.shape[2]-1
         gt_slices  = gt.shape[2]-1     # OBS: appical slices removed
         
