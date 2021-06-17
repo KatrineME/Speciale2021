@@ -213,7 +213,7 @@ if user == 'GPU':
     os.chdir('/home/michala/Speciale2021/Speciale2021')
 
 user = 'M'    
-from load_data_gt_im_sub import load_data_sub
+from load_data_gt_im_sub_space import load_data_sub
 
 phase = 'Systole'
 
@@ -274,6 +274,8 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
 print('Data loaded+concat')
+
+
 #%%
 H = 128
 W = 128
@@ -375,7 +377,7 @@ out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
 #%%
 #Plot softmax probabilities for a single slice
-test_slice = 10
+test_slice = 165
 alpha = 0.4
 
 fig = plt.figure()
@@ -451,7 +453,7 @@ out_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 #%%
-test_slice = 271
+test_slice = 162
 plt.figure(dpi=200)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
 #%%
@@ -487,17 +489,17 @@ te = lv_loss(Tensor(out_seg_mean).permute(0,3,1,2))
 
 plt.figure(dpi=200)
 
-j = 25*0
+j = 25*6
 
 for i in range(0,25):
     plt.subplot(5,5,i+1)
-    #plt.imshow(out_seg_mean_am[i+j,:,:])
-    plt.imshow(te[i+j,:,:])
+    plt.imshow(out_seg_mean_am[i+j,:,:])
+    #plt.imshow(te[i+j,:,:])
     
 #%%
 w = 0.1
 h = 0.3
-
+test_slice = 165
 plt.figure(dpi=200)
 plt.suptitle('Diastolic - Averaged model for test image at slice: {}'.format(test_slice))
 
@@ -526,8 +528,8 @@ plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Left ventricle', fontsize=10)
 
 #%% Metrics
-os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
 from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
 dice = np.zeros((out_seg_mean.shape[0],3))
@@ -617,7 +619,6 @@ p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][5].shape[0])
 p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][6].shape[0])
 p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][7].shape[0])
 
-
 p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][0].shape[0])
 p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][1].shape[0])
 p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][2].shape[0])
@@ -640,7 +641,10 @@ p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][7].shape[0])
 #%% Calculate volume for diastolic phase
 #test_index = data_gt_ed[num_eval:num_test]
 
-PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia.pt'
+PATH_soft_dia_fold = path_out_soft# = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice_10lclv.pt'
+
+#PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia.pt'
+#PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia.pt'
 soft_dia_fold = torch.load(PATH_soft_dia_fold, map_location=torch.device(device))
 
 soft_dia_mean = soft_dia_fold.mean(axis=0)
@@ -729,4 +733,4 @@ b = np.sum(ref_dia_oh[slice,:,:,c])
 #%%
 pier = np.corrcoef(ef_ref[2],ef_target[2])
 
-"""
+
