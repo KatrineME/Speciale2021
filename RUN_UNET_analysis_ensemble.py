@@ -741,7 +741,7 @@ plt.imshow(seg_dia_oh[slice,:,:,c])
 plt.imshow(seg_sys_oh[slice,:,:,c], alpha =0.5)
 
 b = np.sum(ref_dia_oh[slice,:,:,c])
-
+"""
 
 
 
