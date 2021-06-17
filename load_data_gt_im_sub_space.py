@@ -126,7 +126,7 @@ def load_data_sub(user, phase, diagnose):
         gt_crop.append(in_gt)
         
     
-    return im_crop, gt_crop
+    return im_crop, gt_crop, spacing
 
 
 
