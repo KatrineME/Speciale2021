@@ -239,18 +239,20 @@ num_train_sub = 12
 num_eval_sub = num_train_sub
 num_test_sub = num_eval_sub + 8
 """
-im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
+im_train_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_MINF[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_NOR[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_RV[0:num_train_sub]).astype(None)))
 
-gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).astype(None),
+gt_train_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_gt_ed_HCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_gt_ed_MINF[0:num_train_sub]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
 
+gt_test_ed_sub = gt_train_ed_sub
+im_test_ed_sub = im_train_ed_sub
 """
 im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
@@ -579,16 +581,24 @@ for i in range(0,out_seg_mean.shape[0]):
         pass 
     
 mean_dice = np.mean(dice, axis=0)  
-std_dice = np.std(dice,  axis=0)
+std_dice  = np.std(dice,  axis=0)
+var_dice  = np.var(dice,  axis=0)
 
 mean_haus = np.mean(haus, axis=0)
-std_haus = np.std(haus,  axis=0)
+std_haus  = np.std(haus,  axis=0)
+var_haus  = np.var(haus,  axis=0)
 
 print('mean dice = ',mean_dice)  
-print('std dice = ', std_dice) 
+print('std dice = ',  std_dice) 
+print('var dice = ',  var_dice) 
 
 print('mean haus = ',mean_haus)
-print('std haus = ', std_haus)
+print('std haus = ',  std_haus)
+print('var hause = ', var_haus) 
+
+# Boxplot
+plt.boxplot(dice)
+
 
 #%%%%%%%%%%%%%%%%%%%%%%% METRICS %%%%%%%%%%%%%%%%%%%%%
 # Slices per patient
@@ -733,7 +743,6 @@ plt.imshow(seg_sys_oh[slice,:,:,c], alpha =0.5)
 
 b = np.sum(ref_dia_oh[slice,:,:,c])
 
-#%%
-pier = np.corrcoef(ef_ref[2],ef_target[2])
+
 
 
