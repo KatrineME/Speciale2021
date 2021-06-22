@@ -223,7 +223,7 @@ if user == 'GPU':
  
 from load_data_gt_im_sub_space import load_data_sub
 
-"""
+
 phase = 'Systole'
 
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,phase,'DCM')
@@ -232,8 +232,8 @@ data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,phase,'MINF')
 data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,phase,'NOR')
 data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,phase,'RV')
 
-"""
-phase = 'Systole'
+
+phase = 'Diastole'
 
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
@@ -293,19 +293,19 @@ print('Data loaded+concat')
 H = 128
 W = 128
 CV_folds = 6
-data_im = im_test_ed_sub.shape[0]
+data_im = im_test_es_sub.shape[0]
 
 
 out_soft = np.zeros((CV_folds, data_im, 4, H, W))
 
-im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=False, sampler=None,
+im_data = torch.utils.data.DataLoader(im_test_es_sub, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None, prefetch_factor=2, num_workers=0)
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lv_sys_100_fold{}.pt'.format(fold)
+        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_sys_100_fold{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_dice_2lclv_dia_200_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
@@ -326,7 +326,7 @@ for fold in range(0,6):
 #out_soft_mean = out_soft.mean(axis=0)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_100sys_dice_lv.pt'
+    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_100sys_dice_lclv.pt'
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
     
