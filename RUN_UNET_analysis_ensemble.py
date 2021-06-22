@@ -281,6 +281,7 @@ print('Data loaded+concat')
 
 
 #%%
+"""
 H = 128
 W = 128
 CV_folds = 6
@@ -322,7 +323,7 @@ if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
     
 torch.save(out_soft, PATH_out_soft)
-
+"""
 """ OUT-COMMENTED PLOT STATEMENTS
 #%% Run model0
 path_model_0 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold0.pt'
@@ -373,8 +374,8 @@ out_5 = model_5(Tensor(im_test_ed_sub))
 out_5 = out_5["softmax"].detach().numpy()
 """
 #%% Load model if averagered on GPU
-"""
-path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lc.pt'
+
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_CE.pt'
 #path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
@@ -750,7 +751,6 @@ b = np.sum(ref_dia_oh[slice,:,:,c])
 #%%
 cor_edv = np.corrcoef(target_vol_ed,ref_vol_ed)
 
-"""
 
 
 
