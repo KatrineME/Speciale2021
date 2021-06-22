@@ -281,6 +281,7 @@ print('Data loaded+concat')
 
 
 #%%
+"""
 H = 128
 W = 128
 CV_folds = 6
@@ -296,7 +297,7 @@ im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=Fals
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_200_fold{}.pt'.format(fold)
+        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lv_dia_100_fold{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_dice_2lclv_dia_200_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
@@ -317,12 +318,12 @@ for fold in range(0,6):
 #out_soft_mean = out_soft.mean(axis=0)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_200dia_dice_lclv_new.pt'
+    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_100dia_dice_lv.pt'
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
     
 torch.save(out_soft, PATH_out_soft)
-
+"""
 """ OUT-COMMENTED PLOT STATEMENTS
 #%% Run model0
 path_model_0 = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold0.pt'
@@ -373,15 +374,15 @@ out_5 = model_5(Tensor(im_test_ed_sub))
 out_5 = out_5["softmax"].detach().numpy()
 """
 #%% Load model if averagered on GPU
-"""
-path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice_10lclv.pt'
+
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_CE.pt'
 #path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
 #%%
 #Plot softmax probabilities for a single slice
-test_slice = 165
+test_slice = 264
 alpha = 0.4
 
 fig = plt.figure()
@@ -457,7 +458,7 @@ out_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 #%%
-test_slice = 162
+test_slice = 314
 plt.figure(dpi=200)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
 #%%
@@ -595,10 +596,14 @@ print('mean haus = ',mean_haus)
 print('std haus = ',  std_haus)
 print('var hause = ', var_haus) 
 
+#%%
+class_labels = ['RV', 'MYO', 'LV']
 # Boxplot
-plt.boxplot(dice)
-
-
+plt.figure(figsize = (10,5), dpi=200)
+plt.boxplot(dice, vert = False)
+plt.yticks([1,2,3],['RV', 'MYO', 'LV'], fontsize = 14)
+plt.xticks(fontsize = 14)
+plt.title('Boxplot for Dice in Diastolic SD', fontsize = 20)
 #%%%%%%%%%%%%%%%%%%%%%%% METRICS %%%%%%%%%%%%%%%%%%%%%
 # Slices per patient
 p = []
@@ -741,7 +746,14 @@ plt.imshow(seg_dia_oh[slice,:,:,c])
 plt.imshow(seg_sys_oh[slice,:,:,c], alpha =0.5)
 
 b = np.sum(ref_dia_oh[slice,:,:,c])
-"""
+
+
+#%%
+cor_edv = np.corrcoef(target_vol_ed,ref_vol_ed)
+
+
+
+
 
 
 

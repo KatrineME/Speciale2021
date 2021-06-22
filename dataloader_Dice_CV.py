@@ -213,17 +213,13 @@ os.chdir("/home/michala/training")                      # Server directory micha
 from load_data_gt_im_sub_space import load_data_sub
 
 user = 'GPU'
-data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
-data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
-data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
-data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,'Systole','NOR')
-data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,'Systole','RV')
+phase = 'Systole'
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU',phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU',phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU',phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU',phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU',phase,'RV')
 
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR - Concatenate data 
@@ -414,7 +410,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
     
-            loss = loss_d + loss_c + loss_lv
+            loss = loss_d + loss_c #+ loss_c#+ loss_lv loss with c
 
             # Calculate gradients
             loss.backward()
@@ -470,7 +466,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
     
-            loss = loss_d + loss_c + loss_lv #+ loss_lv + loss_c
+            loss = loss_d + loss_c #+ loss_c#+ loss_lv #+ loss_lv + loss_c
     
             # Calculate loss
             eval_loss += loss.item()
@@ -514,7 +510,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_100_fold{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lc_sys_100_fold{}.pt".format(fold)
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
 
@@ -560,7 +556,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_100_CV_scheduler.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_100_dice_lc_scheduler.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -569,6 +565,6 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_100_train_results_scheduler.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lc_sys_100_train_results_scheduler.pt"
 torch.save(T, PATH_results)
 
