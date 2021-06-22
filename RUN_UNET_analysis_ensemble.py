@@ -375,8 +375,8 @@ out_5 = out_5["softmax"].detach().numpy()
 """
 #%% Load model if averagered on GPU
 
-path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_CE.pt'
-#path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
+#path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_CE.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_100dia_CE.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -458,7 +458,7 @@ out_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 #%%
-test_slice = 314
+test_slice = 10
 plt.figure(dpi=200)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
 #%%
@@ -533,8 +533,8 @@ plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Left ventricle', fontsize=10)
 
 #%% Metrics
-#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
 from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
 dice = np.zeros((out_seg_mean.shape[0],3))
@@ -589,12 +589,12 @@ std_haus  = np.std(haus,  axis=0)
 var_haus  = np.var(haus,  axis=0)
 
 print('mean dice = ',mean_dice)  
-print('std dice = ',  std_dice) 
-print('var dice = ',  var_dice) 
+print('std dice  = ',  std_dice) 
+print('var dice  = ',  var_dice) 
 
 print('mean haus = ',mean_haus)
-print('std haus = ',  std_haus)
-print('var hause = ', var_haus) 
+print('std haus  = ',  std_haus)
+print('var haus  = ', var_haus) 
 
 #%%
 class_labels = ['RV', 'MYO', 'LV']
