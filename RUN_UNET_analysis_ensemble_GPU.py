@@ -223,6 +223,7 @@ if user == 'GPU':
  
 from load_data_gt_im_sub_space import load_data_sub
 
+"""
 phase = 'Systole'
 
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,phase,'DCM')
@@ -231,7 +232,8 @@ data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,phase,'MINF')
 data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,phase,'NOR')
 data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,phase,'RV')
 
-phase = 'Diastole'
+"""
+phase = 'Systole'
 
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
