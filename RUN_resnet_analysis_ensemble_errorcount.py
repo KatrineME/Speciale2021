@@ -212,8 +212,7 @@ if device == 'cuda':
     user = 'GPU'
 else:
     user = 'K'
-#%% 
-user = 'M'
+
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 if user == 'K':
@@ -290,8 +289,8 @@ print('Data loaded+concat')
 
 #%% Load model if averagered on GPU
 
-path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-#path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
+#path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_100dia_dice.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -404,9 +403,24 @@ lv_neigh = lv_loss(out_seg_per)
 
 c_non = np.count_nonzero(lv_neigh, axis = (1,2)) # number of error pixels in each slice
 
-cnon_slice = np.count_nonzero(cnon) # number of slices with erros 
-
+cnon_slice = np.count_nonzero(c_non) # number of slices with erros 
+print('Percentage of slices with errors:', (cnon_slice/len(c_non))*100)
+print('Number of errornous neighbour pixels:', c_non.sum())
 #%%
+# Slices per patient
+p = []
+
+for i in range(0,8):
+    p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][i].shape[0])
+for i in range(0,8):
+    p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][i].shape[0])
+for i in range(0,8):
+    p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][i].shape[0])
+for i in range(0,8):
+    p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][i].shape[0])
+for i in range(0,8):
+    p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][i].shape[0])
+    
 test_index = len(p)
 
 s = 0
@@ -418,7 +432,7 @@ for i in range(0,test_index):
         
     s += p[i] 
     #print('s= ',s)
-   
+print('Percentage of patient volumes w. errors:',(np.count_nonzero(cnon_pt)/len(p))*100)   
 
 #%%
 w = 0.1
@@ -523,56 +537,8 @@ plt.boxplot(dice, vert = False)
 plt.yticks([1,2,3],['RV', 'MYO', 'LV'], fontsize = 14)
 plt.xticks(fontsize = 14)
 plt.title('Boxplot for Dice in Diastolic SD', fontsize = 20)
+
 #%%%%%%%%%%%%%%%%%%%%%%% METRICS %%%%%%%%%%%%%%%%%%%%%
-# Slices per patient
-p = []
-
-p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][0].shape[0])
-p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][1].shape[0])
-p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][2].shape[0])
-p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][3].shape[0])
-p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][4].shape[0])
-p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][5].shape[0])
-p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][6].shape[0])
-p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][7].shape[0])
-
-
-p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][0].shape[0])
-p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][1].shape[0])
-p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][2].shape[0])
-p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][3].shape[0])
-p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][4].shape[0])
-p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][5].shape[0])
-p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][6].shape[0])
-p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][7].shape[0])
-
-p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][0].shape[0])
-p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][1].shape[0])
-p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][2].shape[0])
-p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][3].shape[0])
-p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][4].shape[0])
-p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][5].shape[0])
-p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][6].shape[0])
-p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][7].shape[0])
-
-p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][0].shape[0])
-p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][1].shape[0])
-p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][2].shape[0])
-p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][3].shape[0])
-p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][4].shape[0])
-p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][5].shape[0])
-p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][6].shape[0])
-p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][7].shape[0])
-
-p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][0].shape[0])
-p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][1].shape[0]) 
-p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][2].shape[0])
-p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][3].shape[0]) 
-p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][4].shape[0])
-p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][5].shape[0]) 
-p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][6].shape[0])
-p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][7].shape[0]) 
-
 
 #%% Calculate volume for diastolic phase
 #test_index = data_gt_ed[num_eval:num_test]
