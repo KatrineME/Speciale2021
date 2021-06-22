@@ -25,36 +25,87 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 #%%
 
-y = gt_test_ed_sub[2,:,:]
+#y = gt_test_ed_sub[2,:,:]
 
-Y = torch.nn.functional.one_hot(Tensor(y).to(torch.int64), num_classes=4).detach().numpy()
+device = 'cpu'
+
+#path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice_10lclv.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
+
+out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
+
+out_soft = out_soft.mean(axis=0)
+y_pred = Tensor(out_soft).permute(0,2,3,1)
+
+# Penalize bgr next to lv
+poteUP    = y_pred[:,0:-1,:,0]*y_pred[:,1:,:,3]
+poteDOWN  =  y_pred[:,1:,:,0] *y_pred[:,0:-1,:,3]
+poteUD    = poteUP+poteDOWN
+poteUD    = torch.mean(poteUD, axis=1)
+poteUD    = torch.mean(poteUD, axis=1)
+
+poteLEFT  = y_pred[:,:,1:,0]  *y_pred[:,:,0:-1,3]
+poteRIGHT = y_pred[:,:,0:-1,0]*y_pred[:,:,1:,3]
+poteLR    = poteLEFT+poteRIGHT
+poteLR    = torch.mean(poteLR, axis=1)
+poteLR    = torch.mean(poteLR, axis=1)
+
+pote1      = poteUD + poteLR
+#%%
+# Penalize rv next to lv
+poteUP   = y_pred[:,0:-1,:,1]*y_pred[:,1:,:,3]
+poteDOWN =  y_pred[:,1:,:,1] *y_pred[:,0:-1,:,3]
+poteUD   = poteUP+poteDOWN
+poteUD   = torch.mean(poteUD, axis=1)
+poteUD   = torch.mean(poteUD, axis=1)
+
+poteLEFT  = y_pred[:,:,1:,1]   *y_pred[:,:,0:-1,3]
+poteRIGHT = y_pred[:,:,0:-1,1] *y_pred[:,:,1:,3]
+poteLR    = poteLEFT+poteRIGHT
+poteLR    = torch.mean(poteLR, axis=1)
+poteLR    = torch.mean(poteLR, axis=1)
+
+pote2 = poteUD + poteLR
 
 
-Y_BGR = Y[:,:,0]
-Y_RV  = Y[:,:,1]
-Y_MYO = Y[:,:,2]
-Y_LV  = Y[:,:,3]
+#%%
+pote1 = 0.25*pote1 / 2
+pote2 = 0.25*pote2 / 2
+#%%
+loss = torch.mean(pote1+pote2)
 
-Y_LVmod = Y_LV
+#loss with 0.25/2 => tensor(0.0004)
+#loss else        => tensor(0.0034)
+
+#%%
+Y = y_pred
+
+
+Y_BGR = Y[:,:,:,0]
+Y_RV  = Y[:,:,:,1]
+Y_MYO = Y[:,:,:,2]
+Y_LV  = Y[:,:,:,3]
+
+#Y_LVmod = Y_LV
 # Modify a GT to include an error where LV is in contact with BGR
 #Y_LVmod[50:56,20:39] = 0
 # Modify a GT to include an error where LV is in contact with RV
 #Y_LVmod[15:33,50:55] = 0
 
-Y_LVmod[10:20,20:25] = 1
+#Y_LVmod[10:20,20:25] = 1
 
 H = 128
 W = 128
 
 # Shift
 # Top, bottom, left,right
-Y_LV_pad = np.pad(Y_LVmod,((1,1),(1,1)),'constant', constant_values=0)
+Y_LV_pad = torch.nn.functional.pad(Y_LV,(1,1,1,1),'constant',0)
 
-Y_up   = Y_LV_pad[2:130,1:129]
-Y_down = Y_LV_pad[0:128,1:129]
+Y_up   = Y_LV_pad[:,2:130,1:129]
+Y_down = Y_LV_pad[:,0:128,1:129]
 
-Y_left  = Y_LV_pad[1:129,2:130]
-Y_right = Y_LV_pad[1:129,0:128]
+Y_left  = Y_LV_pad[:,1:129,2:130]
+Y_right = Y_LV_pad[:,1:129,0:128]
 
 #Y_UpLe = Y_LV_pad[2:130,2:130]
 #Y_UpRi = Y_LV_pad[2:130,0:128]
@@ -67,9 +118,9 @@ inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
 #inside[inside > 0] = 1
 #inside = ndimage.binary_erosion(inside).astype(inside.dtype)  # OBS: fjerner noget på inderside
 
-loss = np.sum(inside) #/(128*128)
+loss = torch.sum(inside)/(128*128*337)
 print('loss = ', loss)
-
+#%%
 #plt.figure(dpi=200)
 #plt.imshow(inside)
 #plt.title('Pixels penalized for neighbourhood')
