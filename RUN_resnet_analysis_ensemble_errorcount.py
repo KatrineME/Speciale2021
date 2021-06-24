@@ -28,6 +28,7 @@ import glob2
 from torch import nn
 from torch import Tensor
 import scipy.ndimage
+import scipy.stats
 import torchsummary
 
 
@@ -206,7 +207,7 @@ if __name__ == "__main__":
     
     if device == 'cuda':
         unet.cuda()
-    torchsummary.summary(model, (1, 128, 128))
+    #torchsummary.summary(unet, (1, 128, 128))
 
 #%% Specify directory
 if device == 'cuda':
@@ -291,7 +292,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_100dia_dice.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100dia_dice_lc.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -367,15 +368,16 @@ plt.show()
 
 #%% Mean + argmax + one hot
 
-out_soft_mean = out_soft.mean(axis=0)
+out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
-out_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
+out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 #%%
-test_slice = 314
+test_slice = 10
 plt.figure(dpi=200)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
+plt.title('slice: {}'.format(test_slice))
 
 
 #%%
@@ -405,7 +407,8 @@ lv_neigh = lv_loss(out_seg_per)
 c_non = np.count_nonzero(lv_neigh, axis = (1,2)) # number of error pixels in each slice
 
 cnon_slice = np.count_nonzero(c_non) # number of slices with erros 
-print('Percentage of slices with errors:', (cnon_slice/len(c_non))*100)
+print('Number of slices with errors:', cnon_slice)
+print('Percentage of slices with errors:', (cnon_slice/len(c_non))*100,'%')
 print('Number of errornous neighbour pixels:', c_non.sum())
 #%%
 # Slices per patient
@@ -433,6 +436,7 @@ for i in range(0,test_index):
         
     s += p[i] 
     #print('s= ',s)
+print('Number of patient volumes w. errors:',np.count_nonzero(cnon_pt))
 print('Percentage of patient volumes w. errors:',(np.count_nonzero(cnon_pt)/len(p))*100)   
 
 #%%
@@ -467,12 +471,13 @@ plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Left ventricle', fontsize=10)
 
 #%% Metrics
-#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
-from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
 dice = np.zeros((out_seg_mean.shape[0],3))
 haus = np.zeros((out_seg_mean.shape[0],3))
+haus95 = np.zeros((out_seg_mean.shape[0],3))
 
 # OBS OBS OBS OBS
 # dim[0] = BG
@@ -492,18 +497,21 @@ for i in range(0,out_seg_mean.shape[0]):
     
     if len(np.unique(ref[i,:,:,1]))!=1 and len(np.unique(out_seg_mean[i,:,:,1]))!=1:
         haus[i,0]    = hd(out_seg_mean[i,:,:,1],ref[i,:,:,1])  
+        haus95[i,0]    = hd95(out_seg_mean[i,:,:,1],ref[i,:,:,1])  
         h_count += 1
     else:
         pass
     
     if len(np.unique(ref_dia[i,:,:,2]))!=1 and len(np.unique(out_seg_mean[i,:,:,2]))!=1:      
-        haus[i,1]    = hd(out_seg_mean[i,:,:,2],ref[i,:,:,2])  
+        haus[i,1]    = hd(out_seg_mean[i,:,:,2],ref[i,:,:,2]) 
+        haus95[i,1]    = hd95(out_seg_mean[i,:,:,2],ref[i,:,:,2])
         h_count += 1
     else:
         pass
     
     if len(np.unique(ref_dia[i,:,:,3]))!=1 and len(np.unique(out_seg_mean[i,:,:,3]))!=1:
-        haus[i,2]    = hd(out_seg_mean[i,:,:,3],ref[i,:,:,3])  
+        haus[i,2]    = hd(out_seg_mean[i,:,:,3],ref[i,:,:,3])
+        haus95[i,2]    = hd95(out_seg_mean[i,:,:,3],ref[i,:,:,3])
         h_count += 1
     else:
         pass
@@ -522,13 +530,86 @@ mean_haus = np.mean(haus, axis=0)
 std_haus  = np.std(haus,  axis=0)
 var_haus  = np.var(haus,  axis=0)
 
-print('mean dice = ',mean_dice)  
-print('std dice = ',  std_dice) 
-print('var dice = ',  var_dice) 
+mean_haus95 = np.mean(haus95, axis=0)
+std_haus95  = np.std(haus95,  axis=0)
+var_haus95  = np.var(haus95,  axis=0)
 
-print('mean haus = ',mean_haus)
-print('std haus = ',  std_haus)
-print('var hause = ', var_haus) 
+print('mean dice   = ',mean_dice)  
+print('std dice    = ',  std_dice) 
+print('var dice    = ',  var_dice) 
+
+print('mean haus   = ',mean_haus)
+print('mean haus95 = ',mean_haus95)
+
+print('std haus    = ',  std_haus)
+print('std haus95  = ',  std_haus95)
+
+print('var haus    = ', var_haus) 
+print('var haus95  = ', var_haus95)
+
+#%% ACCURACY
+acc = np.zeros((out_seg_mean.shape[0],3))
+
+for i in range(0,out_seg_mean.shape[0]):
+    acc[i,0] = accuracy_self(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
+    acc[i,1] = accuracy_self(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
+    acc[i,2] = accuracy_self(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
+
+mean_acc = np.mean(acc, axis=0)  
+std_acc  = np.std(acc,  axis=0)
+var_acc  = np.var(acc,  axis=0)
+
+print('mean acc   = ',mean_acc)  
+print('var acc    = ',  var_acc) 
+print('std acc    = ',  std_acc) 
+
+#%% MCC
+mcc_cor = np.zeros((out_seg_mean.shape[0],3))
+
+for i in range(0,out_seg_mean.shape[0]):
+    mcc_cor[i,0] = mcc(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
+    mcc_cor[i,1] = mcc(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
+    mcc_cor[i,2] = mcc(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
+
+mean_mcc = np.mean(mcc_cor, axis=0)  
+std_mcc  = np.std(mcc_cor,  axis=0)
+var_mcc  = np.var(mcc_cor,  axis=0)
+
+print('mean mcc   = ',mean_mcc)  
+print('var mcc    = ',  var_mcc) 
+print('std mcc    = ',  std_mcc) 
+
+
+#%% Sensitivty
+sen = np.zeros((out_seg_mean.shape[0],3))
+
+for i in range(0,out_seg_mean.shape[0]):
+    sen[i,0] = sensitivity(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
+    sen[i,1] = sensitivity(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
+    sen[i,2] = sensitivity(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
+
+mean_sen = np.mean(sen, axis=0)  
+std_sen  = np.std(sen,  axis=0)
+var_sen  = np.var(sen,  axis=0)
+
+print('mean sen   = ',mean_sen)  
+print('var sen    = ',  var_sen) 
+print('std sen    = ',  std_sen) 
+#%% Specificity
+spec = np.zeros((out_seg_mean.shape[0],3))
+
+for i in range(0,out_seg_mean.shape[0]):
+    spec[i,0] = specificity(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
+    spec[i,1] = specificity(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
+    spec[i,2] = specificity(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
+
+mean_spec = np.mean(spec, axis=0)  
+std_spec  = np.std(spec,  axis=0)
+var_spec  = np.var(spec,  axis=0)
+
+print('mean spec   = ',mean_spec)  
+print('var spec    = ',  var_spec) 
+print('std spec    = ',  std_spec) 
 
 #%%
 class_labels = ['RV', 'MYO', 'LV']
@@ -637,13 +718,37 @@ b = np.sum(ref_dia_oh[slice,:,:,c])
 #%%
 cor_edv = np.corrcoef(target_vol_ed,ref_vol_ed)
 
+#%% E-map
+emap = np.zeros((out_soft_mean.shape[0],out_soft_mean.shape[2],out_soft_mean.shape[3]))
+
+for i in range(0, emap.shape[0]):
+
+    out_img  = out_soft_mean[i,:,:,:]
+    entropy2 = scipy.stats.entropy(out_img)
+    
+    # Normalize 
+    m_entropy   = np.max(entropy2)
+    entropy     = entropy2/m_entropy
+    emap[i,:,:] = entropy
+
+emap = np.expand_dims(emap, axis=1)
 
 
+#% Plot for visual inspection
+# argmax seg + umap + GT
+test_slice = 329
 
+plt.figure(dpi=200, figsize=(20,10))
+plt.subplot(3,1,1)
+plt.imshow(out_seg_mean_am[test_slice,:,:])
+plt.title('Seg. for slice: {}'.format(test_slice))
 
+plt.subplot(3,1,2)
+plt.imshow(emap[test_slice,0,:,:])
+plt.title('Umap for slice: {}'.format(test_slice))
 
-
-
-
+plt.subplot(3,1,3)
+plt.imshow(gt_test_ed_sub[test_slice,:,:])
+plt.title('GT for slice: {}'.format(test_slice))
 
 
