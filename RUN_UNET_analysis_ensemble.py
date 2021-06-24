@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import torchvision
 import glob2
 #import time
+import torchsummary
 
 #from skimage.transform import resize
 from torch import nn
@@ -46,6 +47,7 @@ class UNet(nn.Module):
                  norm_layer=nn.InstanceNorm2d, drop_prob=0.):
         super(UNet, self).__init__()
         self.drop_prob = drop_prob
+        
         # construct UNet structure
         unet_block = UnetSkipConnectionBlock(in_channels=initial_filter_size * 2 ** (num_downs-1), out_channels=initial_filter_size * 2 ** num_downs,
                                              num_classes=num_classes, kernel_size=kernel_size, norm_layer=norm_layer,
@@ -81,6 +83,7 @@ class UnetSkipConnectionBlock(nn.Module):
         self.use_dropout = True if drop_prob > 0. else False
         self.drop_prob = drop_prob
         self.outermost = outermost
+        
         # downconv
         pool = nn.MaxPool2d(2, stride=2)
         conv1 = self.contract(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, norm_layer=norm_layer)
@@ -197,7 +200,7 @@ if __name__ == "__main__":
     
     if device == 'cuda':
         unet.cuda()
-    #torchsummary.summary(model, (1, 128, 128))
+    torchsummary.summary(unet, (1, 128, 128))
 
 #%% Specify directory
 if device == 'cuda':
