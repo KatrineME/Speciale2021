@@ -28,6 +28,7 @@ import glob2
 from torch import nn
 from torch import Tensor
 import scipy.ndimage
+import torchsummary
 
 
 if torch.cuda.is_available():
@@ -205,7 +206,7 @@ if __name__ == "__main__":
     
     if device == 'cuda':
         unet.cuda()
-    #torchsummary.summary(model, (1, 128, 128))
+    torchsummary.summary(model, (1, 128, 128))
 
 #%% Specify directory
 if device == 'cuda':

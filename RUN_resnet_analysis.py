@@ -21,6 +21,7 @@ import numpy as np
 import torch.optim as optim
 import torch.utils.model_zoo as model_zoo
 import matplotlib.pyplot as plt
+import torchsummary
 
 from torch.autograd import Variable
 from torch import Tensor
@@ -369,8 +370,8 @@ if __name__ == "__main__":
 
     n_channels = 3  # 3
     n_classes  = 2
-    model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    #model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
+    #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
+    model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     if device =='cuda':
         model.cuda()
     torchsummary.summary(model, (n_channels, 80, 80))

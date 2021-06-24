@@ -100,4 +100,21 @@ plt.imshow(img_p[:,:,c_slice])
 plt.imshow(bin_gt, alpha=0.3)
 plt.plot(center[-1,1],center[-1,0],'r+')
 
+#%%
+s = 23
+
+plt.figure(dpi=200, figsize=(14,10))
+plt.subplot(2,2,1)
+plt.imshow(img[:,:,c_slice])
+plt.title('Original cMRI', fontsize=s)
+plt.subplot(2,2,2)
+plt.imshow(im_crop[-1][c_slice,0,:,:])
+plt.title('Cropped cMRI', fontsize=s)
+plt.subplot(2,2,3)
+plt.imshow(gt[:,:,c_slice])
+plt.title('Original annotation', fontsize=s)
+plt.subplot(2,2,4)
+plt.imshow(gt_crop[-1][c_slice,:,:])
+plt.title('Cropped annotation', fontsize=s)
+
 
