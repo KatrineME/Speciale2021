@@ -373,7 +373,7 @@ if __name__ == "__main__":
     #model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     if device =='cuda':
         model.cuda()
-    #torchsummary.summary(model, (n_channels, 80, 80))
+    torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')

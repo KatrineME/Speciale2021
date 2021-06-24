@@ -289,8 +289,8 @@ print('Data loaded+concat')
 
 #%% Load model if averagered on GPU
 
-#path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_100dia_dice.pt'
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
+#path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_100dia_dice.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -372,7 +372,7 @@ out_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 #%%
-test_slice = 314
+test_slice = 263
 plt.figure(dpi=200)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
 
