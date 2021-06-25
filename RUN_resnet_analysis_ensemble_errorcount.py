@@ -292,13 +292,13 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100dia_dice_lc.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100dia_dice_lv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
 #%%
 #Plot softmax probabilities for a single slice
-test_slice = 264
+test_slice = 67
 alpha = 0.4
 
 fig = plt.figure()
@@ -374,7 +374,7 @@ out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), 
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 #%%
-test_slice = 10
+
 plt.figure(dpi=200)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
 plt.title('slice: {}'.format(test_slice))
@@ -399,7 +399,7 @@ def lv_loss(y_pred):
     inside = inside.detach().cpu()#cuda()
 
     #print('inside', inside)    
-    return inside # torch.sum(Tensor(inside))/(128*128*32)#.cuda()
+    return torch.sum(Tensor(inside))/(128*128*32)#.cuda()
 
 out_seg_per = Tensor(out_seg_mean).permute(0,3,1,2)
 lv_neigh = lv_loss(out_seg_per)
