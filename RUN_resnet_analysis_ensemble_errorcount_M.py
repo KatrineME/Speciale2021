@@ -299,14 +299,14 @@ print('Data loaded+concat')
 
 #%% Load model if averagered on GPU
 
-path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100sys_dice_lc.pt'
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100sys_dice_0lc_20lv.pt'
 #path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100sys_CE.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
 #%%
 #Plot softmax probabilities for a single slice
-test_slice = 255
+test_slice = 28
 alpha = 0.4
 
 fig = plt.figure()
@@ -382,7 +382,7 @@ out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), 
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 #%%
-test_slice = 255
+test_slice = 9
 plt.figure(dpi=200)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
 plt.title('slice: {}'.format(test_slice))
@@ -744,7 +744,7 @@ emap = np.expand_dims(emap, axis=1)
 
 #% Plot for visual inspection
 # argmax seg + umap + GT
-test_slice = 177
+test_slice = 84
 
 plt.figure(dpi=200, figsize=(20,10))
 plt.subplot(3,1,1)
