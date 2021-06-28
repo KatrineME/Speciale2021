@@ -299,15 +299,18 @@ print('Data loaded+concat')
 
 #%% Load model if averagered on GPU
 
-path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100sys_dice_0lc_20lv.pt'
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_traindata_100sys_dice_0lc_20lv.pt'
 #path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100sys_CE.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
+
 #%%
 #Plot softmax probabilities for a single slice
-test_slice = 28
+test_slice = 69
 alpha = 0.4
+
+# Slices 9, 28, 67, 84, 177, 186, 199, 248, 255, 265, 269, 312, 315
 
 fig = plt.figure()
 
@@ -381,11 +384,19 @@ out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+
+
+
 #%%
-test_slice = 9
-plt.figure(dpi=200)
-plt.imshow(out_seg_mean_am[test_slice,:,:])
-plt.title('slice: {}'.format(test_slice))
+
+test_slice = 25*3
+plt.figure(figsize=(15,15),dpi=200)
+for i in range(0,25):
+    plt.subplot(5,5,i+1)
+    plt.imshow(out_seg_mean_am[i + test_slice,:,:])
+    plt.title('slice: {}'.format(i + test_slice), fontsize =15)
+    plt.xticks(fontsize=5)
+    plt.yticks(fontsize=5)
 
 
 #%%
@@ -418,6 +429,7 @@ cnon_slice = np.count_nonzero(c_non) # number of slices with erros
 print('Number of slices with errors:', cnon_slice)
 print('Percentage of slices with errors:', (cnon_slice/len(c_non))*100,'%')
 print('Number of errornous neighbour pixels:', c_non.sum())
+
 #%%
 # Slices per patient
 p = []
@@ -729,9 +741,13 @@ cor_edv = np.corrcoef(target_vol_ed,ref_vol_ed)
 #%% E-map
 emap = np.zeros((out_soft_mean.shape[0],out_soft_mean.shape[2],out_soft_mean.shape[3]))
 
+test_slice = 315
+
+
 for i in range(0, emap.shape[0]):
 
-    out_img  = out_soft_mean[i,:,:,:]
+    #out_img  = out_soft_mean[i,:,:,:]
+    out_img = (out_soft[5,test_slice,:,:,:])
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
@@ -744,7 +760,7 @@ emap = np.expand_dims(emap, axis=1)
 
 #% Plot for visual inspection
 # argmax seg + umap + GT
-test_slice = 84
+
 
 plt.figure(dpi=200, figsize=(20,10))
 plt.subplot(3,1,1)
