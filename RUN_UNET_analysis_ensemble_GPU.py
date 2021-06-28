@@ -243,7 +243,7 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 12
+num_train_sub = 8
 num_eval_sub = num_train_sub
 num_test_sub = num_eval_sub + 8
 
