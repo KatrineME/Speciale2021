@@ -495,7 +495,7 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=50, timeout=50000) # 50000 s = 14 h
+    study.optimize(objective, n_trials=100, timeout=50000) # 50000 s = 14 h
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -514,8 +514,16 @@ if __name__ == "__main__":
         
     
     plt.figure(dpi=200)
-    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lr"])
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
+    optuna.visualization.matplotlib.plot_contour(study, params=["lr", "eps"])
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_eps.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["lr", "drop_prob"])
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_drop.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["lr", "weight_decay"])
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_wd.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_param_importances(study)
