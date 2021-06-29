@@ -220,7 +220,7 @@ os.chdir("/home/michala/training")                      # Server directory micha
 
 
 #%% Specify directory
-#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 from load_data_gt_im_sub import load_data_sub

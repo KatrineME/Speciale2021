@@ -782,3 +782,24 @@ for i in range(0,36):
     plt.yticks(fontsize = 6)
 
 
+#%%
+os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+gt = np.concatenate((np.concatenate(data_gt_ed_DCM).astype(None),
+                                  np.concatenate(data_gt_ed_HCM).astype(None),
+                                  np.concatenate(data_gt_ed_MINF).astype(None),
+                                  np.concatenate(data_gt_ed_NOR).astype(None),
+                                  np.concatenate(data_gt_ed_RV).astype(None)))
+ref_sys = torch.nn.functional.one_hot(Tensor(gt).to(torch.int64), num_classes=4).detach().cpu().numpy()
+
+r = np.sum(ref_sys, axis=(1,2))
+ri = np.where(r[:,0] == 0)[0]
+
+print('slice # with no annotation:',ri)
+print('Number of slice without annotation:',len(ri))
+
+#%%
+slice =403
+
+plt.figure(dpi=200)
+plt.imshow(gt[slice,:,:])
+plt.title('Slice {}'.format(slice))
