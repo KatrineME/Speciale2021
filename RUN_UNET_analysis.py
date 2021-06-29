@@ -251,7 +251,7 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
 PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_CrossVal_optuna.pt'
 
 #%% Import results from training (Loss + Accuracy)
-PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_200_train_results_scheduler.pt'
+PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_dice_sys_100e_10lc10lv_train_results_scheduler.pt'
 res_ed = torch.load(PATH_res_ed, map_location=torch.device('cpu'))
 
 #%% Load model

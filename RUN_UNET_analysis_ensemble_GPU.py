@@ -243,24 +243,26 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 12
+num_train_sub = 8
 num_eval_sub = num_train_sub
 num_test_sub = num_eval_sub + 8
-"""
-im_train_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_ed_MINF[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_ed_NOR[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_ed_RV[0:num_train_sub]).astype(None)))
 
-gt_train_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_HCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_MINF[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
+im_train_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_es_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_es_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_es_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_es_RV[0:num_train_sub]).astype(None)))
 
-gt_test_ed_sub = gt_train_ed_sub
-im_test_ed_sub = im_train_ed_sub
+gt_train_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_es_RV[0:num_train_sub]).astype(None)))
+
+gt_test_es_sub = gt_train_es_sub
+im_test_es_sub = im_train_es_sub 
+
+
 """
 im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
@@ -285,7 +287,7 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
-
+"""
 print('Data loaded+concat')
 
 
@@ -305,7 +307,7 @@ im_data = torch.utils.data.DataLoader(im_test_es_sub, batch_size=1, shuffle=Fals
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_10lc_10lv_sys_100e_fold{}.pt'.format(fold)
+        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_0lc_20lv_sys_100e_fold{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_dice_2lclv_dia_200_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
@@ -326,7 +328,7 @@ for fold in range(0,6):
 #out_soft_mean = out_soft.mean(axis=0)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_100sys_dice_10lc_10lv.pt'
+    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_traindata_100sys_dice_0lc_20lv.pt'
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
     

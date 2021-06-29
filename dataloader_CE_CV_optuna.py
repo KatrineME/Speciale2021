@@ -268,7 +268,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds    
 k_folds    = 6
-num_epochs = 2
+num_epochs = 100
 #num_epochs  = trial.suggest_float("num_epochs",  5, 100)
 
 loss_function = nn.CrossEntropyLoss()
@@ -316,13 +316,13 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
       
         model_unet = define_model(trial).to(device)
     
-        optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
+        #optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
         weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
 
         lr  = trial.suggest_float("lr",  1e-6, 1e-2)
         eps = trial.suggest_float("eps", 1e-8, 1e-2)
     
-        optimizer = getattr(optim, optimizer_name)(model_unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
+        optimizer = torch.optim.Adam(model_unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
         # Init the neural network
         #network = unet()
         model_unet.apply(weights_init)
@@ -488,7 +488,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
 #%%
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=5, timeout=4000)
+    study.optimize(objective, n_trials=100, timeout=4000)
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -507,8 +507,16 @@ if __name__ == "__main__":
         
     
     plt.figure(dpi=200)
-    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lr"])
-    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna.png')
+    optuna.visualization.matplotlib.plot_contour(study, params=["lr", "eps"])
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_eps.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["lr", "drop_prob"])
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_drop.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["lr", "weight_decay"])
+    plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_wd.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_param_importances(study)
@@ -519,7 +527,6 @@ if __name__ == "__main__":
     plt.savefig('/home/michala/Speciale2021/Speciale2021/history_optuna.png')
 
 
-print('cha cha cha')
 
 """    
 PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
