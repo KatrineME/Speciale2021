@@ -282,7 +282,7 @@ def objective(trial):
     #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=180)
     
     k_folds    = 6
-    num_epochs = 100
+    num_epochs = 50
     #num_epochs  = trial.suggest_float("num_epochs",  5, 100)
     
     loss_function = nn.CrossEntropyLoss()
@@ -518,7 +518,7 @@ if __name__ == "__main__":
     plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_eps.png')
     
     plt.figure(dpi=200)
-    optuna.visualization.matplotlib.plot_contour(study, params=["lr", "drop_prob"])
+    optuna.visualization.matplotlib.plot_contour(study, params=["lr", "drop_prob_l"])
     plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_drop.png')
     
     plt.figure(dpi=200)
