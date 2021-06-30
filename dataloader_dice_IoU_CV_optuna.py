@@ -435,10 +435,10 @@ def objective(trial):
                 
                 # Set total and correct
                 predicted  = torch.argmax(output, axis=1)
-                predicteds = torch.nn.functional.one_hot((predicted).to(torch.int64), num_classes=4).detach().numpy()
+                predicteds = torch.nn.functional.one_hot((predicted).to(torch.int64), num_classes=4).detach().cpu().numpy()
                 
                 target     = torch.argmax(labels, axis=1)
-                targets    = torch.nn.functional.one_hot((target).to(torch.int64), num_classes=4).detach().numpy()
+                targets    = torch.nn.functional.one_hot((target).to(torch.int64), num_classes=4).detach().cpu().numpy()
                 
                 total     += (target.shape[0])*(128*128)
                 correct   += (predicted == target).sum().item()
@@ -474,7 +474,7 @@ def objective(trial):
                 inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
                 inputs = inputs.cuda()
                 labels = eval_data[:,1,:,:]
-                labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
+                labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().cpu().numpy()
                 labels = labels.permute(0,3,1,2)
                 labels = labels.cuda()
                 #print('i=',i)
@@ -497,10 +497,10 @@ def objective(trial):
                 
                 # Set total and correct
                 predicted_e    = torch.argmax(output, axis=1)
-                predicteds_e  = torch.nn.functional.one_hot(Tensor(predicted_e).to(torch.int64), num_classes=4).detach().numpy()
+                predicteds_e  = torch.nn.functional.one_hot(Tensor(predicted_e).to(torch.int64), num_classes=4).detach().cpu().numpy()
                 
                 target_e     = torch.argmax(labels, axis=1)
-                targets_e    = torch.nn.functional.one_hot((target_e).to(torch.int64), num_classes=4).detach().numpy()
+                targets_e    = torch.nn.functional.one_hot((target_e).to(torch.int64), num_classes=4).detach().cpu().numpy()
                 
                 total_e     += (labels.shape[0])*(128*128)
                 correct_e   += (predicted_e == labels).sum().item()
