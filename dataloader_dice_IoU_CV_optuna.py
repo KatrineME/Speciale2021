@@ -451,6 +451,7 @@ def objective(trial):
         
             #train_losses.append(np.mean(batch_loss))
             train_loss = 0.0 #[]
+            train_IoU.append(IoU)
             
             # Print accuracy
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
@@ -459,7 +460,8 @@ def objective(trial):
             correct   = 0.0
             total     = 0.0
             incorrect = 0.0
-            train_IoU.append(IoU)
+            IoU       = 0.0
+            
             
             #print('train_accuracy', train_accuracy)
             #print('--------------------------------')
@@ -530,6 +532,7 @@ def objective(trial):
             correct_e   = 0.0
             total_e     = 0.0
             incorrect_e = 0.0
+            IoU_e       = 0.0
             
             #lr_get   = lr_scheduler.get_last_lr()[0]
             #lr_scheduler.step()
