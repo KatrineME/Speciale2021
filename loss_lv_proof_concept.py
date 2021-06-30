@@ -73,13 +73,14 @@ pote1 = 0.25*pote1 / 2
 pote2 = 0.25*pote2 / 2
 #%%
 loss = torch.mean(pote1+pote2)
-
+print(loss)
 #loss with 0.25/2 => tensor(0.0004)
 #loss else        => tensor(0.0034)
 
 #%%
 Y = y_pred
 
+#%%
 
 Y_BGR = Y[:,:,:,0]
 Y_RV  = Y[:,:,:,1]
