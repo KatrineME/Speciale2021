@@ -502,9 +502,9 @@ def objective(trial):
                 target_e     = torch.argmax(labels, axis=1)
                 targets_e    = torch.nn.functional.one_hot(target_e.to(torch.int64), num_classes=4).detach().cpu().numpy()
                 
-                total_e     += (labels.shape[0])*(128*128)
-                correct_e   += (predicted_e == labels).sum().item()
-                incorrect_e += (predicted_e != labels).sum().item()
+                total_e     += (target_e.shape[0])*(128*128)
+                correct_e   += (predicted_e == target_e).sum().item()
+                incorrect_e += (predicted_e != target_e).sum().item()
                 
                 IoU_e += jc(predicteds_e, targets_e)
                 
