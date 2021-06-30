@@ -507,6 +507,7 @@ def objective(trial):
                 incorrect_e += (predicted_e != target_e).sum().item()
                 
                 IoU_e += jc(predicteds_e, targets_e)
+                print('IoU for eval iter:', IoU_e)
                 
             eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
             #eval_losses.append(np.mean(eval_loss))
