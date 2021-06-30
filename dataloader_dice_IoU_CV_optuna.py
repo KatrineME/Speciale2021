@@ -512,7 +512,7 @@ def objective(trial):
             eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
             #eval_losses.append(np.mean(eval_loss))
             eval_loss = 0.0
-            eval_IoU.append(IoU_e)
+            eval_IoU.append(IoU_e/(j+1))
             
             # Print accuracy
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
