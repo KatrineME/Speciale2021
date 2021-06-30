@@ -298,7 +298,6 @@ def lv_loss(y_true, y_pred):
     Y_left = Y_LV_pad[:,1:129,2:130]
     Y_right= Y_LV_pad[:,1:129,0:128]
     
-
     inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
     inside = inside.detach().cpu()#cuda()
 
@@ -311,7 +310,6 @@ k_folds    = 6
 num_epochs = 100
 
 #loss_function = nn.CrossEntropyLoss()
-
 
 # For fold results
 results = {}
@@ -409,8 +407,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_d  = soft_dice_loss(labels, output)
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
-    
-            loss = loss_d + 0*loss_c + 10*loss_lv#+ loss_lv loss with c
+
+            loss = loss_d + 0*loss_c + 1000*loss_lv#+ loss_lv loss with c
 
             # Calculate gradients
             loss.backward()
@@ -424,11 +422,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # Set total and correct
             predicted = torch.argmax(output, axis=1)
             target    = torch.argmax(labels, axis=1)
-            total    += (target.shape[0])*(128*128)
-            correct  += (predicted == target).sum().item()
+            total     += (target.shape[0])*(128*128)
+            correct   += (predicted == target).sum().item()
             incorrect += (predicted != target).sum().item()
 
-            
         train_losses.append(train_loss/(i+1)) # This is normalised by batch size
         #print('train_losses', train_losses)
         train_loss = 0.0 
@@ -466,7 +463,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
     
-            loss = loss_d + 0*loss_c + 10*loss_lv#+ loss_lv #+ loss_lv + loss_c
+            loss = loss_d + 0*loss_c + 1000*loss_lv#+ loss_lv #+ loss_lv + loss_c
     
             # Calculate loss
             eval_loss += loss.item()
@@ -510,10 +507,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_0lc_10lv_sys_100e_fold{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_0lc_1000lv_sys_100e_fold{}.pt".format(fold)
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
-
         
 m_fold_train_losses = np.mean(fold_train_losses, axis = 0) 
 m_fold_eval_losses  = np.mean(fold_eval_losses, axis = 0)   
@@ -556,7 +552,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_100e_dice_0lc10lv_scheduler.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_100e_dice_0lc1000lv_scheduler.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -565,6 +561,6 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_100e_0lc10lv_train_results_scheduler.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_100e_0lc1000lv_train_results_scheduler.pt"
 torch.save(T, PATH_results)
 
