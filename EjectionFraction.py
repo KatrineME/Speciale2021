@@ -198,14 +198,124 @@ print('End-sys volume seg = \n', EF_target[1])
 print('End-dia volume seg = \n', EF_target[2]) 
 
 #%% Correlation
+cor_EF = np.corrcoef(EF_target[0], EF_ref[0])
+
 cor_dia = np.corrcoef(target_vol_dia, ref_vol_dia)
 cor_sys = np.corrcoef(target_vol_sys, ref_vol_sys)
 
 cor_dia_RV = np.corrcoef(target_vol_dia_RV, ref_vol_dia_RV)
 cor_sys_RV = np.corrcoef(target_vol_sys_RV, ref_vol_sys_RV)
-#%% LV
-print('Correlation diastole =', cor_dia[1,0]) 
-print('Correlation systole  =', cor_sys[1,0]) 
-#%%
-print('Correlation diastole =', cor_dia_RV) 
-print('Correlation systole  =', cor_sys_RV) 
+
+#EF
+print('Correlation EF LV =', cor_EF[1,0]) 
+# LV
+print('Correlation diastole LV =', cor_dia[1,0]) 
+print('Correlation systole  LV =', cor_sys[1,0]) 
+# RV
+print('Correlation diastole RV =', cor_dia_RV[1,0]) 
+print('Correlation systole  RV =', cor_sys_RV[1,0]) 
+
+
+#%% Bias
+
+bias_sys_vol = np.mean(EF_target[1]-EF_ref[1])
+bias_dia_vol = np.mean(EF_target[2]-EF_ref[2])
+bias_EF      = np.mean(EF_target[0]-EF_ref[0])
+
+print('Bias sys LV=', bias_sys_vol ) 
+print('Bias dia LV=', bias_dia_vol )
+print('Bias EF  LV=', bias_EF )
+
+bias_sys_vol_RV = np.mean(EF_target_RV[1]-EF_ref_RV[1])
+bias_dia_vol_RV = np.mean(EF_target_RV[2]-EF_ref_RV[2])
+bias_EF_RV      = np.mean(EF_target_RV[0]-EF_ref_RV[0])
+
+print('Bias sys RV=', bias_sys_vol_RV ) 
+print('Bias dia RV=', bias_dia_vol_RV )
+print('Bias EF  RV=', bias_EF_RV )
+
+#%% std
+
+std_EF_dif = np.std(EF_ref[0]-EF_target[0])
+std_sys_dif = np.std(EF_ref[1]-EF_target[1])
+std_dia_dif = np.std(EF_ref[2]-EF_target[2])
+
+print('Std EF =', std_EF_dif )
+print('Std sys vol =', std_sys_dif )
+print('Std dia vol =', std_dia_dif ) 
+
+
+std_EF_dif_RV = np.std(EF_ref_RV[0]-EF_target_RV[0])
+std_sys_dif_RV = np.std(EF_ref_RV[1]-EF_target_RV[1])
+std_dia_dif_RV = np.std(EF_ref_RV[2]-EF_target_RV[2])
+
+print('Std EF RV =', std_EF_dif_RV )
+print('Std sys vol RV =', std_sys_dif_RV )
+print('Std dia vol RV =', std_dia_dif_RV ) 
+
+#%% MAE
+
+# LV
+MAE_sys_vol = np.sum(np.abs(EF_target[1]-EF_ref[1]))/EF_ref[1].shape[0]
+MAE_dia_vol = np.sum(np.abs(EF_target[2]-EF_ref[2]))/EF_ref[2].shape[0]
+MAE_EF      = np.sum(np.abs(EF_ref[0]-EF_target[0]))/EF_ref[0].shape[0]
+
+print('MAE EF =', MAE_EF )
+print('MAE sys vol =', MAE_sys_vol )
+print('MAE dia vol =', MAE_dia_vol ) 
+
+# RV
+MAE_sys_vol_RV = np.sum(np.abs(EF_target_RV[1]-EF_ref_RV[1]))/EF_ref_RV[1].shape[0]
+MAE_dia_vol_RV = np.sum(np.abs(EF_target_RV[2]-EF_ref_RV[2]))/EF_ref_RV[2].shape[0]
+MAE_EF_RV      = np.sum(np.abs(EF_target_RV[0]-EF_ref_RV[0]))/EF_ref_RV[0].shape[0]
+
+print('MAE EF RV =', MAE_EF_RV )
+print('MAE sys vol RV =', MAE_sys_vol_RV )
+print('MAE dia vol RV =', MAE_dia_vol_RV ) 
+
+
+#%%%
+
+myo = soft_sys[:,31,:,:,:]
+myo_am = np.argmax(myo, axis=1)
+seg = torch.nn.functional.one_hot(torch.as_tensor(myo_am), num_classes=4).detach().cpu().numpy()
+seg = seg[:,:,:,2]
+
+
+seg = np.sum(seg, axis=0)
+
+plt.figure(dpi=200)
+plt.imshow(seg)
+plt.colorbar()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
