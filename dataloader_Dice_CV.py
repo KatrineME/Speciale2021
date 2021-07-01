@@ -263,8 +263,9 @@ def soft_dice_loss(y_true, y_pred):
      
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
      denominator = torch.sum((torch.square(y_pred) + torch.square(y_true)), (2,3))
-     
-     return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
+     h =  ((numerator + eps) / (denominator + eps)) 
+     c = np.expand_dims(np.array([1,2,4,1]), axis=0)
+     return 1 - torch.mean(c*h) 
 
 
 def class_loss(y_true,y_pred):
@@ -304,7 +305,7 @@ def lv_loss(y_true, y_pred):
     #print('inside', inside)    
     return torch.sum(Tensor(inside))/(128*128*32)#.cuda()
 
-    
+
 #%% Training with K-folds
 k_folds    = 6
 num_epochs = 100
@@ -409,7 +410,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_lv = lv_loss(labels, output)
             #print('loss lv = ', loss_lv)
 
-            loss = loss_d + 0*loss_c + 2*loss_lv#+ loss_lv loss with c
+            loss = loss_d #+ 0*loss_c + 2*loss_lv#+ loss_lv loss with c
             #print('loss',loss)
 
             # Calculate gradients
@@ -446,6 +447,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             # get the inputs
             inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
             inputs = inputs.cuda()
+            
+            
             labels = eval_data[:,1,:,:]
             labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
             labels = labels.permute(0,3,1,2)
@@ -465,7 +468,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
     
-            loss = loss_d + 0*loss_c + 2*loss_lv#+ loss_lv #+ loss_lv + loss_c
+            loss = loss_d #+ 0*loss_c + 2*loss_lv#+ loss_lv #+ loss_lv + loss_c
     
             # Calculate loss
             eval_loss += loss.item()
