@@ -299,15 +299,87 @@ print('Data loaded+concat')
 
 #%% Load model if averagered on GPU
 
-path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_traindata_100sys_dice_0lc_20lv.pt'
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100sys_dice_0lc_1000lv.pt'
 #path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100sys_CE.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
+#%%
+#Plot softmax probabilities for a single slice
+test_slice = 199
+alpha = 0.4
+
+# Slices 9, 28, 67, 84, 177, 186, 199, 248, 255, 265, 269, 312, 315
+
+fig = plt.figure()
+
+class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4)
+plt.figure(dpi=200, figsize=(18,32))
+
+w = 0.1
+
+for fold_model in range (0,6):
+    out_img_ed = np.squeeze(out_soft[fold_model,test_slice,:,:,:])
+    seg_met_dia = np.argmax(out_soft[fold_model,:,:,:], axis=1)
+    seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4)
+    
+    #Reference annotation
+    plt.suptitle('Diastolic phase: test image at slice %i for CV folds' %test_slice, fontsize=30, y=0.9)
+    plt.subplot(7, 4, 1)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,0])
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.ylabel('Reference', fontsize=16)
+    plt.title('Background', fontsize=16)
+    
+    plt.subplot(7, 4, 2)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,1])
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.title('Right ventricle', fontsize=16)
+    
+    plt.subplot(7, 4, 3)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,2])
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.title('Myocardium', fontsize=16)
+    
+    plt.subplot(7, 4, 4)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,3])
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.title('Left ventricle', fontsize=16)
+    
+    
+    #CV model segmentations
+    plt.subplot(7, 4, 1+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(out_soft[fold_model, test_slice,0,:,:])
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.ylabel('CV fold {}'.format(fold_model), fontsize=16)
+    
+    plt.subplot(7, 4, 2+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(out_soft[fold_model, test_slice,1,:,:])
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    
+    plt.subplot(7, 4, 3+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(out_soft[fold_model, test_slice,2,:,:])
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    
+    plt.subplot(7, 4, 4+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(out_soft[fold_model, test_slice,3,:,:])
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+
+plt.show()  
+
 
 #%%
 #Plot softmax probabilities for a single slice
-test_slice = 69
+test_slice = 28
 alpha = 0.4
 
 # Slices 9, 28, 67, 84, 177, 186, 199, 248, 255, 265, 269, 312, 315
@@ -380,16 +452,43 @@ plt.show()
 #%% Mean + argmax + one hot
 
 out_soft_mean   = out_soft.mean(axis=0)
+
+#out_soft_mean   = out_soft[5,:,:,:,:]
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
 ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 
+#%%
+w = 0.1
+h = 0.3
+test_slice = 199
+plt.figure(dpi=200)
+plt.suptitle('Diastolic - Averaged model for test image at slice: {}'.format(test_slice))
 
+plt.subplot(2,2,1)
+plt.subplots_adjust(hspace = h, wspace = w)
+plt.imshow(out_soft_mean[test_slice,0,:,:])
+#plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('Background', fontsize=10)
+
+plt.subplot(2,2,2)
+plt.subplots_adjust(hspace = h, wspace = w)
+plt.imshow(out_soft_mean[test_slice,1,:,:])
+plt.title('Right ventricle', fontsize=10)
+
+plt.subplot(2,2,3)
+plt.subplots_adjust(hspace = h, wspace = w)
+plt.imshow(out_soft_mean[test_slice,2,:,:])
+plt.title('Myocardium', fontsize=10)
+
+plt.subplot(2,2,4)
+plt.subplots_adjust(hspace = h, wspace = w)
+plt.imshow(out_soft_mean[test_slice,3,:,:])
+plt.title('Left ventricle', fontsize=10)
 
 #%%
-
-test_slice = 25*3
+test_slice = 25*1
 plt.figure(figsize=(15,15),dpi=200)
 for i in range(0,25):
     plt.subplot(5,5,i+1)
@@ -397,6 +496,12 @@ for i in range(0,25):
     plt.title('slice: {}'.format(i + test_slice), fontsize =15)
     plt.xticks(fontsize=5)
     plt.yticks(fontsize=5)
+
+#%% 
+plt.figure(figsize=(15,15),dpi=200)
+test_slice = 28
+plt.imshow(out_seg_mean_am[test_slice,:,:])
+plt.title('slice: {}'.format(test_slice), fontsize =25)
 
 
 #%%
@@ -430,7 +535,7 @@ print('Number of slices with errors:', cnon_slice)
 print('Percentage of slices with errors:', (cnon_slice/len(c_non))*100,'%')
 print('Number of errornous neighbour pixels:', c_non.sum())
 
-#%%
+
 # Slices per patient
 p = []
 
@@ -458,6 +563,27 @@ for i in range(0,test_index):
     #print('s= ',s)
 print('Number of patient volumes w. errors:',np.count_nonzero(cnon_pt))
 print('Percentage of patient volumes w. errors:',(np.count_nonzero(cnon_pt)/len(p))*100)   
+
+
+#%%
+gt_per = (Tensor(ref).permute(0,3,1,2)).detach().numpy()
+out_seg_per = (Tensor(out_seg_mean).permute(0,3,1,2)).detach().numpy()
+
+ss = np.sum(out_seg_per, axis=(2,3))
+gs = np.sum(gt_per, axis=(2,3))
+
+emp_both = (ss == 0) & (gs == 0)
+bin_both = emp_both.sum(axis=0)
+
+g_emp = gs == 0
+bin_gt = g_emp.sum(axis=0)
+
+seg_emp = ss == 0
+bin_seg = seg_emp.sum(axis=0)
+
+print('bin_both', bin_both)
+print('bin_seg', bin_seg)
+
 
 #%%
 w = 0.1
@@ -492,7 +618,7 @@ plt.title('Left ventricle', fontsize=10)
 
 #%% Metrics
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
 dice = np.zeros((out_seg_mean.shape[0],3))
@@ -583,6 +709,23 @@ print('mean acc   = ',mean_acc)
 print('var acc    = ',  var_acc) 
 print('std acc    = ',  std_acc) 
 
+#%% IoU
+jac = np.zeros((out_seg_mean.shape[0],3))
+
+for i in range(0,out_seg_mean.shape[0]):
+    jac[i,0] = jc(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
+    jac[i,1] = jc(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
+    jac[i,2] = jc(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
+
+mean_jac = np.mean(jac, axis=0)  
+std_jac  = np.std(jac,  axis=0)
+var_jac  = np.var(jac,  axis=0)
+
+print('mean jac   = ',  mean_jac)  
+print('var jac    = ',  var_jac) 
+print('std jac    = ',  std_jac) 
+
+
 #%% MCC
 mcc_cor = np.zeros((out_seg_mean.shape[0],3))
 
@@ -615,6 +758,7 @@ var_sen  = np.var(sen,  axis=0)
 print('mean sen   = ',mean_sen)  
 print('var sen    = ',  var_sen) 
 print('std sen    = ',  std_sen) 
+
 #%% Specificity
 spec = np.zeros((out_seg_mean.shape[0],3))
 
@@ -630,6 +774,7 @@ var_spec  = np.var(spec,  axis=0)
 print('mean spec   = ',mean_spec)  
 print('var spec    = ',  var_spec) 
 print('std spec    = ',  std_spec) 
+
 
 #%%
 class_labels = ['RV', 'MYO', 'LV']
@@ -650,7 +795,7 @@ PATH_soft_dia_fold = path_out_soft# = '/Users/michalablicher/Desktop/Out_softmax
 #PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia.pt'
 #PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia.pt'
 soft_dia_fold = torch.load(PATH_soft_dia_fold, map_location=torch.device(device))
-
+#%%
 soft_dia_mean = soft_dia_fold.mean(axis=0)
 seg_dia_mean  = np.argmax(soft_dia_mean, axis=1)
 
@@ -702,8 +847,8 @@ for i in range(0,test_index):
     #print('s= ',s)
      
 #%% Calculate EF        
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 
 from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
@@ -741,13 +886,15 @@ cor_edv = np.corrcoef(target_vol_ed,ref_vol_ed)
 #%% E-map
 emap = np.zeros((out_soft_mean.shape[0],out_soft_mean.shape[2],out_soft_mean.shape[3]))
 
-test_slice = 315
+test_slice = 28
+
+# Slices 9, 28, 67, 84, 177, 186, 199, 248, 255, 265, 269, 312, 315
 
 
 for i in range(0, emap.shape[0]):
 
-    #out_img  = out_soft_mean[i,:,:,:]
-    out_img = (out_soft[5,test_slice,:,:,:])
+    out_img  = out_soft_mean[i,:,:,:]
+    #out_img = (out_soft[5,test_slice,:,:,:])
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
@@ -775,4 +922,203 @@ plt.subplot(3,1,3)
 plt.imshow(gt_test_es_sub[test_slice,:,:])
 plt.title('GT for slice: {}'.format(test_slice))
 
-# Slices 9, 28, 67, 84, 177, 186, 199, 248, 255, 265, 269, 312, 315
+#%%
+plt.figure(dpi=200)
+plt.imshow(im_test_es_sub[test_slice,0,:,:])
+plt.title('Img for slice: {}'.format(test_slice))
+
+
+#%% Threshold prediction probabilities
+
+seg_met = np.argmax(out_soft_mean, axis=1)
+
+# Create Plot 
+plt.figure(dpi=200)
+plt.suptitle('Comparison of GT and predicted segmentation', fontsize=16 , y=0.8)
+
+#n = 36 # anatomically incoherent 
+n = 28 # anatomcally incoherent 
+#n = 28 # totally incoherent 
+
+plt.subplot(1, 3, 1)
+plt.imshow(im_test_es_sub[test_slice,0,:,:])
+plt.xticks(rotation=40, fontweight='light', fontsize=7,)
+plt.yticks(horizontalalignment='right',fontweight='light', fontsize=7,)
+plt.title('MRI', fontsize =10)
+
+plt.subplot(1, 3, 2)
+plt.imshow(gt_test_es_sub[n,:,:])
+plt.xticks(rotation=40, fontweight='light', fontsize=7,)
+plt.yticks(horizontalalignment='right',fontweight='light', fontsize=7,)
+plt.title('Ground truth', fontsize =10)
+
+plt.subplot(1, 3, 3)
+plt.imshow(seg_met[n,:,:])
+plt.xticks(rotation=40, fontweight='light', fontsize=7,)
+plt.yticks(horizontalalignment='right',fontweight='light', fontsize=7,)
+plt.title('Predicted', fontsize =10)
+
+plt.tight_layout()
+plt.show()
+
+
+#%% calculate metrics
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021/")
+#from metrics import dc, hd, risk, EF_calculation
+
+dice = np.zeros(seg_met.shape[0])
+haus = np.zeros(seg_met.shape[0])
+fpos = np.zeros(seg_met.shape[0])
+fneg = np.zeros(seg_met.shape[0])
+
+for i in range(0,seg_met.shape[0]):
+    #dice_m  = dc(seg_met[i,:,:],gt_test_es_sub[i,:,:])  
+    #dice[i] = dice_m
+    
+    #haus_m  = hd(seg_met[i,:,:],gt_test_es_sub[i,:,:])  
+    #haus[i] = haus_m
+    
+    fn_m, fp_m = risk(seg_met[i,:,:],gt_test_es_sub[i,:,:])  
+    fneg[i] = fn_m
+    fpos[i] = fp_m
+        
+
+#mean_dice = np.mean(dice)  
+#mean_haus = np.mean(haus)
+risk_measure = fpos+fneg
+
+
+#print('mean overall dice = ',mean_dice)  
+#print('mean overall haus = ',mean_haus)
+print('mean overall risk = ',np.mean(risk_measure))
+
+#print('Dice for test slice [n]      = ',dc(seg_met[n,:,:],gt_test_es_sub[n,:,:]) )
+#print('Hausdorff for test slice [n] = ',hd(seg_met[n,:,:],gt_test_es_sub[n,:,:]) )
+print('Risk measure test slice [n]  = ', risk_measure[n])
+
+#%%
+
+#out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
+
+#ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+
+
+#%% Coverage threshold
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+from uncertain_thres import get_seg_errors_mask, generate_thresholds
+H = 128 
+W = 128
+pred   = Tensor(out_seg_mean).permute(0,3,1,2)
+ref_e  = Tensor(ref).permute(0,3,1,2)
+emap_e = np.squeeze(emap)
+
+err_indices = get_seg_errors_mask(pred, gt_test_es_sub)
+percentiles = generate_thresholds(pred, gt_test_es_sub, emap_e)
+
+uncertain_voxels = np.zeros((len(percentiles),out_seg_mean.shape[0],H,W))
+cov_slices       = np.zeros((out_seg_mean.shape[0],len(percentiles)))
+
+for p, thres in enumerate(percentiles):
+    for i in range(0,out_seg_mean.shape[0]):
+        uncertain_voxels[p,i,:,:] = emap[i,:,:] >= thres
+        cov_slices[i,p] = np.sum(uncertain_voxels[p,i,:,:])
+    coverage = np.mean(cov_slices*1/(H*W)*100, axis=0)
+
+
+#%% Risk measure
+
+#thresholding the softmax for each of 4 channels by the percentile values
+prob_thres = np.zeros((len(percentiles),337,4,H,W))
+a  = np.zeros((337,4,H,W))
+aa = np.zeros((len(percentiles),337,H,W))
+risk_measure = np.zeros((len(percentiles),337))
+
+#%%
+for i in range(len(percentiles)):
+    for k in range(0,10):#prob_thres.shape[1]):
+        a[k,:,:,:]  = out_soft_mean[k,:,:,:] > percentiles[i]
+        aa[i,:,:,:] = np.argmax(a,axis=1)
+        
+        fn_m, fp_m  = risk(aa[i,k,:,:],gt_test_es_sub[k,:,:])  
+        
+        risk_measure[i,k] = fp_m + fn_m
+        
+risk_m = np.mean(risk_measure, axis=1)
+
+
+#%%
+plt.figure(dpi=300)
+
+thres_values = np.round([percentiles[50],percentiles[70], percentiles[80], percentiles[90]],8)
+test_slice = 9
+
+plt.suptitle('Comparison of uncertainty threholds', y=0.9)
+
+plt.subplot(2,4,1)
+plt.imshow(im_test_es_sub[test_slice,0,:,:])
+plt.subplots_adjust(hspace = 0, wspace = 0.6)
+plt.title('Original Im', fontsize=10)
+
+plt.subplot(2,4,2)
+plt.imshow(gt_test_es_sub[test_slice,:,:])
+plt.title('GT seg.', fontsize=10)
+
+plt.subplot(2,4,3)
+plt.imshow(out_seg_mean_am[test_slice,:,:])
+plt.title('Predicted seg.', fontsize=10)
+
+plt.subplot(2,4,4)
+plt.imshow(emap_e[test_slice,:,:])
+plt.title('E-map', fontsize=10)
+plt.colorbar(fraction=0.05)
+
+plt.subplot(2,4,5)
+plt.imshow(aa[50,test_slice,:,:])
+plt.title('Thres: 8.27 e-12', fontsize=10)
+
+plt.subplot(2,4,6)
+plt.imshow(aa[70,test_slice,:,:])
+plt.title('Thres: 7.40 e-07', fontsize=10)
+
+plt.subplot(2,4,7)
+plt.imshow(aa[90,test_slice,:,:])
+plt.title('Thres: 1.90 e-04', fontsize=10)
+
+plt.subplot(2,4,8)
+plt.imshow(aa[99,test_slice,:,:])
+plt.title('Thres: 3.55 e-02', fontsize=10)
+
+#%%
+# Risk-coverage curve
+plt.figure(dpi=300)
+plt.suptitle('Risk-Coverage curve', fontsize=16)
+plt.plot(coverage[1:-1],risk_m[1:-1],'b.', label ='Unet-CE (e-map)')
+plt.xlabel('Coverage [%]')
+plt.ylabel('Risk (FP+FN)')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
