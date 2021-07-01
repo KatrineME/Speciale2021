@@ -11,3 +11,6 @@ s = torch.sum(ref_dia,axis=(1,2))
 d = ((s/(128*128))*100).detach().numpy()
 
 bgr = np.mean(d[:,0])
+RV  = np.mean(d[:,1])
+MYO = np.mean(d[:,2])
+LV  = np.mean(d[:,3])

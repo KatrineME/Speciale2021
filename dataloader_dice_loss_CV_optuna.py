@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Jul  1 16:14:30 2021
+
+@author: katrine
+"""
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -219,7 +225,7 @@ os.chdir("/home/michala/training")                      # Server directory micha
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
-from load_data_gt_im_sub import load_data_sub
+from load_data_gt_im_sub_space import load_data_sub
 
 
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
@@ -526,10 +532,12 @@ def objective(trial):
 
             eval_accuracy_float = float(eval_accuracy[-1])
             eval_IoU_float = float(eval_IoU[-1])
-            print('float', eval_IoU_float)
+            eval_loss_float = float(eval_losses[-1])
+            
+            print('float', eval_loss_float)
             
             #trial.report(eval_accuracy_float, epoch)
-            trial.report(eval_IoU_float, epoch)
+            trial.report(eval_loss_float, epoch)
        
             correct_e   = 0.0
             total_e     = 0.0
@@ -565,8 +573,9 @@ def objective(trial):
 
 
 if __name__ == "__main__":
-    study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=100, timeout=28800 ) # 72000 s = 20 h # 50000 s = 14 h
+    #study = optuna.create_study(direction="maximize")
+    study = optuna.create_study(direction="minimize")
+    study.optimize(objective, n_trials=100, timeout=36000 ) # 72000 s = 20 h # 50000 s = 14 h
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -586,24 +595,24 @@ if __name__ == "__main__":
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "eps"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/optuna_lr_eps.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/optuna_lr_eps_loss.png')
     #plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_eps.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "drop_prob_l"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/optuna_lr_drop.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/optuna_lr_drop_loss.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "weight_decay"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/optuna_lr_wd.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/optuna_lr_wd_loss.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_param_importances(study)
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/importances_optuna.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/importances_optuna_loss.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_optimization_history(study)
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/history_optuna.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/history_optuna_loss.png')
 
 
 
