@@ -263,9 +263,9 @@ def soft_dice_loss(y_true, y_pred):
      
      numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
      denominator = torch.sum((torch.square(y_pred) + torch.square(y_true)), (2,3))
-     h =  ((numerator + eps) / (denominator + eps)) 
+     h =  1 - ((numerator + eps) / (denominator + eps)) 
      c = Tensor(np.expand_dims(np.array([1,2,4,1]), axis=0)).cuda()
-     return 1 - torch.mean(c*h) 
+     return torch.mean(c*h) 
 
 
 def class_loss(y_true,y_pred):
@@ -308,7 +308,7 @@ def lv_loss(y_true, y_pred):
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 100
+num_epochs = 10
 
 #loss_function = nn.CrossEntropyLoss()
 
@@ -512,7 +512,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dicew_sys_100e_fold{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dicew_sys_10e_fold{}.pt".format(fold)
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
         
@@ -557,7 +557,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_100e_dicew.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_10e_dicew.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -566,6 +566,6 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dicew_sys_100e_train_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dicew_sys_10e_train_results.pt"
 torch.save(T, PATH_results)
 
