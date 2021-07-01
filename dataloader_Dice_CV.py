@@ -412,7 +412,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
 
             loss = loss_d #+ 0*loss_c + 2*loss_lv#+ loss_lv loss with c
             
-            print('loss',loss)
+            #print('loss',loss)
 
             # Calculate gradients
             loss.backward()
@@ -513,7 +513,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dicew_sys_10e_fold{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dicew_sys_200e_fold{}.pt".format(fold)
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
         
@@ -558,7 +558,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_10e_dicew.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_200e_dicew.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -567,6 +567,6 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dicew_sys_10e_train_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dicew_sys_200e_train_results.pt"
 torch.save(T, PATH_results)
 
