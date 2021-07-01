@@ -407,8 +407,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_d  = soft_dice_loss(labels, output)
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
+            print('loss lv = ', loss_lv)
 
-            loss = loss_d + 0*loss_c + 1000*loss_lv#+ loss_lv loss with c
+            loss = loss_d + 0*loss_c + 100*loss_lv#+ loss_lv loss with c
             print('loss',loss)
 
             # Calculate gradients
@@ -464,7 +465,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
     
-            loss = loss_d + 0*loss_c + 1000*loss_lv#+ loss_lv #+ loss_lv + loss_c
+            loss = loss_d + 0*loss_c + 100*loss_lv#+ loss_lv #+ loss_lv + loss_c
     
             # Calculate loss
             eval_loss += loss.item()
