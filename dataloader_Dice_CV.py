@@ -307,7 +307,7 @@ def lv_loss(y_true, y_pred):
     
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 200
+num_epochs = 100
 
 #loss_function = nn.CrossEntropyLoss()
 
@@ -354,9 +354,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     unet.apply(weights_init)
     
     # Initialize optimizer
-    optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
+    optimizer = torch.optim.Adam(unet.parameters(), lr=0.0001, eps=1e-4, weight_decay=1e-4) #LR 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=80)
+    #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=80)
     #lr_scheduler =     torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1, last_epoch=-1)
 
 
@@ -486,8 +486,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         incorrect_e = 0.0
     
         
-        lr_get   = lr_scheduler.get_last_lr()[0]
-        lr_scheduler.step()
+        #lr_get   = lr_scheduler.get_last_lr()[0]
+        #lr_scheduler.step()
         
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
@@ -552,7 +552,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_100e_dice_0lc1000lv_scheduler.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_100e_dice_0lc1000lv.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -561,6 +561,6 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_100e_0lc1000lv_train_results_scheduler.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_100e_0lc1000lv_train_results.pt"
 torch.save(T, PATH_results)
 
