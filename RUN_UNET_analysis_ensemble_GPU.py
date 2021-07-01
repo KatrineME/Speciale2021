@@ -319,7 +319,7 @@ for fold in range(0,6):
             out = model(Tensor(im).cuda())
         else:
             out = model(Tensor(im))
-        out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy()
+        out_soft[fold,i,:,:,:] = out["log_softmax"].detach().cpu().numpy()
         
         
     del path_model, model, out
@@ -328,7 +328,7 @@ for fold in range(0,6):
 #out_soft_mean = out_soft.mean(axis=0)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_100sys_dice_0lc_2lv.pt'
+    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_100sys_dice_0lc_2lv_log.pt'
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
     
