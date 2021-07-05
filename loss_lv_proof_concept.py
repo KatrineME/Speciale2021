@@ -29,8 +29,8 @@ from torch.utils.data import DataLoader
 
 device = 'cpu'
 
-#path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice_10lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100sys_dice_0lc_2lv_log.pt'
+#path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia_dice_2lclv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -78,7 +78,7 @@ print(loss)
 #loss else        => tensor(0.0034)
 
 #%%
-Y = y_pred
+Y = torch.exp(y_pred)
 
 #%%
 
@@ -127,7 +127,7 @@ print('loss = ', loss)
 #plt.title('Pixels penalized for neighbourhood')
 
 plt.figure(dpi=200)
-plt.imshow(Y_LVmod)
+
 plt.imshow(Y_MYO, alpha=0.2)
 plt.imshow(Y_RV, alpha=0.2)
 #plt.imshow(inside, alpha=0.2)
