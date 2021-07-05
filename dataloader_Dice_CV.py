@@ -409,9 +409,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_d  = soft_dice_loss(labels, output)
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
-            print('loss lv = ', loss_lv)
-            print('loss c = ', loss_c)
-            print('loss d =', loss_d)
+            #print('loss lv = ', loss_lv)
+            #print('loss c = ', loss_c)
+            #print('loss d =', loss_d)
 
             loss = loss_d + 2*loss_c + 2*loss_lv#+ loss_lv loss with c
             
