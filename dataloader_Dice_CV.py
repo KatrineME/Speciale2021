@@ -265,7 +265,7 @@ def soft_dice_loss(y_true, y_pred):
      denominator = torch.sum((torch.square(y_pred) + torch.square(y_true)), (2,3))
      h =  1 - ((numerator + eps) / (denominator + eps)) 
      c = Tensor(np.expand_dims(np.array([1,2,4,1]), axis=0)).cuda()
-     return (torch.sum(c*h))/8 #torch.mean(c*h) 
+     return (torch.sum(c*h))#/8 #torch.mean(c*h) 
 
 
 def class_loss(y_true,y_pred):
