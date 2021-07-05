@@ -289,9 +289,9 @@ def class_loss(y_true,y_pred):
     return loss_c
 
 def lv_loss(y_true, y_pred):
-    Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
-    Y_RV   = y_pred[:,1,:,:]           # size([B,H,W])
-    Y_LV   = y_pred[:,3,:,:]           # size([B,H,W])
+    Y_BGR  = 1*y_pred[:,0,:,:]           # size([B,H,W])
+    Y_RV   = 2*y_pred[:,1,:,:]           # size([B,H,W])
+    Y_LV   = 1*y_pred[:,3,:,:]           # size([B,H,W])
 
     Y_LV_pad = torch.nn.functional.pad(Y_LV,(1,1,1,1),'constant', 0)
 
