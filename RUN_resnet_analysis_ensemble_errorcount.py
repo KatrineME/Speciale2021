@@ -285,20 +285,19 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
-
 print('Data loaded+concat')
 
 
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100dia_dice_lv.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_200sys_dicew_2lv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
 #%%
 #Plot softmax probabilities for a single slice
-test_slice = 67
+test_slice = 31
 alpha = 0.4
 
 fig = plt.figure()
@@ -398,10 +397,10 @@ def lv_loss(y_pred):
     inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
     inside = inside.detach().cpu()#cuda()
 
-    #print('inside', inside)    
-    return torch.sum(Tensor(inside))/(128*128*32)#.cuda()
+    print('inside', inside.shape)    
+    return inside #torch.sum(Tensor(inside))/(128*128*32)#.cuda()
 
-out_seg_per = Tensor(out_seg_mean).permute(0,3,1,2)
+out_seg_per = Tensor(out_seg_mean).permute(0,3,1,2)   # dim: [B,C,H,W]
 lv_neigh = lv_loss(out_seg_per)
 
 c_non = np.count_nonzero(lv_neigh, axis = (1,2)) # number of error pixels in each slice
@@ -410,6 +409,26 @@ cnon_slice = np.count_nonzero(c_non) # number of slices with erros
 print('Number of slices with errors:', cnon_slice)
 print('Percentage of slices with errors:', (cnon_slice/len(c_non))*100,'%')
 print('Number of errornous neighbour pixels:', c_non.sum())
+
+#%%
+def soft_dice_loss(y_true, y_pred):
+     """ Calculate soft dice loss for each class
+        y_pred = bs x c x h x w
+        y_true = bs x c x h x w (one hot)
+     """
+     eps = 1e-6
+     w = 1/8
+     
+     numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
+     denominator = torch.sum((torch.square(y_pred) + torch.square(y_true)), (2,3))
+     h =  1 - ((numerator + eps) / (denominator + eps)) 
+     c = Tensor(np.expand_dims(np.array([1*w,2*w,4*w,1*w]), axis=0))
+     return torch.sum(c*h), c*h, h
+
+d, ch,h = soft_dice_loss(out_seg_per, Tensor(ref).permute(0,3,1,2))
+print(d/337)
+print(d.shape)
+
 #%%
 # Slices per patient
 p = []
@@ -442,7 +461,7 @@ print('Percentage of patient volumes w. errors:',(np.count_nonzero(cnon_pt)/len(
 #%%
 w = 0.1
 h = 0.3
-test_slice = 165
+test_slice = 310
 plt.figure(dpi=200)
 plt.suptitle('Diastolic - Averaged model for test image at slice: {}'.format(test_slice))
 
