@@ -272,7 +272,7 @@ def class_loss(y_true,y_pred):
     eps = 1e-6
 
     y_true_s   = torch.sum(y_true, (2,3))
-    y_true_sin = torch.empty((y_true_s.shape))#.cuda()
+    y_true_sin = torch.empty((y_true_s.shape)).cuda()
     
     y_true_sin[y_true_s > 0]  = 0
     y_true_sin[y_true_s == 0] = 1
@@ -281,7 +281,7 @@ def class_loss(y_true,y_pred):
     loss_c = -1* torch.sum(torch.log(1 - y_pred + eps),(2,3))
     
     loss_c = loss_c*y_true_sin
-    c = Tensor(np.expand_dims(np.array([1,2,4,1]), axis=0))#.cuda()
+    c = Tensor(np.expand_dims(np.array([1,2,4,1]), axis=0)).cuda()
     loss_c = loss_c*c
     loss_c = torch.sum(loss_c)
     loss_c = loss_c/(y_pred.shape[3]*y_pred.shape[2]*y_pred.shape[1]*y_pred.shape[0])
