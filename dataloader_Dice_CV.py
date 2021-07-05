@@ -272,7 +272,7 @@ def class_loss(y_true,y_pred):
     eps = 1e-6
 
     y_true_s   = torch.sum(y_true, (2,3))
-    y_true_sin = torch.empty((y_true_s.shape)).cuda()
+    y_true_sin = torch.empty((y_true_s.shape))#.cuda()
     
     y_true_sin[y_true_s > 0]  = 0
     y_true_sin[y_true_s == 0] = 1
@@ -281,6 +281,8 @@ def class_loss(y_true,y_pred):
     loss_c = -1* torch.sum(torch.log(1 - y_pred + eps),(2,3))
     
     loss_c = loss_c*y_true_sin
+    c = Tensor(np.expand_dims(np.array([1,2,4,1]), axis=0))#.cuda()
+    loss_c = loss_c*c
     loss_c = torch.sum(loss_c)
     loss_c = loss_c/(y_pred.shape[3]*y_pred.shape[2]*y_pred.shape[1]*y_pred.shape[0])
 
@@ -408,9 +410,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_d  = soft_dice_loss(labels, output)
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
-            #print('loss lv = ', loss_lv)
+            print('loss lv = ', loss_lv)
+            print('loss c = ', loss_c)
+            print('loss d =', loss_d)
 
-            loss = loss_d + 0*loss_c + 2*loss_lv#+ loss_lv loss with c
+            loss = loss_d + 2*loss_c + 2*loss_lv#+ loss_lv loss with c
             
             #print('loss',loss)
 
