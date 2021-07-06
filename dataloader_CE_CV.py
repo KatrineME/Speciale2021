@@ -225,7 +225,7 @@ data_im_es_MINF, data_gt_es_MINF = load_data_sub('GPU','Systole','MINF')
 data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('GPU','Systole','NOR')
 data_im_es_RV,   data_gt_es_RV   = load_data_sub('GPU','Systole','RV')
 """
-phase = 'Systole'
+phase = 'Diastole'
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU',phase,'DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU',phase,'HCM')
 data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU',phase,'MINF')
@@ -266,7 +266,7 @@ gt_test_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_sub:num_te
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 100
+num_epochs = 150
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -320,10 +320,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     
     # Initialize optimizer
     optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
-    #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=80)
-    #lr_scheduler =     torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1, last_epoch=-1)
-
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)
     
     #% Training
     train_losses  = []
@@ -342,7 +339,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     incorrect_e     = 0.0
 
     for epoch in range(num_epochs):  # loop over the dataset multiple times
-    
+        print(epoch, scheduler.get_lr()[0])
+        scheduler.step()
+
         unet.train()
         print('Epoch train =',epoch)
         #0.0  
@@ -449,16 +448,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         total_e     = 0.0
         incorrect_e = 0.0
         #print('eval_results', eval_results)
-
+        
+        #scheduler.step()
         #print('--------------------------------')
         #results[fold] = 100.0 * (correct_e / total_e)
         
-        
-        # Learning rate scheduler
-        
-        lr_get   = lr_scheduler.get_last_lr()[0]
-        #lr_param = optimizer.param_groups[0]['lr']
-        lr_scheduler.step()
 
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
@@ -478,7 +472,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_100_fold{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_150_fold{}.pt".format(fold)
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
 
@@ -523,7 +517,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_100_CV_scheduler.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_150_CV.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -532,7 +526,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_100_train_results_scheduler.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_150_train_results.pt"
 torch.save(T, PATH_results)
 
 
