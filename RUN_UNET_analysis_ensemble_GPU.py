@@ -300,7 +300,7 @@ data_im = im_test_es_sub.shape[0]
 
 out_soft = np.zeros((CV_folds, data_im, 4, H, W))
 
-im_data = torch.utils.data.DataLoader(im_test_es_sub, batch_size=1, shuffle=False, sampler=None,
+im_data = torch.utils.data.DataLoader(im_test_ed_sub, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None, prefetch_factor=2, num_workers=0)
