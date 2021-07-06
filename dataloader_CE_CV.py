@@ -216,7 +216,7 @@ os.chdir("/home/michala/training")                      # Server directory micha
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
-from load_data_gt_im_sub import load_data_sub
+from load_data_gt_im_sub_space import load_data_sub
 
 """
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
@@ -319,8 +319,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     unet.apply(weights_init)
     
     # Initialize optimizer
-    optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)
+    optimizer = torch.optim.Adam(unet.parameters(), lr=0.0001, eps=1e-4, weight_decay=1e-4) #LR 
+    #scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)
     
     #% Training
     train_losses  = []
@@ -449,7 +449,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         incorrect_e = 0.0
         #print('eval_results', eval_results)
         
-        scheduler.step()
+        #scheduler.step()
         #print('--------------------------------')
         #results[fold] = 100.0 * (correct_e / total_e)
         
