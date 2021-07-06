@@ -320,7 +320,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     
     # Initialize optimizer
     optimizer = torch.optim.Adam(unet.parameters(), lr=0.001, eps=1e-4, weight_decay=1e-4) #LR 
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.1)
     
     #% Training
     train_losses  = []
@@ -339,7 +339,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     incorrect_e     = 0.0
 
     for epoch in range(num_epochs):  # loop over the dataset multiple times
-        print(epoch, scheduler.get_lr()[0])
+        #print(scheduler.get_last_lr())
         scheduler.step()
 
         unet.train()
