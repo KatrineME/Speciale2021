@@ -340,7 +340,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
 
     for epoch in range(num_epochs):  # loop over the dataset multiple times
         #print(scheduler.get_last_lr())
-        scheduler.step()
+        #scheduler.step()
 
         unet.train()
         print('Epoch train =',epoch)
@@ -449,7 +449,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         incorrect_e = 0.0
         #print('eval_results', eval_results)
         
-        #scheduler.step()
+        scheduler.step()
         #print('--------------------------------')
         #results[fold] = 100.0 * (correct_e / total_e)
         
