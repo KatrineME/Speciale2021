@@ -339,7 +339,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     incorrect_e     = 0.0
 
     for epoch in range(num_epochs):  # loop over the dataset multiple times
-        #print(scheduler.get_last_lr())
+        print(scheduler.get_last_lr())
         scheduler.step()
 
         unet.train()
