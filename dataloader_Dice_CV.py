@@ -213,7 +213,7 @@ os.chdir("/home/michala/training")                      # Server directory micha
 from load_data_gt_im_sub_space import load_data_sub
 
 user = 'GPU'
-phase = 'Diastole'
+phase = 'Systole'
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU',phase,'DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU',phase,'HCM')
 data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU',phase,'MINF')
@@ -265,7 +265,7 @@ def soft_dice_loss(y_true, y_pred):
      denominator = torch.sum((torch.square(y_pred) + torch.square(y_true)), (2,3))
      h =  1 - ((numerator + eps) / (denominator + eps)) 
      c = Tensor(np.expand_dims(np.array([1,2,4,1]), axis=0)).cuda()
-     return torch.mean(c*h) #(torch.sum(c*h))#/8 
+     return torch.mean(h) #(torch.sum(c*h))#/8 
 
 def class_loss(y_true,y_pred):
     eps = 1e-6
@@ -281,16 +281,16 @@ def class_loss(y_true,y_pred):
     
     loss_c = loss_c*y_true_sin
     c = Tensor(np.expand_dims(np.array([1,2,4,1]), axis=0)).cuda()
-    loss_c = loss_c*c
+    #loss_c = loss_c*c
     loss_c = torch.sum(loss_c)
     loss_c = loss_c/(y_pred.shape[3]*y_pred.shape[2]*y_pred.shape[1]*y_pred.shape[0])
 
     return loss_c
 
 def lv_loss(y_true, y_pred):
-    Y_BGR  = 1*y_pred[:,0,:,:]           # size([B,H,W])
-    Y_RV   = 2*y_pred[:,1,:,:]           # size([B,H,W])
-    Y_LV   = 1*y_pred[:,3,:,:]           # size([B,H,W])
+    Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
+    Y_RV   = y_pred[:,1,:,:]           # size([B,H,W])
+    Y_LV   = y_pred[:,3,:,:]           # size([B,H,W])
 
     Y_LV_pad = torch.nn.functional.pad(Y_LV,(1,1,1,1),'constant', 0)
 
@@ -309,7 +309,7 @@ def lv_loss(y_true, y_pred):
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 200
+num_epochs = 150
 
 #loss_function = nn.CrossEntropyLoss()
 
@@ -413,7 +413,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             #print('loss c = ', loss_c)
             #print('loss d =', loss_d)
 
-            loss = loss_d + loss_c + loss_lv#+ loss_lv loss with c
+            loss = loss_d #+ 2*loss_c + 2*loss_lv#+ loss_lv loss with c
             
             #print('loss',loss)
 
@@ -471,7 +471,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
     
-            loss = loss_d + 0*loss_c + 2*loss_lv#+ loss_lv #+ loss_lv + loss_c
+            loss = loss_d #+ 0*loss_c + 2*loss_lv#+ loss_lv #+ loss_lv + loss_c
     
             # Calculate loss
             eval_loss += loss.item()
@@ -515,7 +515,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dicew_2lv_dia_200e_fold{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_150e_fold{}.pt".format(fold)
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
         
@@ -560,7 +560,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dicew_2lv_dia_200e.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_150e.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -569,6 +569,6 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dicew_2lv_dia_200e_train_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_sys_150e_train_results.pt"
 torch.save(T, PATH_results)
 

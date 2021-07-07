@@ -5,20 +5,7 @@ Created on Thu Jun 24 15:29:54 2021
 
 @author: michalablicher
 """
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jun 22 10:27:26 2021
 
-@author: michalablicher
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jun  9 11:41:06 2021
-
-@author: katrine
-"""
 #%% Load packages
 import torch
 import os
@@ -296,10 +283,9 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
 
 print('Data loaded+concat')
 
-
 #%% Load model if averagered on GPU
 
-path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100sys_dice_0lc_1000lv.pt'
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200sys_dicew.pt'
 #path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100sys_CE.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
@@ -462,7 +448,7 @@ ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torc
 #%%
 w = 0.1
 h = 0.3
-test_slice = 199
+test_slice = 9
 plt.figure(dpi=200)
 plt.suptitle('Diastolic - Averaged model for test image at slice: {}'.format(test_slice))
 
@@ -499,7 +485,7 @@ for i in range(0,25):
 
 #%% 
 plt.figure(figsize=(15,15),dpi=200)
-test_slice = 28
+test_slice = 312
 plt.imshow(out_seg_mean_am[test_slice,:,:])
 plt.title('slice: {}'.format(test_slice), fontsize =25)
 
@@ -693,6 +679,27 @@ print('std haus95  = ',  std_haus95)
 print('var haus    = ', var_haus) 
 print('var haus95  = ', var_haus95)
 
+#%% Boxplot
+plt.figure(dpi=200, figsize =(12,12))
+plt.subplot(2,1,1)
+plt.hist(dice, label=('RV','MYO','LV'), color=('tab:blue','mediumseagreen','orange'))
+plt.legend()
+plt.xlabel('Dice Score')
+plt.ylabel('# Number of slices')
+plt.title('Histogram of Dice Scores for CE model')
+plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
+
+
+plt.subplot(2,1,2)
+plt.hist(dice, label=('RV','MYO','LV'), color=('tab:blue','mediumseagreen','orange'))
+plt.legend()
+plt.xlabel('Dice Score')
+plt.ylabel('# Number of slices')
+plt.title('Histogram of Dice Scores for SD model')
+plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
+
+
+
 #%% ACCURACY
 acc = np.zeros((out_seg_mean.shape[0],3))
 
@@ -738,12 +745,12 @@ mean_mcc = np.mean(mcc_cor, axis=0)
 std_mcc  = np.std(mcc_cor,  axis=0)
 var_mcc  = np.var(mcc_cor,  axis=0)
 
-print('mean mcc   = ',mean_mcc)  
+print('mean mcc   = ',  mean_mcc)  
 print('var mcc    = ',  var_mcc) 
 print('std mcc    = ',  std_mcc) 
 
 
-#%% Sensitivty
+#%% Sensitivty/Recall
 sen = np.zeros((out_seg_mean.shape[0],3))
 
 for i in range(0,out_seg_mean.shape[0]):
@@ -755,9 +762,26 @@ mean_sen = np.mean(sen, axis=0)
 std_sen  = np.std(sen,  axis=0)
 var_sen  = np.var(sen,  axis=0)
 
-print('mean sen   = ',mean_sen)  
+print('mean sen   = ',  mean_sen)  
 print('var sen    = ',  var_sen) 
 print('std sen    = ',  std_sen) 
+
+
+#%% Precision
+prec = np.zeros((out_seg_mean.shape[0],3))
+
+for i in range(0,out_seg_mean.shape[0]):
+    prec[i,0] = precision(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
+    prec[i,1] = precision(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
+    prec[i,2] = precision(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
+
+mean_prec = np.mean(prec, axis=0)  
+std_prec  = np.std(prec,  axis=0)
+var_prec  = np.var(prec,  axis=0)
+
+print('mean prec   = ',  mean_prec)  
+print('var prec    = ',  var_prec) 
+print('std prec    = ',  std_prec) 
 
 #%% Specificity
 spec = np.zeros((out_seg_mean.shape[0],3))
@@ -771,7 +795,7 @@ mean_spec = np.mean(spec, axis=0)
 std_spec  = np.std(spec,  axis=0)
 var_spec  = np.var(spec,  axis=0)
 
-print('mean spec   = ',mean_spec)  
+print('mean spec   = ',  mean_spec)  
 print('var spec    = ',  var_spec) 
 print('std spec    = ',  std_spec) 
 
