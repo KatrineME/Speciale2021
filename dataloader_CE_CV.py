@@ -225,7 +225,7 @@ data_im_es_MINF, data_gt_es_MINF = load_data_sub('GPU','Systole','MINF')
 data_im_es_NOR,  data_gt_es_NOR  = load_data_sub('GPU','Systole','NOR')
 data_im_es_RV,   data_gt_es_RV   = load_data_sub('GPU','Systole','RV')
 """
-phase = 'Diastole'
+phase = 'Systole'
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU',phase,'DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU',phase,'HCM')
 data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU',phase,'MINF')

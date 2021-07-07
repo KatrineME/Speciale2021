@@ -285,7 +285,7 @@ print('Data loaded+concat')
 
 #%% Load model if averagered on GPU
 
-path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200sys_dicew.pt'
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
 #path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100sys_CE.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
@@ -365,7 +365,7 @@ plt.show()
 
 #%%
 #Plot softmax probabilities for a single slice
-test_slice = 28
+test_slice = 45
 alpha = 0.4
 
 # Slices 9, 28, 67, 84, 177, 186, 199, 248, 255, 265, 269, 312, 315
@@ -373,8 +373,11 @@ alpha = 0.4
 fig = plt.figure()
 
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
-ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4)
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4)
 plt.figure(dpi=200, figsize=(18,32))
+
+
+back_image = im_test_ed_sub[test_slice,0,:,:]
 
 w = 0.1
 
@@ -388,26 +391,26 @@ for fold_model in range (0,6):
     plt.subplot(7, 4, 1)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,0])
-    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(back_image,alpha=alpha)
     plt.ylabel('Reference', fontsize=16)
     plt.title('Background', fontsize=16)
     
     plt.subplot(7, 4, 2)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,1])
-    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(back_image,alpha=alpha)
     plt.title('Right ventricle', fontsize=16)
     
     plt.subplot(7, 4, 3)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,2])
-    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(back_image,alpha=alpha)
     plt.title('Myocardium', fontsize=16)
     
     plt.subplot(7, 4, 4)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,3])
-    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(back_image,alpha=alpha)
     plt.title('Left ventricle', fontsize=16)
     
     
@@ -415,23 +418,23 @@ for fold_model in range (0,6):
     plt.subplot(7, 4, 1+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,0])
-    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(back_image,alpha=alpha)
     plt.ylabel('CV fold {}'.format(fold_model), fontsize=16)
     
     plt.subplot(7, 4, 2+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,1])
-    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(back_image,alpha=alpha)
     
     plt.subplot(7, 4, 3+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,2])
-    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(back_image,alpha=alpha)
     
     plt.subplot(7, 4, 4+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,3])
-    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(back_image,alpha=alpha)
 
 plt.show()  
 
@@ -443,12 +446,12 @@ out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
-ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 
 #%%
 w = 0.1
 h = 0.3
-test_slice = 9
+test_slice = 300
 plt.figure(dpi=200)
 plt.suptitle('Diastolic - Averaged model for test image at slice: {}'.format(test_slice))
 
@@ -474,7 +477,7 @@ plt.imshow(out_soft_mean[test_slice,3,:,:])
 plt.title('Left ventricle', fontsize=10)
 
 #%%
-test_slice = 25*1
+test_slice = 25*7
 plt.figure(figsize=(15,15),dpi=200)
 for i in range(0,25):
     plt.subplot(5,5,i+1)
@@ -485,7 +488,7 @@ for i in range(0,25):
 
 #%% 
 plt.figure(figsize=(15,15),dpi=200)
-test_slice = 312
+test_slice = 31
 plt.imshow(out_seg_mean_am[test_slice,:,:])
 plt.title('slice: {}'.format(test_slice), fontsize =25)
 
@@ -550,7 +553,59 @@ for i in range(0,test_index):
 print('Number of patient volumes w. errors:',np.count_nonzero(cnon_pt))
 print('Percentage of patient volumes w. errors:',(np.count_nonzero(cnon_pt)/len(p))*100)   
 
+#%%
+import skimage
+from skimage import measure
 
+labeled_image_rv = []
+labeled_image_myo = []
+labeled_image_lv = []
+labeled_image_all = []
+
+out_seg_mean_bin = (out_seg_mean_am > 0).astype(int)
+
+#w = out_seg_mean_bin.astype(int)
+
+#%%
+for i in range(0, (out_seg_mean.shape[0])):
+    labeled_image_all.append(skimage.measure.label(out_seg_mean_bin[i,:,:], connectivity=2, return_num=True))
+    labeled_image_rv.append(skimage.measure.label(out_seg_mean[i,:,:,1], connectivity=2, return_num=True))
+    labeled_image_myo.append(skimage.measure.label(out_seg_mean[i,:,:,2], connectivity=2, return_num=True))
+    labeled_image_lv.append(skimage.measure.label(out_seg_mean[i,:,:,3], connectivity=2, return_num=True))
+
+#%%
+
+slice = 79
+plt.figure(dpi=200)
+plt.subplot(2,2,1)
+plt.imshow(out_seg_mean_am[slice,:,:])
+plt.subplot(2,2,2)
+plt.imshow(labeled_image_rv[slice][0])
+plt.subplot(2,2,3)
+plt.imshow(labeled_image_myo[slice][0])
+plt.subplot(2,2,4)
+plt.imshow(labeled_image_all[slice][0])
+
+#%%
+multi_lab_rv = []
+multi_lab_myo = []
+multi_lab_lv = []
+multi_lab_all = []
+
+for i in range(0, (out_seg_mean.shape[0])):
+    multi_lab_rv.append(float(labeled_image_rv[i][1] > 1))
+    multi_lab_myo.append(float(labeled_image_myo[i][1] > 1))
+    multi_lab_lv.append(float(labeled_image_lv[i][1] > 1))
+    multi_lab_all.append(float(labeled_image_all[i][1] > 1))
+
+    
+tot_all = np.sum(multi_lab_all)
+
+tot_rv = np.sum(multi_lab_rv)
+tot_myo = np.sum(multi_lab_myo)
+tot_lv = np.sum(multi_lab_lv)
+
+print('Total slices with more:', tot_rv, tot_myo, tot_lv, tot_all)
 #%%
 gt_per = (Tensor(ref).permute(0,3,1,2)).detach().numpy()
 out_seg_per = (Tensor(out_seg_mean).permute(0,3,1,2)).detach().numpy()
@@ -689,7 +744,7 @@ plt.ylabel('# Number of slices')
 plt.title('Histogram of Dice Scores for CE model')
 plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
 
-
+#%%
 plt.subplot(2,1,2)
 plt.hist(dice, label=('RV','MYO','LV'), color=('tab:blue','mediumseagreen','orange'))
 plt.legend()
