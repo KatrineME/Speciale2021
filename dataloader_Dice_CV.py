@@ -413,7 +413,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             #print('loss c = ', loss_c)
             #print('loss d =', loss_d)
 
-            loss = loss_d + 2*loss_c + 2*loss_lv#+ loss_lv loss with c
+            loss = loss_d + loss_c + loss_lv#+ loss_lv loss with c
             
             #print('loss',loss)
 

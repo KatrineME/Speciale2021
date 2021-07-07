@@ -31,52 +31,94 @@ import scipy.ndimage
 #!pip install opencv-python
 
 #%% Import results from training (Loss + Accuracy)
-PATH_res_ed = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_dicew_2lv_dia_200e_train_results.pt'
+PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_dicew_2lv_dia_200e_train_results.pt'
+PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_100_train_results_scheduler.pt'
 #PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_dicew_2lv_dia_200e_train_results.pt'
-res_ed = torch.load(PATH_res_ed, map_location=torch.device('cpu'))
+res_dice = torch.load(PATH_dice, map_location=torch.device('cpu'))
+res_CE = torch.load(PATH_CE, map_location=torch.device('cpu'))
 
 #%% Loss and accuracy
-out_mean = res_ed[0] # import mean from model
-out_one  = res_ed[1] 
+out_mean = res_dice[0] # import mean from model
+out_one  = res_dice[1] 
 
 train_loss = out_mean[0]
-eval_loss = out_mean[1]
+eval_loss  = out_mean[1]
 
 train_loss_0 = out_one[0][0]
-eval_loss_0 = out_one[1][0]
+eval_loss_0  = out_one[1][0]
 train_loss_1 = out_one[0][1]
-eval_loss_1 = out_one[1][1]
+eval_loss_1  = out_one[1][1]
 train_loss_2 = out_one[0][2]
-eval_loss_2 = out_one[1][2]
+eval_loss_2  = out_one[1][2]
 train_loss_3 = out_one[0][3]
-eval_loss_3 = out_one[1][3]
+eval_loss_3  = out_one[1][3]
 train_loss_4 = out_one[0][4]
-eval_loss_4 = out_one[1][4]
+eval_loss_4  = out_one[1][4]
 train_loss_5 = out_one[0][5]
-eval_loss_5 = out_one[1][5]
+eval_loss_5  = out_one[1][5]
 
 train_acc = out_mean[2]
-eval_acc = out_mean[3]
+eval_acc  = out_mean[3]
 
 train_acc_1 = out_one[2][0]
-eval_acc_1 = out_one[3][0]
+eval_acc_1  = out_one[3][0]
 train_acc_2 = out_one[2][1]
-eval_acc_2 = out_one[3][1]
+eval_acc_2  = out_one[3][1]
 train_acc_3 = out_one[2][2]
-eval_acc_3 = out_one[3][2]
+eval_acc_3  = out_one[3][2]
 train_acc_4 = out_one[2][3]
-eval_acc_4 = out_one[3][3]
+eval_acc_4  = out_one[3][3]
 train_acc_5 = out_one[2][4]
-eval_acc_5 = out_one[3][4]
+eval_acc_5  = out_one[3][4]
 train_acc_6 = out_one[2][5]
-eval_acc_6 = out_one[3][5]
+eval_acc_6  = out_one[3][5]
 
 train_inc = (out_mean[4])
-eval_inc = (out_mean[5])*5
+eval_inc  = (out_mean[5])*5
+
+#%% CE
+out_mean_CE = res_CE[0] # import mean from model
+out_one_CE  = res_CE[1] 
+
+train_loss_CE = out_mean_CE[0]
+eval_loss_CE  = out_mean_CE[1]
+
+train_loss_0_CE = out_one_CE[0][0]
+eval_loss_0_CE  = out_one_CE[1][0]
+train_loss_1_CE = out_one_CE[0][1]
+eval_loss_1_CE  = out_one_CE[1][1]
+train_loss_2_CE = out_one_CE[0][2]
+eval_loss_2_CE  = out_one_CE[1][2]
+train_loss_3_CE = out_one_CE[0][3]
+eval_loss_3_CE  = out_one_CE[1][3]
+train_loss_4_CE = out_one_CE[0][4]
+eval_loss_4_CE  = out_one_CE[1][4]
+train_loss_5_CE = out_one_CE[0][5]
+eval_loss_5_CE  = out_one_CE[1][5]
+
+train_acc_CE = out_mean_CE[2]
+eval_acc_CE  = out_mean_CE[3]
+
+train_acc_1_CE = out_one_CE[2][0]
+eval_acc_1_CE  = out_one_CE[3][0]
+train_acc_2_CE = out_one_CE[2][1]
+eval_acc_2_CE  = out_one_CE[3][1]
+train_acc_3_CE = out_one_CE[2][2]
+eval_acc_3_CE  = out_one_CE[3][2]
+train_acc_4_CE = out_one_CE[2][3]
+eval_acc_4_CE  = out_one_CE[3][3]
+train_acc_5_CE = out_one_CE[2][4]
+eval_acc_5_CE  = out_one_CE[3][4]
+train_acc_6_CE = out_one_CE[2][5]
+eval_acc_6_CE  = out_one_CE[3][5]
+
+train_inc_CE = (out_mean_CE[4])
+eval_inc_CE  = (out_mean_CE[5])*5
 #%%
 
 
-t1 = np.arange(len(train_acc_1[0:200]))
+t1 = np.arange(len(train_acc_1))
+t2 = np.arange(len(train_acc_1_CE))
 
 plt.figure(figsize=(12, 12),dpi=400)
 plt.plot(t1, train_acc_1[0:200], 'b', label = 'Training Loss')
@@ -99,63 +141,116 @@ epochs_train = np.arange(len(train_loss))
 epochs_eval  = np.arange(len(eval_loss))
 
 plt.figure(figsize=(15, 15),dpi=400)
-#plt.rcParams.update({'font.size': 26})
-plt.subplot(2,2,1)
-plt.plot(t1, train_loss_0[0:200], 'b', label = 'Training loss fold 0')
-plt.plot(t1 , train_loss_1[0:200], 'g', label = 'Training loss fold 1')
-plt.plot(t1 , train_loss_2[0:200], 'r', label = 'Training loss fold 2')
-plt.plot(t1 , train_loss_3[0:200], 'y', label = 'Training loss fold 3')
-plt.plot(t1 , train_loss_4[0:200], 'm', label = 'Training loss fold 4')
-plt.plot(t1 , train_loss_5[0:200], 'c', label = 'Training loss fold 5')
 
-plt.plot(t1, eval_loss_0[0:200], 'b' ,linestyle = 'dashed', label = 'Validation loss fold 0')
-plt.plot(t1 , eval_loss_1[0:200], 'g',linestyle = 'dashed', label = 'Validation loss fold 1')
-plt.plot(t1 , eval_loss_2[0:200], 'r',linestyle = 'dashed', label = 'Validation loss fold 2')
-plt.plot(t1 , eval_loss_3[0:200], 'y',linestyle = 'dashed', label = 'Validation loss fold 3')
-plt.plot(t1 , eval_loss_4[0:200], 'm',linestyle = 'dashed', label = 'Validation loss fold 4')
-plt.plot(t1 , eval_loss_5[0:200], 'c',linestyle = 'dashed', label = 'Validation loss fold 5')
+plt.subplot(2,2,3)
+plt.plot(t1, train_loss_0, 'b', label = 'Training loss fold 0')
+plt.plot(t1 , train_loss_1, 'g', label = 'Training loss fold 1')
+plt.plot(t1 , train_loss_2, 'r', label = 'Training loss fold 2')
+plt.plot(t1 , train_loss_3, 'y', label = 'Training loss fold 3')
+plt.plot(t1 , train_loss_4, 'm', label = 'Training loss fold 4')
+plt.plot(t1 , train_loss_5, 'c', label = 'Training loss fold 5')
+
+plt.plot(t1, eval_loss_0, 'b' ,linestyle = 'dashed', label = 'Validation loss fold 0')
+plt.plot(t1 , eval_loss_1, 'g',linestyle = 'dashed', label = 'Validation loss fold 1')
+plt.plot(t1 , eval_loss_2, 'r',linestyle = 'dashed', label = 'Validation loss fold 2')
+plt.plot(t1 , eval_loss_3, 'y',linestyle = 'dashed', label = 'Validation loss fold 3')
+plt.plot(t1 , eval_loss_4, 'm',linestyle = 'dashed', label = 'Validation loss fold 4')
+plt.plot(t1 , eval_loss_5, 'c',linestyle = 'dashed', label = 'Validation loss fold 5')
+
+#plt.scatter(np.argmin(eval_loss),np.min(eval_loss),marker="v",s=10)
 
 plt.grid(color='k', linestyle='-', linewidth=0.2)
 plt.xticks(np.arange(0, len(t1) + 2, step = 50), fontsize =14)
 plt.yticks(fontsize =14)
 plt.xlabel('Epochs', fontsize = 16)
-plt.ylabel('Cross-Entropy Loss',  fontsize = 16)
-plt.legend(loc="upper right", fontsize = 16)
-plt.title('Loss function', fontsize =28)
+plt.ylabel('Soft-Dice Loss',  fontsize = 16)
+plt.legend(loc="upper right", fontsize = 13)
+plt.title('Cost function for SD', fontsize =28)
 
-plt.subplot(2,2,2)
-plt.plot(t1, train_acc_1[0:200], 'b', label = 'Training accuracy fold 0')
-plt.plot(t1 , train_acc_2[0:200], 'g', label = 'Training accuracy fold 1')
-plt.plot(t1 , train_acc_3[0:200], 'r', label = 'Training accuracy fold 2')
-plt.plot(t1 , train_acc_4[0:200], 'y', label = 'Training accuracy fold 3')
-plt.plot(t1 , train_acc_5[0:200], 'm', label = 'Training accuracy fold 4')
-plt.plot(t1 , train_acc_6[0:200], 'c', label = 'Training accuracy fold 5')
+plt.subplot(2,2,4)
+plt.plot(t1, train_acc_1, 'b', label = 'Training accuracy fold 0')
+plt.plot(t1 , train_acc_2, 'g', label = 'Training accuracy fold 1')
+plt.plot(t1 , train_acc_3, 'r', label = 'Training accuracy fold 2')
+plt.plot(t1 , train_acc_4, 'y', label = 'Training accuracy fold 3')
+plt.plot(t1 , train_acc_5, 'm', label = 'Training accuracy fold 4')
+plt.plot(t1 , train_acc_6, 'c', label = 'Training accuracy fold 5')
 
-plt.plot(t1, eval_acc_1[0:200], 'b' ,linestyle = 'dashed', label = 'Validation accuracy fold 0')
-plt.plot(t1 , eval_acc_2[0:200], 'g',linestyle = 'dashed', label = 'Validation accuracy fold 1')
-plt.plot(t1 , eval_acc_3[0:200], 'r',linestyle = 'dashed', label = 'Validation accuracy fold 2')
-plt.plot(t1 , eval_acc_4[0:200], 'y',linestyle = 'dashed', label = 'Validation accuracy fold 3')
-plt.plot(t1 , eval_acc_5[0:200], 'm',linestyle = 'dashed', label = 'Validation accuracy fold 4')
-plt.plot(t1 , eval_acc_6[0:200], 'c',linestyle = 'dashed', label = 'Validation accuracy fold 5')
+plt.plot(t1, eval_acc_1, 'b' ,linestyle = 'dashed', label = 'Validation accuracy fold 0')
+plt.plot(t1 , eval_acc_2, 'g',linestyle = 'dashed', label = 'Validation accuracy fold 1')
+plt.plot(t1 , eval_acc_3, 'r',linestyle = 'dashed', label = 'Validation accuracy fold 2')
+plt.plot(t1 , eval_acc_4, 'y',linestyle = 'dashed', label = 'Validation accuracy fold 3')
+plt.plot(t1 , eval_acc_5, 'm',linestyle = 'dashed', label = 'Validation accuracy fold 4')
+plt.plot(t1 , eval_acc_6, 'c',linestyle = 'dashed', label = 'Validation accuracy fold 5')
 
 plt.grid(color='k', linestyle='-', linewidth=0.2)
 plt.xticks(np.arange(0, len(t1) + 2, step = 50), fontsize =14)
 plt.yticks(fontsize =14)
 plt.xlabel('Epochs', fontsize = 16)
 plt.ylabel('Accuracy %',  fontsize = 16)
-plt.legend(loc="lower right", fontsize = 16)
-plt.title("Accuracy", fontsize =28)
+plt.legend(loc="lower right", fontsize = 13)
+plt.title("Accuracy for SD", fontsize =28)
+
+
+
+plt.subplot(2,2,1)
+plt.plot(t2, train_loss_0_CE, 'b', label = 'Training loss fold 0')
+plt.plot(t2 , train_loss_1_CE, 'g', label = 'Training loss fold 1')
+plt.plot(t2 , train_loss_2_CE, 'r', label = 'Training loss fold 2')
+plt.plot(t2 , train_loss_3_CE, 'y', label = 'Training loss fold 3')
+plt.plot(t2 , train_loss_4_CE, 'm', label = 'Training loss fold 4')
+plt.plot(t2 , train_loss_5_CE, 'c', label = 'Training loss fold 5')
+
+plt.plot(t2, eval_loss_0_CE, 'b' ,linestyle = 'dashed', label = 'Validation loss fold 0')
+plt.plot(t2 , eval_loss_1_CE, 'g',linestyle = 'dashed', label = 'Validation loss fold 1')
+plt.plot(t2 , eval_loss_2_CE, 'r',linestyle = 'dashed', label = 'Validation loss fold 2')
+plt.plot(t2 , eval_loss_3_CE, 'y',linestyle = 'dashed', label = 'Validation loss fold 3')
+plt.plot(t2 , eval_loss_4_CE, 'm',linestyle = 'dashed', label = 'Validation loss fold 4')
+plt.plot(t2 , eval_loss_5_CE, 'c',linestyle = 'dashed', label = 'Validation loss fold 5')
+
+#plt.scatter(np.argmin(eval_loss),np.min(eval_loss),marker="v",s=10)
+
+plt.grid(color='k', linestyle='-', linewidth=0.2)
+plt.xticks(np.arange(0, len(t1) + 2, step = 50), fontsize =14)
+plt.yticks(fontsize =14)
+plt.xlabel('Epochs', fontsize = 16)
+plt.ylabel('Cross-Entropy Loss',  fontsize = 16)
+plt.legend(loc="upper right", fontsize = 13)
+plt.title('Cost function for CE', fontsize =28)
+
+plt.subplot(2,2,2)
+plt.plot(t2, train_acc_1_CE, 'b', label = 'Training accuracy fold 0')
+plt.plot(t2 , train_acc_2_CE, 'g', label = 'Training accuracy fold 1')
+plt.plot(t2 , train_acc_3_CE, 'r', label = 'Training accuracy fold 2')
+plt.plot(t2 , train_acc_4_CE, 'y', label = 'Training accuracy fold 3')
+plt.plot(t2 , train_acc_5_CE, 'm', label = 'Training accuracy fold 4')
+plt.plot(t2 , train_acc_6_CE, 'c', label = 'Training accuracy fold 5')
+
+plt.plot(t2, eval_acc_1_CE, 'b' ,linestyle = 'dashed', label = 'Validation accuracy fold 0')
+plt.plot(t2 , eval_acc_2_CE, 'g',linestyle = 'dashed', label = 'Validation accuracy fold 1')
+plt.plot(t2 , eval_acc_3_CE, 'r',linestyle = 'dashed', label = 'Validation accuracy fold 2')
+plt.plot(t2 , eval_acc_4_CE, 'y',linestyle = 'dashed', label = 'Validation accuracy fold 3')
+plt.plot(t2 , eval_acc_5_CE, 'm',linestyle = 'dashed', label = 'Validation accuracy fold 4')
+plt.plot(t2 , eval_acc_6_CE, 'c',linestyle = 'dashed', label = 'Validation accuracy fold 5')
+
+plt.grid(color='k', linestyle='-', linewidth=0.2)
+plt.xticks(np.arange(0, len(t1) + 2, step = 50), fontsize =14)
+plt.yticks(fontsize =14)
+plt.xlabel('Epochs', fontsize = 16)
+plt.ylabel('Accuracy %',  fontsize = 16)
+plt.legend(loc="lower right", fontsize = 13)
+plt.title("Accuracy for CE", fontsize =28)
+
 
 #%%
-#plt.subplot(2,2,3)
+plt.figure(dpi=300)
 plt.semilogy(epochs_train + 1 , train_inc, 'b', label = 'Training incorrect')
-plt.semilogy(epochs_eval  + 1 , eval_inc,  'r' ,linestyle = 'dashed',label = 'Validation incorrect')
+plt.semilogy(epochs_eval  + 1 , eval_inc,  'r' ,label = 'Validation incorrect')
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-plt.xticks(np.arange(0, len(epochs_train) + 2, step = 50), fontsize =14)
+plt.xticks(np.arange(0, len(epochs_train) + 2, step = 25), fontsize =14)
 plt.yticks(fontsize =14)
 plt.xlabel('Epochs', fontsize = 16)
 plt.ylabel('Log #incorrect seg',  fontsize = 16)
-plt.legend(loc="upper right", fontsize = 16)
+plt.legend(loc="upper right", fontsize = 13)
 plt.title("Number of Incorrect", fontsize =28)
 
 
@@ -164,123 +259,220 @@ plt.title("Number of Incorrect", fontsize =28)
 epochs_train = np.arange(len(train_loss))
 epochs_eval  = np.arange(len(eval_loss))
 
+epochs_train_CE = np.arange(len(train_loss_CE))
+epochs_eval_CE  = np.arange(len(eval_loss_CE))
+
 plt.figure(figsize=(30, 10),dpi=400)
 #plt.rcParams.update({'font.size': 26})
 plt.subplot(1,3,1)
-plt.plot(epochs_train + 1 , train_loss, 'b', label = 'Training Loss')
-plt.plot(epochs_eval  + 1 , eval_loss, 'r', label = 'Validation Loss')
+plt.plot(epochs_train + 1 , train_loss, 'b', label = 'Training Loss    (SD)')
+plt.plot(epochs_eval  + 1 , eval_loss, 'r', label = 'Validation Loss (SD)')
+plt.plot(epochs_train_CE + 1 , train_loss_CE, 'g', label = 'Training Loss    (CE)')
+plt.plot(epochs_eval_CE  + 1 , eval_loss_CE, 'k', label = 'Validation Loss (CE)')
+
 plt.grid(color='k', linestyle='-', linewidth=0.2)
 plt.xticks(np.arange(0, len(epochs_train) + 2, step = 50), fontsize =18)
 plt.yticks(fontsize =18)
-plt.xlabel('Epochs', fontsize = 20)
-plt.ylabel('Cross-Entropy Loss',  fontsize = 20)
-plt.legend(loc="upper right", fontsize = 20)
-plt.title('Loss function', fontsize =28)
+plt.xlabel('Epochs', fontsize = 25)
+plt.ylabel('Loss',  fontsize = 25)
+plt.legend(loc="upper right", fontsize = 28)
+plt.title('Loss function for averaged models', fontsize =28)
 
 plt.subplot(1,3,2)
-plt.plot(epochs_train + 1 , train_acc, 'b', label = 'Training accuracy')
-plt.plot(epochs_eval  + 1 , eval_acc,  'r',label = 'Validation accuracy')
+plt.plot(epochs_train + 1 , train_acc, 'b', label = 'Training accuracy    (SD)')
+plt.plot(epochs_eval  + 1 , eval_acc,  'r',label = 'Validation accuracy (SD)')
+plt.plot(epochs_train_CE + 1 , train_acc_CE, 'g', label = 'Training accuracy    (CE)')
+plt.plot(epochs_eval_CE  + 1 , eval_acc_CE,  'k',label = 'Validation accuracy (CE)')
+
 plt.grid(color='k', linestyle='-', linewidth=0.2)
 plt.xticks(np.arange(0, len(epochs_train) + 2, step = 50), fontsize =18)
 plt.yticks(fontsize =18)
-plt.xlabel('Epochs', fontsize = 20)
-plt.ylabel('Accuracy %',  fontsize = 20)
-plt.legend(loc="lower right", fontsize = 20)
-plt.title("Accuracy", fontsize =28)
+plt.xlabel('Epochs', fontsize = 25)
+plt.ylabel('Accuracy %',  fontsize = 25)
+plt.legend(loc="lower right", fontsize = 28)
+plt.title("Accuracy for averaged models", fontsize =28)
 
 plt.subplot(1,3,3)
-plt.semilogy(epochs_train + 1 , train_inc, 'b', label = 'Training incorrect')
-plt.semilogy(epochs_eval  + 1 , eval_inc,  'r' ,linestyle = 'dashed',label = 'Validation incorrect')
+plt.semilogy(epochs_train + 1 , train_inc, 'b', label = 'Training incorrect    (SD)')
+plt.semilogy(epochs_eval  + 1 , eval_inc,  'r' ,label = 'Validation incorrect (SD)')
+plt.semilogy(epochs_train_CE + 1 , train_inc_CE, 'g', label = 'Training incorrect    (CE)')
+plt.semilogy(epochs_eval_CE  + 1 , eval_inc_CE,  'k' ,label = 'Validation incorrect (CE)')
+
 plt.grid(color='k', linestyle='-', linewidth=0.2)
 plt.xticks(np.arange(0, len(epochs_train) + 2, step = 50), fontsize =18)
-plt.yticks(fontsize =18)
-plt.xlabel('Epochs', fontsize = 20)
-plt.ylabel('Log #incorrect seg',  fontsize = 20)
-plt.legend(loc="upper right", fontsize = 20)
-plt.title("Number of Incorrect", fontsize =28)
+plt.yticks(fontsize = 18)
+plt.xlabel('Epochs', fontsize = 25)
+plt.ylabel('Log #incorrect seg',  fontsize = 25)
+plt.legend(loc="upper right", fontsize = 28)
+plt.title("Number of Incorrect for averaged models", fontsize =28)
 
+##################################################################################################################
+##################################################################################################################
+#%% Import results from training (Loss + Accuracy)
+PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
+PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_CE.pt'
+#PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_dicew_2lv_dia_200e_train_results.pt'
+res_dice = torch.load(PATH_dice, map_location=torch.device('cpu'))
+res_CE = torch.load(PATH_CE, map_location=torch.device('cpu'))
+##################################################################################################################
+##################################################################################################################
+os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+from load_data_gt_im_sub_space import load_data_sub
+phase = 'Diastole'
+user = 'K'
 
-#%% Plot softmax probabilities for a single slice
-test_slice = 12
-out_img_ed = np.squeeze(out_image_ed[test_slice,:,:,:].detach().numpy())
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
+
+num_train_sub = 12
+num_eval_sub = num_train_sub
+num_test_sub = num_eval_sub + 8
+
+im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+#%% Plot softmax probabilities for all CV models
+#Plot softmax probabilities for a single slice
+test_slice = 31
 alpha = 0.4
+
+model = 'CE'
+
+if model == 'CE':
+    out_soft = res_CE
+if model == 'SD':
+    out_soft = res_dice
 
 fig = plt.figure()
 
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
-plt.figure(dpi=200, figsize=(15,15))
-for i in range(0,4):
-    plt.suptitle('Diastolic phase: test image at slice %i' %test_slice, fontsize=20)
-    plt.subplot(3, 4, i+1)
-    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
-    plt.imshow(out_img_ed[i,:,:])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    plt.title(class_title[i], fontsize =16)
-    plt.xticks(
-    rotation=40,
-    fontweight='light',
-    fontsize=7)
-    plt.yticks(
-    horizontalalignment='right',
-    fontweight='light',
-    fontsize=7)
-   
-    if i == 0:
-        plt.ylabel('Softmax probability', fontsize=14)
-        
-    plt.subplot(3, 4, i+1+4)
-    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
-    plt.imshow(seg_dia[test_slice,:,:,i])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    if i == 0:
-        plt.ylabel('Argmax', fontsize=14)
-    plt.subplot(3, 4, i+1+8)     
-    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
-    plt.imshow(ref_dia[test_slice,:,:,i])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    if i == 0:
-        plt.ylabel('Reference', fontsize=14)
-plt.show()   
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4)
+plt.figure(dpi=200, figsize=(18,32))
 
-#%% Plot softmax probabilities for a single slice
-test_slice = 24
-out_img_es = np.squeeze(out_image_es[test_slice,:,:,:].detach().numpy())
+w = 0.1
 
-fig = plt.figure()
+for fold_model in range (0,6):
+    out_img_ed = np.squeeze(out_soft[fold_model,:,:,:,:])
+    #seg_met_dia = np.argmax(out_soft[fold_model,:,:,:], axis=1)
+    #seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4)
+    seg_dia = Tensor(out_img_ed).permute(0,2,3,1).detach().numpy()
+    
+    #Reference annotation
+    plt.suptitle('Softmax probabilities for each model at test slice %i (CE)' %test_slice, fontsize=35, y=0.92)
+    plt.subplot(7, 4, 1)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,0])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.ylabel('Reference', fontsize=28)
+    plt.title('Background', fontsize=28)
+    
+    plt.subplot(7, 4, 2)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,1])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.title('Right ventricle', fontsize=28)
+    
+    plt.subplot(7, 4, 3)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,2])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.title('Myocardium', fontsize=28)
+    
+    plt.subplot(7, 4, 4)
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(ref_dia[test_slice,:,:,3])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.title('Left ventricle', fontsize=28)
+    
+    
+    #CV model segmentations
+    plt.subplot(7, 4, 1+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(seg_dia[test_slice,:,:,0])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.ylabel('CV fold {}'.format(fold_model), fontsize=28)
+    
+    plt.subplot(7, 4, 2+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(seg_dia[test_slice,:,:,1])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    
+    plt.subplot(7, 4, 3+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(seg_dia[test_slice,:,:,2])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    
+    plt.subplot(7, 4, 4+4*(fold_model+1))
+    plt.subplots_adjust(hspace = 0.05, wspace = w)
+    plt.imshow(seg_dia[test_slice,:,:,3])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+
+plt.show()  
+#%% Averaged model
+test_slice = 309
 alpha = 0.4
-class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
-plt.figure(dpi=200, figsize=(15,15))
+
+model = 'SD'
+
+if model == 'CE':
+    out_soft = res_CE
+if model == 'SD':
+    out_soft = res_dice
+
+out_soft_mean   = out_soft.mean(axis=0)
+
+plt.figure(dpi=300, figsize=(1.5*5,3.5*5))
+plt.suptitle('Softmax probabilies for averaged model at test slice 309 ({})'.format(model), y=0.92, fontsize=18)
 for i in range(0,4):
-    plt.suptitle('Systolic phase: test image at slice %i' %test_slice, fontsize=20)
-    plt.subplot(3, 4, i+1)
-    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
-    plt.imshow(out_img_es[i,:,:])
-    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
-    plt.title(class_title[i], fontsize =16)
-    plt.xticks(
-    rotation=40,
-    fontweight='light',
-    fontsize=7)
-    plt.yticks(
-    horizontalalignment='right',
-    fontweight='light',
-    fontsize=7)
-    if i == 0:
-        plt.ylabel('Softmax probability', fontsize=14)
-        
-    plt.subplot(3, 4, i+1+4)
-    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
-    plt.imshow(seg_sys[test_slice,:,:,i])
-    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
-    if i == 0:
-        plt.ylabel('Argmax', fontsize=14)
-    plt.subplot(3, 4, i+1+8)
-    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
-    plt.imshow(ref_sys[test_slice,:,:,i])
-    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
-    if i == 0:
-        plt.ylabel('Reference', fontsize=14)
-#plt.show()   
+    plt.subplot(4,2,i+1)
+    plt.imshow(out_soft_mean[test_slice,i,:,:])
+    plt.title(class_title[i], fontsize=15)
+
+plt.show()
+
+#%% Argmax model
+out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
+out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
+
+plt.figure(dpi=300, figsize=(9.5,2))
+plt.suptitle('Segmentations for averaged models at test slice 31', y=1.2, fontsize=18)
+
+plt.subplot(1,4,1)
+plt.imshow(im_test_ed_sub[test_slice,0,:,:])
+plt.title('Original cMRI')
+
+plt.subplot(1,4,2)
+out_soft = res_CE
+out_soft_mean   = out_soft.mean(axis=0)
+out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
+plt.imshow(out_seg_mean_am[test_slice,:,:])
+plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('CE model')
+
+plt.subplot(1,4,3)
+out_soft = res_dice
+out_soft_mean   = out_soft.mean(axis=0)
+out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
+plt.imshow(out_seg_mean_am[test_slice,:,:])
+plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('SD model')
+
+plt.subplot(1,4,4)
+plt.imshow(gt_test_ed_sub[test_slice,:,:])
+plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('Reference')
 
 
 

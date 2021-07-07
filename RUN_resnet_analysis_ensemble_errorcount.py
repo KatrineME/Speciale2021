@@ -291,7 +291,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_200sys_dicew_2lv.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_CE.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -599,7 +599,7 @@ print('var mcc    = ',  var_mcc)
 print('std mcc    = ',  std_mcc) 
 
 
-#%% Sensitivty
+#%% Sensitivty/Recall
 sen = np.zeros((out_seg_mean.shape[0],3))
 
 for i in range(0,out_seg_mean.shape[0]):
@@ -629,7 +629,21 @@ var_spec  = np.var(spec,  axis=0)
 print('mean spec   = ',mean_spec)  
 print('var spec    = ',  var_spec) 
 print('std spec    = ',  std_spec) 
+#%% Precision
+prec = np.zeros((out_seg_mean.shape[0],3))
 
+for i in range(0,out_seg_mean.shape[0]):
+    prec[i,0] = precision(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
+    prec[i,1] = precision(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
+    prec[i,2] = precision(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
+
+mean_prec = np.mean(prec, axis=0)  
+std_prec  = np.std(prec,  axis=0)
+var_prec  = np.var(prec,  axis=0)
+
+print('mean prec   = ',mean_prec)  
+print('var prec    = ',  var_prec) 
+print('std prec    = ',  std_prec)
 #%%
 class_labels = ['RV', 'MYO', 'LV']
 # Boxplot
