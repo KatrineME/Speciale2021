@@ -426,8 +426,6 @@ def objective(trial):
                 inputs = inputs.cuda()
                 
                 labels = train_data[:,1,:,:]
-                labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
-                labels = labels.permute(0,3,1,2)
                 labels = labels.cuda()
                 #print('i=',i)
                 # wrap them in Variable
@@ -462,7 +460,7 @@ def objective(trial):
                 predicted  = torch.argmax(output, axis=1)
                 predicteds = torch.nn.functional.one_hot(predicted.to(torch.int64), num_classes=4).detach().cpu().numpy()
                 
-                target     = torch.argmax(labels, axis=1)
+                target     = labels 
                 targets    = torch.nn.functional.one_hot(target.to(torch.int64), num_classes=4).detach().cpu().numpy()
                 
                 total     += (target.shape[0])*(128*128)
