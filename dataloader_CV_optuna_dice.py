@@ -444,8 +444,9 @@ def objective(trial):
                 #print('output shape = ', output.shape)
                 
                 # Find loss
-                loss = soft_dice_loss(labels, output)
-                #loss = loss_function(output, labels)
+                #loss = soft_dice_loss(labels, output)
+                loss = nn.CrossEntropyLoss(labels, output)
+                
                 #print('loss = ', loss)
                 
                 # Calculate gradients
