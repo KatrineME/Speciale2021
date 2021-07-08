@@ -128,7 +128,7 @@ def mcc(result, reference):
     except ZeroDivisionError:
         mcc = 0.0
         
-    return mcc
+    return mcc, tp, fp, fn, tn
 
 def recall(result, reference):
     """

@@ -306,6 +306,7 @@ def jc(result, reference):
     #jc = float(intersection) / float(union)
     
     return jc
+
 #%% Training with K-folds
 def objective(trial):
       
