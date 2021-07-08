@@ -219,7 +219,7 @@ os.chdir("/home/michala/training")                      # Server directory micha
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
-from load_data_gt_im_sub import load_data_sub
+from load_data_gt_im_sub_space import load_data_sub
 
 
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
@@ -300,6 +300,28 @@ def jc(result, reference):
     #jc = float(intersection) / float(union)
     
     return jc
+ 
+
+    
+def dc(result, reference):
+    """
+    Dice coefficient
+    """
+    
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
+    
+    intersection = np.count_nonzero(result & reference)
+    
+    size_i1 = np.count_nonzero(result)
+    size_i2 = np.count_nonzero(reference)
+    
+    try:
+        dc = 2. * intersection / float(size_i1 + size_i2)
+    except ZeroDivisionError:
+        dc = 1#0.0
+    
+    return dc
 #%% Training with K-folds
 def objective(trial):
       
@@ -376,8 +398,8 @@ def objective(trial):
         eval_accuracy   = []
         eval_incorrect  = []
         
-        train_IoU       = []
-        eval_IoU        = []
+        train_dice       = []
+        eval_dice        = []
         
         eval_loss      = 0.0
         train_loss     = 0.0
@@ -388,8 +410,8 @@ def objective(trial):
         correct_e      = 0.0
         incorrect_e    = 0.0
         
-        IoU   = 0.0
-        IoU_e = 0.0
+        dice_t   = 0.0
+        dice_e   = 0.0
     
         for epoch in range(num_epochs):  # loop over the dataset multiple times
             
@@ -446,14 +468,14 @@ def objective(trial):
                 correct   += (predicted == target).sum().item()
                 incorrect += (predicted != target).sum().item()
                 
-                IoU += jc(predicteds,targets)
+                dice_t += dc(predicteds,targets)
             
             train_losses.append(train_loss/(i+1)) #train_data.shape[0]) # This is normalised by batch size
             #print('epoch loss = ', train_losses)
         
             #train_losses.append(np.mean(batch_loss))
             train_loss = 0.0 #[]
-            train_IoU.append(IoU)
+            train_dice.append(dice_t)
             
             # Print accuracy
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
@@ -462,7 +484,7 @@ def objective(trial):
             correct   = 0.0
             total     = 0.0
             incorrect = 0.0
-            IoU       = 0.0
+            dice_t    = 0.0
             
             
             #print('train_accuracy', train_accuracy)
@@ -510,13 +532,13 @@ def objective(trial):
                 correct_e   += (predicted_e == target_e).sum().item()
                 incorrect_e += (predicted_e != target_e).sum().item()
                 
-                IoU_e += jc(predicteds_e, targets_e)
-                print('IoU for eval iter:', IoU_e)
+                dice_e += dc(predicteds_e, targets_e)
+                print('Dice for eval iter:', dice_e)
                 
             eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
             #eval_losses.append(np.mean(eval_loss))
             eval_loss = 0.0
-            eval_IoU.append(IoU_e/(j+1))
+            eval_dice.append(dice_e/(j+1))
             
             # Print accuracy
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
@@ -525,16 +547,16 @@ def objective(trial):
             #print('bf float', eval_accuracy)
 
             eval_accuracy_float = float(eval_accuracy[-1])
-            eval_IoU_float = float(eval_IoU[-1])
-            print('float', eval_IoU_float)
+            eval_dice_float = float(eval_dice[-1])
+            print('float', eval_dice_float)
             
             #trial.report(eval_accuracy_float, epoch)
-            trial.report(eval_IoU_float, epoch)
+            trial.report(eval_dice_float, epoch)
        
             correct_e   = 0.0
             total_e     = 0.0
             incorrect_e = 0.0
-            IoU_e       = 0.0
+            dice_e      = 0.0
             
             #lr_get   = lr_scheduler.get_last_lr()[0]
             #lr_scheduler.step()
@@ -561,12 +583,12 @@ def objective(trial):
         #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
         #torch.save(model_unet, PATH_model)
         
-    return eval_IoU_float  #eval_accuracy_float
+    return eval_dice_float  #eval_accuracy_float
 
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=100, timeout=28800 ) # 72000 s = 20 h # 50000 s = 14 h
+    study.optimize(objective, n_trials=100, timeout=72000 ) # 72000 s = 20 h # 50000 s = 14 h
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -586,24 +608,36 @@ if __name__ == "__main__":
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "eps"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/optuna_lr_eps.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_lr_eps.png')
     #plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_eps.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "drop_prob_l"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/optuna_lr_drop.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_lr_drop.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "weight_decay"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/optuna_lr_wd.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_lr_wd.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "weight_decay"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_eps_wd.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "drop_prob_l"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_eps_drop.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "weight_decay"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_drop_wd.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_param_importances(study)
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/importances_optuna.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/importances_optuna.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_optimization_history(study)
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna_trial/history_optuna.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/history_optuna.png')
 
 
 

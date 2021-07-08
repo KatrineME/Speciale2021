@@ -219,7 +219,7 @@ os.chdir("/home/michala/training")                      # Server directory micha
 #os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
-from load_data_gt_im_sub import load_data_sub
+from load_data_gt_im_sub_space import load_data_sub
 
 
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
@@ -274,7 +274,7 @@ def objective(trial):
     #optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
     weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
 
-    lr  = trial.suggest_float("lr",  1e-6, 1e-2)
+    lr  = trial.suggest_float("lr",  1e-5, 1e-2)
     eps = trial.suggest_float("eps", 1e-8, 1e-2)
     
     #optimizer = getattr(optim, Adam)(model_unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
@@ -308,8 +308,8 @@ def objective(trial):
     fold_eval_losses  = []
     fold_train_accuracy    = []
     fold_eval_accuracy     = []
-    fold_train_incorrect = []
-    fold_eval_incorrect = []
+    fold_train_incorrect   = []
+    fold_eval_incorrect    = []
     
     #%
     # K-fold Cross Validation model evaluation
@@ -375,6 +375,7 @@ def objective(trial):
                 # Forward Pass
                 output = model_unet(inputs)     
                 output = output["log_softmax"]
+                output = torch.exp(output)
                 #print('output shape = ', output.shape)
                 
                 # Find loss
@@ -433,6 +434,7 @@ def objective(trial):
                 # Forward pass
                 output = model_unet(inputs)     
                 output = output["log_softmax"]
+                output = torch.exp(output)
                 # Find loss
                 loss = loss_function(output, labels)
                 
@@ -459,7 +461,7 @@ def objective(trial):
             eval_accuracy_float = float(eval_accuracy[-1])
             print('float', eval_accuracy_float)
             
-            trial.report(eval_accuracy_float, epoch)
+            trial.report(dice, epoch)
        
             correct_e   = 0.0
             total_e     = 0.0

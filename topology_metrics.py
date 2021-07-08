@@ -218,7 +218,7 @@ if device == 'cuda':
 else:
     user = 'K'
 #%%
-user = 'M'
+user = 'K'
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 if user == 'K':
@@ -294,8 +294,8 @@ print('Data loaded+concat')
 
 #%% Load model if averagered on GPU
 
-path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
-#path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100sys_CE.pt'
+#path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -307,7 +307,7 @@ out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
-ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 
 #%%
 def lv_loss(y_pred):
@@ -338,8 +338,8 @@ c_non = np.count_nonzero(lv_neigh, axis = (1,2)) # number of error pixels in eac
 cnon_slice = np.count_nonzero(c_non) # number of slices with erros 
 print('Number of slices with errors:', cnon_slice)
 print('Percentage of slices with errors:', (cnon_slice/len(c_non))*100,'%')
-print('Number of errornous neighbour pixels:', c_non.sum())
-
+#print('Number of errornous neighbour pixels:', c_non.sum())
+print('\n')
 
 # Slices per patient
 p = []
@@ -410,9 +410,7 @@ for i in range(0, (out_seg_mean.shape[0])):
 
 
 tot_disconnect = np.sum(multi_lab_all)
-print('Number of slices w. disconnect MYO RV:',np.count_nonzero(multi_lab_all))
-print('Percentage of slices w. disconnect MYO RV:',(np.count_nonzero(multi_lab_all)/len(multi_lab_all))*100)   
-
+ 
 
 tot_rv = np.sum(multi_lab_rv)
 tot_myo = np.sum(multi_lab_myo)
@@ -420,7 +418,7 @@ tot_lv = np.sum(multi_lab_lv)
 
 all_tot_sum = []
 for i in range(0, (out_seg_mean.shape[0])):
-    all_tot_sum.append(multi_lab_rv[i] + multi_lab_myo[i])#+ multi_lab_lv[i])
+    all_tot_sum.append(multi_lab_rv[i] + multi_lab_myo[i] + multi_lab_lv[i])
 
 
 c_non_bin = (c_non > 0).astype(int)
@@ -431,10 +429,11 @@ final_both = tot_miss_bin + c_non_bin# + multi_lab_all
 final_bin = (final_both > 0).astype(int)
 final_count = np.sum(final_bin)
 
-print('Number of slices w. multiple components:',np.count_nonzero(final_bin))
-print('Percentage of slices w. multiple components:',(np.count_nonzero(final_bin)/len(final_bin))*100)   
-
-
+print('Number of slices w. multiple components:',np.count_nonzero(tot_miss_bin))
+print('Percentage of slices w. multiple components:',(np.count_nonzero(tot_miss_bin)/len(tot_miss_bin))*100)   
+print('\n')
+print('Number of slices w. disconnect MYO RV:',np.count_nonzero(multi_lab_all))
+print('Percentage of slices w. disconnect MYO RV:',(np.count_nonzero(multi_lab_all)/len(multi_lab_all))*100)  
 
 #%%  Slices per patient
 p = []
@@ -458,7 +457,7 @@ final_myo_rv_pt = np.zeros(test_index)
 
 for i in range(0,test_index):
     for j in range(0, p[i]):
-        final_count_pt[i] += np.count_nonzero(final_bin[j+s])
+        final_count_pt[i] += np.count_nonzero(tot_miss_bin[j+s])
         final_myo_rv_pt[i] += np.count_nonzero(multi_lab_all[j+s])
         
     s += p[i] 
@@ -468,13 +467,51 @@ for i in range(0,test_index):
 
 print('Number of patient volumes w. multiple comp:',np.count_nonzero(final_count_pt))
 print('Percentage of patient volumes w. multiple comp:',(np.count_nonzero(final_count_pt)/len(p))*100)   
+print('\n')
+print('Number of patient volumes w. disconnect MYO RV:',np.count_nonzero(final_myo_rv_pt))
+print('Percentage of patient volumes w. disconnect MYO RV:',(np.count_nonzero(final_myo_rv_pt)/len(p))*100) 
 
 
+#%% OVERALL
+
+overall_errors_slices = (np.array(multi_lab_all) + final_both)
+overall_errors_slices_bin = overall_errors_slices > 0
+overall_errors_count = overall_errors_slices_bin.sum()
+
+print('Number of slices w. any error:',overall_errors_count)
+print('Percentage of slices w.any error:',overall_errors_count/len(overall_errors_slices)*100)  
+print('\n')
+
+s = 0
+overall_count_pt = np.zeros(test_index)
+
+for i in range(0,test_index):
+    for j in range(0, p[i]):
+        overall_count_pt[i] += np.count_nonzero(overall_errors_slices_bin[j+s])
+        
+    s += p[i] 
+    #print('s= ',s)
+print('Number of patient volumes w.any error:',np.count_nonzero(overall_count_pt))
+print('Percentage of patient volumes w. any error:',(np.count_nonzero(overall_count_pt)/len(p))*100)   
+
+#%% PLot of anantomical errors
 
 
+slice_myo = 28
+slice_com = 34
+slice_dis = 67
 
+plt.figure(dpi=400, figsize=(10,10))
+plt.suptitle('Examples of anatomical errors', y=0.68, fontsize=17)
+plt.subplot(1,3,1)
+plt.imshow(out_seg_mean_am[slice_myo,:,:])
+plt.title('LV not fully surrounded by MYO', fontsize=11)
 
+plt.subplot(1,3,2)
+plt.imshow(out_seg_mean_am[slice_com,:,:])
+plt.title('Not single components', fontsize=11)
 
-
-
+plt.subplot(1,3,3)
+plt.imshow(out_seg_mean_am[slice_dis,:,:])
+plt.title('Disconnected components', fontsize=11)
 
