@@ -217,7 +217,7 @@ if device == 'cuda':
     user = 'GPU'
 else:
     user = 'K'
-#%%
+
 user = 'K'
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -295,7 +295,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -496,22 +496,35 @@ print('Percentage of patient volumes w. any error:',(np.count_nonzero(overall_co
 
 #%% PLot of anantomical errors
 
+alpha = 0.4
 
 slice_myo = 28
 slice_com = 34
 slice_dis = 67
 
-plt.figure(dpi=400, figsize=(10,10))
-plt.suptitle('Examples of anatomical errors', y=0.68, fontsize=17)
-plt.subplot(1,3,1)
+plt.figure(dpi=400, figsize=(15,10))
+plt.suptitle('Examples of anatomical errors', fontsize=25)
+plt.subplot(2,3,1)
 plt.imshow(out_seg_mean_am[slice_myo,:,:])
-plt.title('LV not fully surrounded by MYO', fontsize=11)
+plt.imshow(im_test_ed_sub[slice_myo,0,:,:], alpha = alpha)
+plt.title('LV not fully surrounded by MYO', fontsize=17)
+plt.subplot(2,3,1+3)
+plt.imshow(im_test_ed_sub[slice_myo,0,:,:])
 
-plt.subplot(1,3,2)
+
+plt.subplot(2,3,2)
 plt.imshow(out_seg_mean_am[slice_com,:,:])
-plt.title('Not single components', fontsize=11)
+plt.imshow(im_test_ed_sub[slice_com,0,:,:], alpha = alpha)
+plt.title('Not single components', fontsize=17)
+plt.subplot(2,3,2+3)
+plt.imshow(im_test_ed_sub[slice_com,0,:,:])
 
-plt.subplot(1,3,3)
+
+plt.subplot(2,3,3)
 plt.imshow(out_seg_mean_am[slice_dis,:,:])
-plt.title('Disconnected components', fontsize=11)
+plt.imshow(im_test_ed_sub[slice_dis,0,:,:], alpha = alpha)
+plt.title('Disconnected components', fontsize=17)
+plt.subplot(2,3,3+3)
+plt.imshow(im_test_ed_sub[slice_dis,0,:,:])
+
 
