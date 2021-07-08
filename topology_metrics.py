@@ -385,7 +385,7 @@ for i in range(0, (out_seg_mean.shape[0])):
     labeled_image_lv.append(skimage.measure.label(out_seg_mean[i,:,:,3], connectivity=2, return_num=True))
 
 #%%
-slice = 329
+slice = 15
 plt.figure(dpi=200)
 plt.subplot(2,2,1)
 plt.imshow(labeled_image_rv[slice][0])
@@ -409,9 +409,9 @@ for i in range(0, (out_seg_mean.shape[0])):
     multi_lab_all.append(float(labeled_image_all[i][1] > 1))
 
 
-
 tot_disconnect = np.sum(multi_lab_all)
-print('Number of patient volumes w. disconnect MYO RV:',np.count_nonzero(multi_lab_all))
+print('Number of slices w. disconnect MYO RV:',np.count_nonzero(multi_lab_all))
+print('Percentage of slices w. disconnect MYO RV:',(np.count_nonzero(multi_lab_all)/len(multi_lab_all))*100)   
 
 
 tot_rv = np.sum(multi_lab_rv)
@@ -420,21 +420,21 @@ tot_lv = np.sum(multi_lab_lv)
 
 all_tot_sum = []
 for i in range(0, (out_seg_mean.shape[0])):
-    all_tot_sum.append(multi_lab_rv[i] + multi_lab_myo[i] + multi_lab_lv[i])
+    all_tot_sum.append(multi_lab_rv[i] + multi_lab_myo[i])#+ multi_lab_lv[i])
 
-
-print('Total slices with more:', tot_rv, tot_myo, tot_lv, tot_disconnect)
 
 c_non_bin = (c_non > 0).astype(int)
 tot_miss_bin = (np.array(all_tot_sum) > 0).astype(int)
 
 
-
-final_both = tot_miss_bin + c_non_bin + multi_lab_all
+final_both = tot_miss_bin + c_non_bin# + multi_lab_all
 final_bin = (final_both > 0).astype(int)
-
 final_count = np.sum(final_bin)
-print('final_count', final_count)
+
+print('Number of slices w. multiple components:',np.count_nonzero(final_bin))
+print('Percentage of slices w. multiple components:',(np.count_nonzero(final_bin)/len(final_bin))*100)   
+
+
 
 #%%  Slices per patient
 p = []
@@ -454,16 +454,20 @@ test_index = len(p)
 
 s = 0
 final_count_pt = np.zeros(test_index)
+final_myo_rv_pt = np.zeros(test_index)
 
 for i in range(0,test_index):
     for j in range(0, p[i]):
         final_count_pt[i] += np.count_nonzero(final_bin[j+s])
+        final_myo_rv_pt[i] += np.count_nonzero(multi_lab_all[j+s])
         
     s += p[i] 
     #print('s= ',s)
 
-print('Number of patient volumes w. errors:',np.count_nonzero(cnon_pt))
-print('Percentage of patient volumes w. errors:',(np.count_nonzero(cnon_pt)/len(p))*100)   
+
+
+print('Number of patient volumes w. multiple comp:',np.count_nonzero(final_count_pt))
+print('Percentage of patient volumes w. multiple comp:',(np.count_nonzero(final_count_pt)/len(p))*100)   
 
 
 
