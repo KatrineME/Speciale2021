@@ -291,7 +291,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_CE.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -303,7 +303,7 @@ alpha = 0.4
 fig = plt.figure()
 
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
-ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4)
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4)
 plt.figure(dpi=200, figsize=(18,32))
 
 w = 0.1
@@ -314,7 +314,7 @@ for fold_model in range (0,6):
     seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4)
     
     #Reference annotation
-    plt.suptitle('Diastolic phase: test image at slice %i for CV folds' %test_slice, fontsize=30, y=0.9)
+    plt.suptitle('Systolic phase: test image at slice %i for CV folds' %test_slice, fontsize=30, y=0.9)
     plt.subplot(7, 4, 1)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,0])
@@ -371,12 +371,23 @@ out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
-ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
-#%%
+ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+#%% Plot of input data 
+test_slice = 125
 
 plt.figure(dpi=200)
-plt.imshow(out_seg_mean_am[test_slice,:,:])
-plt.title('slice: {}'.format(test_slice))
+plt.suptitle('Input data for systole + diastole')
+plt.subplot(2,2,1)
+plt.imshow(im_test_es_sub[test_slice,0,:,:])
+
+plt.subplot(2,2,2)
+plt.imshow(im_test_ed_sub[test_slice,0,:,:])
+
+plt.subplot(2,2,3)
+plt.imshow(gt_test_es_sub[test_slice,:,:])
+
+plt.subplot(2,2,4)
+plt.imshow(gt_test_ed_sub[test_slice,:,:])
 
 
 #%%
@@ -463,30 +474,30 @@ w = 0.1
 h = 0.3
 test_slice = 310
 plt.figure(dpi=200)
-plt.suptitle('Diastolic - Averaged model for test image at slice: {}'.format(test_slice))
+plt.suptitle('Systolic - Averaged model for test image at slice: {}'.format(test_slice))
 
 plt.subplot(2,2,1)
 plt.subplots_adjust(hspace = h, wspace = w)
 plt.imshow(out_seg_mean[test_slice,:,:,0])
-plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Background', fontsize=10)
 
 plt.subplot(2,2,2)
 plt.subplots_adjust(hspace = h, wspace = w)
 plt.imshow(out_seg_mean[test_slice,:,:,1])
-plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Right ventricle', fontsize=10)
 
 plt.subplot(2,2,3)
 plt.subplots_adjust(hspace = h, wspace = w)
 plt.imshow(out_seg_mean[test_slice,:,:,2])
-plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Myocardium', fontsize=10)
 
 plt.subplot(2,2,4)
 plt.subplots_adjust(hspace = h, wspace = w)
 plt.imshow(out_seg_mean[test_slice,:,:,3])
-plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Left ventricle', fontsize=10)
 
 #%% Metrics
@@ -521,14 +532,14 @@ for i in range(0,out_seg_mean.shape[0]):
     else:
         pass
     
-    if len(np.unique(ref_dia[i,:,:,2]))!=1 and len(np.unique(out_seg_mean[i,:,:,2]))!=1:      
+    if len(np.unique(ref[i,:,:,2]))!=1 and len(np.unique(out_seg_mean[i,:,:,2]))!=1:      
         haus[i,1]    = hd(out_seg_mean[i,:,:,2],ref[i,:,:,2]) 
         haus95[i,1]    = hd95(out_seg_mean[i,:,:,2],ref[i,:,:,2])
         h_count += 1
     else:
         pass
     
-    if len(np.unique(ref_dia[i,:,:,3]))!=1 and len(np.unique(out_seg_mean[i,:,:,3]))!=1:
+    if len(np.unique(ref[i,:,:,3]))!=1 and len(np.unique(out_seg_mean[i,:,:,3]))!=1:
         haus[i,2]    = hd(out_seg_mean[i,:,:,3],ref[i,:,:,3])
         haus95[i,2]    = hd95(out_seg_mean[i,:,:,3],ref[i,:,:,3])
         h_count += 1
@@ -644,7 +655,7 @@ var_prec  = np.var(prec,  axis=0)
 print('mean prec   = ',mean_prec)  
 print('var prec    = ',  var_prec) 
 print('std prec    = ',  std_prec)
-#%%
+#%% Boxplots
 class_labels = ['RV', 'MYO', 'LV']
 # Boxplot
 plt.figure(figsize = (10,5), dpi=200)
@@ -658,9 +669,9 @@ plt.title('Boxplot for Dice in Diastolic SD', fontsize = 20)
 #%% Calculate volume for diastolic phase
 #test_index = data_gt_ed[num_eval:num_test]
 
-PATH_soft_dia_fold = path_out_soft# = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice_10lclv.pt'
+#PATH_soft_dia_fold = path_out_soft# = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice_10lclv.pt'
 
-#PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia.pt'
+PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
 #PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia.pt'
 soft_dia_fold = torch.load(PATH_soft_dia_fold, map_location=torch.device(device))
 
@@ -686,9 +697,12 @@ for i in range(0,test_index):
         
     s += p[i] 
     #print('s= ',s)
+    
+print('Target vol dia: ',target_vol_ed)
+print('Reference vol dia: ',ref_vol_ed)
    
 #%% Calculate volume for systolic phase
-PATH_soft_sys_fold = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200sys.pt'
+PATH_soft_sys_fold = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
 soft_sys_fold = torch.load(PATH_soft_sys_fold, map_location=torch.device(device))
 
 soft_sys_mean = soft_sys_fold.mean(axis=0)
@@ -714,29 +728,27 @@ for i in range(0,test_index):
     s += p[i] 
     #print('s= ',s)
      
+print('Target vol sys: ',target_vol_es)
+print('Reference vol sys: ',ref_vol_es)
 #%% Calculate EF        
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 
 from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
-#%%
+#%% Ejection fraction
 spacings = [1.4, 1.4, 8]
 
-ef_ref    = EF_calculation(ref_vol_es, ref_vol_ed, spacings)
-ef_target = EF_calculation(target_vol_es, target_vol_ed, spacings)
+EF_ref    = EF_calculation(ref_vol_es, ref_vol_ed, spacings)
+EF_target = EF_calculation(target_vol_es, target_vol_ed, spacings)
 
 
-ef_m_ref = np.mean(ef_ref[0])
-ef_m_tar = np.mean(ef_target[0])
+EF_m_ref = np.mean(EF_ref[0])
+EF_m_tar = np.mean(EF_target[0])
 
-print('EF ref  = ', ef_ref[0]) 
-print('esv ref = ', ef_ref[1]) 
-print('edv ref = ', ef_ref[2]) 
+print('EF mean target: ', EF_m_tar)
+print('EF mean reference: ', EF_m_ref)
 
-print('EF seg = ', ef_target[0]) 
-print('esv seg = ', ef_target[1]) 
-print('edv seg = ', ef_target[2]) 
 
 #%%
 slice = 169

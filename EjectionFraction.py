@@ -92,8 +92,8 @@ gt_test_sys_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num
                                   np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 #%% Load 
-path_soft_dia = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100dia_dice_lv.pt'
-path_soft_sys = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100sys_dice_lv.pt'
+path_soft_dia = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
+path_soft_sys = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
 
 soft_dia = torch.load(path_soft_dia ,  map_location=torch.device(device))
 soft_sys = torch.load(path_soft_sys ,  map_location=torch.device(device))
@@ -181,8 +181,8 @@ spacings = [1.4, 1.4, 8] #mm/voxel
 EF_ref    = EF_calculation(ref_vol_sys, ref_vol_dia, spacings)
 EF_target = EF_calculation(target_vol_sys, target_vol_dia, spacings)
 
-EF_ref_RV    = EF_calculation(ref_vol_sys, ref_vol_dia, spacings)
-EF_target_RV = EF_calculation(target_vol_sys, target_vol_dia, spacings)
+EF_ref_RV    = EF_calculation(ref_vol_sys_RV, ref_vol_dia_RV, spacings)
+EF_target_RV = EF_calculation(target_vol_sys_RV, target_vol_dia_RV, spacings)
 
 
 ef_m_ref = np.mean(EF_ref[0])
@@ -209,11 +209,11 @@ cor_sys_RV = np.corrcoef(target_vol_sys_RV, ref_vol_sys_RV)
 #EF
 print('Correlation EF LV =', cor_EF[1,0]) 
 # LV
-print('Correlation diastole LV =', cor_dia[1,0]) 
-print('Correlation systole  LV =', cor_sys[1,0]) 
+print('Correlation diastole LV vol =', cor_dia[1,0]) 
+print('Correlation systole  LV vol =', cor_sys[1,0]) 
 # RV
-print('Correlation diastole RV =', cor_dia_RV[1,0]) 
-print('Correlation systole  RV =', cor_sys_RV[1,0]) 
+print('Correlation diastole RV vol =', cor_dia_RV[1,0]) 
+print('Correlation systole  RV vol =', cor_sys_RV[1,0]) 
 
 
 #%% Bias
@@ -236,7 +236,7 @@ print('Bias EF  RV=', bias_EF_RV )
 
 #%% std
 
-std_EF_dif = np.std(EF_ref[0]-EF_target[0])
+std_EF_dif  = np.std(EF_ref[0]-EF_target[0])
 std_sys_dif = np.std(EF_ref[1]-EF_target[1])
 std_dia_dif = np.std(EF_ref[2]-EF_target[2])
 
@@ -272,6 +272,50 @@ MAE_EF_RV      = np.sum(np.abs(EF_target_RV[0]-EF_ref_RV[0]))/EF_ref_RV[0].shape
 print('MAE EF RV =', MAE_EF_RV )
 print('MAE sys vol RV =', MAE_sys_vol_RV )
 print('MAE dia vol RV =', MAE_dia_vol_RV ) 
+
+#%% DICE SCORE
+#%% Metrics
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
+
+dice_sys = np.zeros((out_seg_sys_mean.shape[0],3))
+
+for i in range(0,out_seg_sys_mean.shape[0]):
+    dice_sys[i,0] = dc(out_seg_sys_mean[i,:,:,1],ref_sys[i,:,:,1])  # = RV
+    dice_sys[i,1] = dc(out_seg_sys_mean[i,:,:,2],ref_sys[i,:,:,2])  # = MYO
+    dice_sys[i,2] = dc(out_seg_sys_mean[i,:,:,3],ref_sys[i,:,:,3])  # = LV
+    
+dice_dia = np.zeros((out_seg_dia_mean.shape[0],3))
+
+for i in range(0,out_seg_sys_mean.shape[0]):
+    dice_dia[i,0] = dc(out_seg_dia_mean[i,:,:,1],ref_dia[i,:,:,1])  # = RV
+    dice_dia[i,1] = dc(out_seg_dia_mean[i,:,:,2],ref_dia[i,:,:,2])  # = MYO
+    dice_dia[i,2] = dc(out_seg_dia_mean[i,:,:,3],ref_dia[i,:,:,3])  # = LV
+#%% Histogram
+plt.figure(dpi=300)
+diff_dia = EF_ref[2]-EF_target[2]
+plt.hist(np.abs(diff_dia),bins=40)
+plt.title('Histogram of absolute difference in volume (dia)')
+
+#%% Boxplot
+plt.figure(dpi=200, figsize =(12,12))
+plt.subplot(2,1,1)
+plt.hist(dice_sys, label=('RV','MYO','LV'), color=('tab:blue','mediumseagreen','orange'))
+plt.legend()
+plt.xlabel('Dice Score')
+plt.ylabel('# Number of slices')
+plt.title('Histogram of Dice Scores for sys model')
+plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
+
+
+plt.subplot(2,1,2)
+plt.hist(dice_dia, label=('RV','MYO','LV'), color=('tab:blue','mediumseagreen','orange'))
+plt.legend()
+plt.xlabel('Dice Score')
+plt.ylabel('# Number of slices')
+plt.title('Histogram of Dice Scores for dia model')
+plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
 
 
 #%%%

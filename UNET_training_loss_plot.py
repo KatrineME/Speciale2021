@@ -421,7 +421,7 @@ for fold_model in range (0,6):
 
 plt.show()  
 #%% Averaged model
-test_slice = 309
+test_slice = 31
 alpha = 0.4
 
 model = 'SD'
@@ -434,7 +434,7 @@ if model == 'SD':
 out_soft_mean   = out_soft.mean(axis=0)
 
 plt.figure(dpi=300, figsize=(1.5*5,3.5*5))
-plt.suptitle('Softmax probabilies for averaged model at test slice 309 ({})'.format(model), y=0.92, fontsize=18)
+plt.suptitle('Softmax probabilies for averaged model at test slice 31 ({})'.format(model), y=0.92, fontsize=18)
 for i in range(0,4):
     plt.subplot(4,2,i+1)
     plt.imshow(out_soft_mean[test_slice,i,:,:])
