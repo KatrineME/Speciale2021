@@ -341,7 +341,7 @@ def objective(trial):
     num_epochs = 50
     #num_epochs  = trial.suggest_float("num_epochs",  5, 100)
     
-    #loss_function = nn.CrossEntropyLoss()
+    loss_function = nn.CrossEntropyLoss()
     
     # For fold results
     
@@ -443,7 +443,7 @@ def objective(trial):
                 
                 # Find loss
                 #loss = soft_dice_loss(labels, output)
-                loss = nn.CrossEntropyLoss(output,labels)
+                loss = loss_function(output,labels)
                 
                 #print('loss = ', loss)
                 
@@ -512,7 +512,7 @@ def objective(trial):
                 #output = torch.exp(output)
                 
                 # Find loss
-                loss = nn.CrossEntropyLoss(output,labels)
+                loss = loss_function(output,labels)
                 
                 # Calculate loss
                 #eval_loss.append(loss.item())
