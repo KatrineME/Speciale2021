@@ -298,7 +298,7 @@ diff_dia = EF_ref[2]-EF_target[2]
 plt.hist(np.abs(diff_dia),bins=40)
 plt.title('Histogram of absolute difference in volume (dia)')
 
-#%% Boxplot
+#%% Histogram
 plt.figure(dpi=200, figsize =(12,12))
 plt.subplot(2,1,1)
 plt.hist(dice_sys, label=('RV','MYO','LV'), color=('tab:blue','mediumseagreen','orange'))
