@@ -744,7 +744,6 @@ plt.ylabel('# Number of slices')
 plt.title('Histogram of Dice Scores for CE model')
 plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
 
-#%%
 plt.subplot(2,1,2)
 plt.hist(dice, label=('RV','MYO','LV'), color=('tab:blue','mediumseagreen','orange'))
 plt.legend()

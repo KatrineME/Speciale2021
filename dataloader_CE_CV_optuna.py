@@ -221,7 +221,6 @@ os.chdir("/home/michala/training")                      # Server directory micha
 
 from load_data_gt_im_sub import load_data_sub
 
-
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub('GPU','Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub('GPU','Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub('GPU','Systole','MINF')
