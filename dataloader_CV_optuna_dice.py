@@ -438,7 +438,7 @@ def objective(trial):
                 # Forward Pass
                 output = model_unet(inputs)     
                 output = output["log_softmax"]
-                output = torch.exp(output)
+                #output = torch.exp(output)
                 #print('output shape = ', output.shape)
                 
                 # Find loss
@@ -509,7 +509,7 @@ def objective(trial):
                 # Forward pass
                 output = model_unet(inputs)     
                 output = output["log_softmax"]
-                output = torch.exp(output)
+                #output = torch.exp(output)
                 
                 # Find loss
                 loss = nn.CrossEntropyLoss(output,labels)
