@@ -443,7 +443,7 @@ def objective(trial):
                 
                 # Find loss
                 #loss = soft_dice_loss(labels, output)
-                loss = nn.CrossEntropyLoss(labels, output)
+                loss = nn.CrossEntropyLoss(output,labels)
                 
                 #print('loss = ', loss)
                 
@@ -512,7 +512,7 @@ def objective(trial):
                 output = torch.exp(output)
                 
                 # Find loss
-                loss = soft_dice_loss(labels,output)
+                loss = nn.CrossEntropyLoss(output,labels)
                 
                 # Calculate loss
                 #eval_loss.append(loss.item())
