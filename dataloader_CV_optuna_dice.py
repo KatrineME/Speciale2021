@@ -619,7 +619,7 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=1, timeout=72000 ) # 72000 s = 20 h # 50000 s = 14 h
+    study.optimize(objective, n_trials=2, timeout=72000 ) # 72000 s = 20 h # 50000 s = 14 h
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -635,7 +635,22 @@ if __name__ == "__main__":
     print("  Params: ")
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
-        
+    
+    os.chdir("/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2") 
+    # Write to txt file
+    text_file = open("Best_trial_lclv_dice.txt", "w")
+    text_file.write("Study statistics: ")
+    text_file.write("  Number of finished trials: ", len(study.trials))
+    text_file.write("  Number of complete trials: ", len(complete_trials))
+    text_file.write("Best trial:")
+    text_file.write("  Value: ", trial.value)
+    text_file.write("  Params: ")
+    for key, value in trial.params.items():
+        text_file.write("    {}: {}".format(key, value))
+
+    text_file.close() 
+    
+    
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "eps"])
     plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_lr_eps.png')
@@ -705,19 +720,7 @@ if __name__ == "__main__":
     optuna.visualization.matplotlib.plot_optimization_history(study)
     plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/history_optuna.png')
 
-    os.chdir("/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2") 
-    # Write to txt file
-    text_file = open("Best_trial_lclv_dice.txt", "w")
-    text_file.write("Study statistics: ")
-    text_file.write("  Number of finished trials: ", len(study.trials))
-    text_file.write("  Number of complete trials: ", len(complete_trials))
-    text_file.write("Best trial:")
-    text_file.write("  Value: ", trial.value)
-    text_file.write("  Params: ")
-    for key, value in trial.params.items():
-        text_file.write("    {}: {}".format(key, value))
-
-    text_file.close()    
+   
 
 """    
 PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
