@@ -291,7 +291,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_CE.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -303,7 +303,7 @@ alpha = 0.4
 fig = plt.figure()
 
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
-ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4)
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4)
 plt.figure(dpi=200, figsize=(18,32))
 
 w = 0.1
@@ -371,7 +371,7 @@ out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
-ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 #%% Plot of input data 
 test_slice = 125
 
@@ -472,7 +472,7 @@ print('Percentage of patient volumes w. errors:',(np.count_nonzero(cnon_pt)/len(
 #%%
 w = 0.1
 h = 0.3
-test_slice = 310
+test_slice = 31
 plt.figure(dpi=200)
 plt.suptitle('Systolic - Averaged model for test image at slice: {}'.format(test_slice))
 
@@ -624,7 +624,7 @@ var_sen  = np.var(sen,  axis=0)
 
 print('mean sen   = ',mean_sen)  
 print('var sen    = ',  var_sen) 
-print('std sen    = ',  std_sen) 
+#print('std sen    = ',  std_sen) 
 #%% Specificity
 spec = np.zeros((out_seg_mean.shape[0],3))
 
@@ -654,7 +654,7 @@ var_prec  = np.var(prec,  axis=0)
 
 print('mean prec   = ',mean_prec)  
 print('var prec    = ',  var_prec) 
-print('std prec    = ',  std_prec)
+#print('std prec    = ',  std_prec)
 #%% Boxplots
 class_labels = ['RV', 'MYO', 'LV']
 # Boxplot

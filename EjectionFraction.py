@@ -216,6 +216,7 @@ print('Correlation EF LV =', cor_EF[1,0])
 # LV
 print('Correlation diastole LV vol =', cor_dia[1,0]) 
 print('Correlation systole  LV vol =', cor_sys[1,0]) 
+print('\n')
 # RV
 print('Correlation diastole RV vol =', cor_dia_RV[1,0]) 
 print('Correlation systole  RV vol =', cor_sys_RV[1,0]) 
@@ -230,7 +231,7 @@ bias_EF      = np.mean(EF_target[0]-EF_ref[0])
 print('Bias sys LV=', bias_sys_vol ) 
 print('Bias dia LV=', bias_dia_vol )
 print('Bias EF  LV=', bias_EF )
-
+print('\n')
 bias_sys_vol_RV = np.mean(EF_target_RV[1]-EF_ref_RV[1])
 bias_dia_vol_RV = np.mean(EF_target_RV[2]-EF_ref_RV[2])
 bias_EF_RV      = np.mean(EF_target_RV[0]-EF_ref_RV[0])
@@ -248,7 +249,7 @@ std_dia_dif = np.std(EF_ref[2]-EF_target[2])
 print('Std EF =', std_EF_dif )
 print('Std sys vol =', std_sys_dif )
 print('Std dia vol =', std_dia_dif ) 
-
+print('\n')
 
 std_EF_dif_RV = np.std(EF_ref_RV[0]-EF_target_RV[0])
 std_sys_dif_RV = np.std(EF_ref_RV[1]-EF_target_RV[1])
@@ -268,7 +269,7 @@ MAE_EF      = np.sum(np.abs(EF_ref[0]-EF_target[0]))/EF_ref[0].shape[0]
 print('MAE EF =', MAE_EF )
 print('MAE sys vol =', MAE_sys_vol )
 print('MAE dia vol =', MAE_dia_vol ) 
-
+print('\n')
 # RV
 MAE_sys_vol_RV = np.sum(np.abs(EF_target_RV[1]-EF_ref_RV[1]))/EF_ref_RV[1].shape[0]
 MAE_dia_vol_RV = np.sum(np.abs(EF_target_RV[2]-EF_ref_RV[2]))/EF_ref_RV[2].shape[0]

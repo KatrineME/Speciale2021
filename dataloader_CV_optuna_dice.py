@@ -280,26 +280,44 @@ def soft_dice_loss(y_true, y_pred):
      return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
 
 
+def class_loss(y_true,y_pred):
+    eps = 1e-6
 
-# Objective function
-def jc(result, reference):
-    """
-    Jaccard coefficient
+    y_true_s   = torch.sum(y_true, (2,3))
+    y_true_sin = torch.empty((y_true_s.shape)).cuda()
+    
+    y_true_sin[y_true_s > 0]  = 0
+    y_true_sin[y_true_s == 0] = 1
+    
+    #y_pred_e = torch.exp(y_pred)
+    loss_c = -1* torch.sum(torch.log(1 - y_pred + eps),(2,3))
+    
+    loss_c = loss_c*y_true_sin
+    #c = Tensor(np.expand_dims(np.array([1,2,4,1]), axis=0)).cuda()
+    #loss_c = loss_c*c
+    loss_c = torch.sum(loss_c)
+    loss_c = loss_c/(y_pred.shape[3]*y_pred.shape[2]*y_pred.shape[1]*y_pred.shape[0])
 
-    """
-    result = np.atleast_1d(result.astype(np.bool))
-    reference = np.atleast_1d(reference.astype(np.bool))
+    return loss_c
+
+def lv_loss(y_true, y_pred):
+    Y_BGR  = y_pred[:,0,:,:]           # size([B,H,W])
+    Y_RV   = y_pred[:,1,:,:]           # size([B,H,W])
+    Y_LV   = y_pred[:,3,:,:]           # size([B,H,W])
+
+    Y_LV_pad = torch.nn.functional.pad(Y_LV,(1,1,1,1),'constant', 0)
+
+    Y_up   = Y_LV_pad[:,2:130,1:129]
+    Y_down = Y_LV_pad[:,0:128,1:129]
     
-    intersection = np.count_nonzero(result & reference)
-    union = np.count_nonzero(result | reference)
+    Y_left = Y_LV_pad[:,1:129,2:130]
+    Y_right= Y_LV_pad[:,1:129,0:128]
     
-    try:
-        jc = float(intersection) / float(union)
-    except ZeroDivisionError:
-        jc = 0.0
-    #jc = float(intersection) / float(union)
-    
-    return jc
+    inside = (Y_up + Y_down + Y_left + Y_right) * (Y_BGR + Y_RV)
+    inside = inside.detach().cpu()#cuda()
+
+    #print('inside', inside)    
+    return torch.sum(Tensor(inside))/(128*128*32)#.cuda()
  
 
     
@@ -330,8 +348,10 @@ def objective(trial):
     #optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
     weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
 
-    lr  = trial.suggest_float("lr",  1e-6, 1e-3)
+    lr  = trial.suggest_float("lr",  1e-8, 1e-2)
     eps = trial.suggest_float("eps", 1e-8, 1e-2)
+    lc_alpha = trial.suggest_float("lc_alpha", 0.1,10)
+    lv_beta = trial.suggest_float("lv_beta", 0.1,10)
     
     #optimizer = getattr(optim, Adam)(model_unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
     optimizer = torch.optim.Adam(model_unet.parameters(), lr=lr, eps=eps, weight_decay=weight_decay) #LR 
@@ -426,6 +446,8 @@ def objective(trial):
                 inputs = inputs.cuda()
                 
                 labels = train_data[:,1,:,:]
+                labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
+                labels = labels.permute(0,3,1,2)
                 labels = labels.cuda()
                 #print('i=',i)
                 # wrap them in Variable
@@ -438,12 +460,16 @@ def objective(trial):
                 # Forward Pass
                 output = model_unet(inputs)     
                 output = output["log_softmax"]
-                #output = torch.exp(output)
+                output = torch.exp(output)
                 #print('output shape = ', output.shape)
                 
                 # Find loss
-                #loss = soft_dice_loss(labels, output)
-                loss = loss_function(output,labels)
+                loss_d  = soft_dice_loss(labels, output)
+                loss_c  = class_loss(labels, output)
+                loss_lv = lv_loss(labels, output)
+    
+                loss = loss_d + lc_alpha*loss_c + lv_beta*loss_lv #+ loss_lv loss with c
+                #loss = loss_function(output,labels)
                 
                 #print('loss = ', loss)
                 
@@ -460,7 +486,7 @@ def objective(trial):
                 predicted  = torch.argmax(output, axis=1)
                 predicteds = torch.nn.functional.one_hot(predicted.to(torch.int64), num_classes=4).detach().cpu().numpy()
                 
-                target     = labels 
+                target     = torch.argmax(labels, axis=1)
                 targets    = torch.nn.functional.one_hot(target.to(torch.int64), num_classes=4).detach().cpu().numpy()
                 
                 total     += (target.shape[0])*(128*128)
@@ -498,7 +524,10 @@ def objective(trial):
                 #inputs, labels = data
                 inputs = Tensor(np.expand_dims(eval_data[:,0,:,:], axis = 1))
                 inputs = inputs.cuda()
+                
                 labels = eval_data[:,1,:,:]
+                labels = torch.nn.functional.one_hot(Tensor(labels).to(torch.int64), num_classes=4)#.detach().numpy()
+                labels = labels.permute(0,3,1,2)
                 labels = labels.cuda()
                 #print('i=',i)
         
@@ -512,7 +541,12 @@ def objective(trial):
                 #output = torch.exp(output)
                 
                 # Find loss
-                loss = loss_function(output,labels)
+                loss_d  = soft_dice_loss(labels, output)
+                loss_c  = class_loss(labels, output)
+                loss_lv = lv_loss(labels, output)
+                
+                loss = loss_d + lc_alpha*loss_c + lv_beta*loss_lv #+ loss_lv loss with c
+                #loss = loss_function(output,labels)
                 
                 # Calculate loss
                 #eval_loss.append(loss.item())
@@ -522,7 +556,7 @@ def objective(trial):
                 predicted_e   = torch.argmax(output, axis=1)
                 predicteds_e  = torch.nn.functional.one_hot(predicted_e.to(torch.int64), num_classes=4).detach().cpu().numpy()
                 
-                target_e     = labels
+                target_e     = torch.argmax(labels, axis=1)
                 targets_e    = torch.nn.functional.one_hot(target_e.to(torch.int64), num_classes=4).detach().cpu().numpy()
                 
                 total_e     += (target_e.shape[0])*(128*128)
@@ -585,7 +619,7 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=100, timeout=72000 ) # 72000 s = 20 h # 50000 s = 14 h
+    study.optimize(objective, n_trials=20, timeout=108000 ) # 72000 s = 20 h # 50000 s = 14 h
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -601,42 +635,92 @@ if __name__ == "__main__":
     print("  Params: ")
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
-        
+    
+    os.chdir("/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2") 
+    # Write to txt file
+    text_file = open("Best_trial_lclv_dice.txt", "w")
+    text_file.write("Study statistics: \n")
+    text_file.write("  Number of finished trials: %s \n" % len(study.trials))
+    text_file.write("  Number of complete trials: %s \n" % len(complete_trials))
+    text_file.write("Best trial: \n")
+    text_file.write("  Value: %s \n" % trial.value)
+    text_file.write("  Params: \n")
+    for key, value in trial.params.items():
+        text_file.write("    {}: {}\n".format(key, value))
+
+    text_file.close() 
+    
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "eps"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_lr_eps.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_lr_eps.png')
     #plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_eps.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "drop_prob_l"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_lr_drop.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_lr_drop.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "weight_decay"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_lr_wd.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_lr_wd.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["eps", "weight_decay"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_eps_wd.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_eps_wd.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["eps", "drop_prob_l"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_eps_drop.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_eps_drop.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "weight_decay"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/optuna_drop_wd.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_drop_wd.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["lr", "lc_alpha"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_lr_alpha.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["lr", "lv_beta"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_lr_beta.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lc_alpha"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_eps_alpha.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lv_beta"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_eps_beta.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "lc_alpha"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_drop_alpha.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "lv_beta"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_drop_beta.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["weight_decay", "lc_alpha"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_wd_alpha.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["weight_decay", "lv_beta"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_wd_beta.png')
+    
+    plt.figure(dpi=200)
+    optuna.visualization.matplotlib.plot_contour(study, params=["lc_alpha", "lv_beta"])
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/optuna_alpha_beta.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_param_importances(study)
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/importances_optuna.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/importances_optuna.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_optimization_history(study)
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/history_optuna.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2/history_optuna.png')
 
-
+   
 
 """    
 PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_optuna.pt"
@@ -718,3 +802,4 @@ torch.save(T, PATH_results)
 
 """
 
+#%%
