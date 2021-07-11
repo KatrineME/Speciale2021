@@ -348,10 +348,10 @@ def objective(trial):
     #optimizer_name = trial.suggest_categorical("optimizer", ["Adam"])
     weight_decay   = trial.suggest_float("weight_decay", 1e-8, 1e-2)
 
-    lr  = trial.suggest_float("lr",  1e-6, 1e-2)
+    lr  = trial.suggest_float("lr",  1e-8, 1e-2)
     eps = trial.suggest_float("eps", 1e-8, 1e-2)
-    lc_alpha = trial.suggest_float("lc_alpha", 0.1,5)
-    lv_beta = trial.suggest_float("lv_beta", 0.1,5)
+    lc_alpha = trial.suggest_float("lc_alpha", 0.1,10)
+    lv_beta = trial.suggest_float("lv_beta", 0.1,10)
     
     #optimizer = getattr(optim, Adam)(model_unet.parameters(), lr=lr, eps = eps, weight_decay = weight_decay)
     optimizer = torch.optim.Adam(model_unet.parameters(), lr=lr, eps=eps, weight_decay=weight_decay) #LR 
