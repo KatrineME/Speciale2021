@@ -639,14 +639,14 @@ if __name__ == "__main__":
     os.chdir("/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_2") 
     # Write to txt file
     text_file = open("Best_trial_lclv_dice.txt", "w")
-    text_file.write("Study statistics: ")
-    text_file.write("  Number of finished trials: %s " % len(study.trials))
-    text_file.write("  Number of complete trials: %s " % len(complete_trials))
-    text_file.write("Best trial:")
-    text_file.write("  Value: %s " % trial.value)
-    text_file.write("  Params: ")
+    text_file.write("Study statistics: \n")
+    text_file.write("  Number of finished trials: %s \n" % len(study.trials))
+    text_file.write("  Number of complete trials: %s \n" % len(complete_trials))
+    text_file.write("Best trial: \n")
+    text_file.write("  Value: %s \n" % trial.value)
+    text_file.write("  Params: \n")
     for key, value in trial.params.items():
-        text_file.write("    {}: {}".format(key, value))
+        text_file.write("    {}: {}\n".format(key, value))
 
     text_file.close() 
     
