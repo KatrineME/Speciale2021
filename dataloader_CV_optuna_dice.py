@@ -640,10 +640,10 @@ if __name__ == "__main__":
     # Write to txt file
     text_file = open("Best_trial_lclv_dice.txt", "w")
     text_file.write("Study statistics: ")
-    text_file.write("  Number of finished trials: ", len(study.trials))
-    text_file.write("  Number of complete trials: ", len(complete_trials))
+    text_file.write("  Number of finished trials: %s " % len(study.trials))
+    text_file.write("  Number of complete trials: %s " % len(complete_trials))
     text_file.write("Best trial:")
-    text_file.write("  Value: ", trial.value)
+    text_file.write("  Value: %s " % trial.value)
     text_file.write("  Params: ")
     for key, value in trial.params.items():
         text_file.write("    {}: {}".format(key, value))
