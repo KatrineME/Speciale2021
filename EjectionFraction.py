@@ -27,7 +27,7 @@ if torch.cuda.is_available():
     # Tensor = torch.cuda.FloatTensor
     device = 'cuda'
 else:
-    # Tensor = torch.FloatTensor
+    # Tensor = torch.FloatTensory
     device = 'cpu'
 torch.cuda.manual_seed_all(808)
 
@@ -44,7 +44,8 @@ if user == 'K':
 if user == 'GPU':
     os.chdir('/home/michala/Speciale2021/Speciale2021')
 
- 
+ #%%
+user = 'M'
 from load_data_gt_im_sub_space import load_data_sub
 
 phase = 'Systole'
@@ -91,9 +92,13 @@ gt_test_sys_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num
                                   np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+
 #%% Load 
-path_soft_dia = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_CE.pt'
-path_soft_sys = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_CE.pt'
+#path_soft_dia = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_CE.pt'
+#path_soft_sys = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_CE.pt'
+
+path_soft_dia = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
+path_soft_sys = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_dice.pt'
 
 soft_dia = torch.load(path_soft_dia ,  map_location=torch.device(device))
 soft_sys = torch.load(path_soft_sys ,  map_location=torch.device(device))
@@ -275,16 +280,16 @@ print('MAE dia vol RV =', MAE_dia_vol_RV )
 
 #%% DICE SCORE
 #%% Metrics
-os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
 dice_sys = np.zeros((out_seg_sys_mean.shape[0],3))
 
 for i in range(0,out_seg_sys_mean.shape[0]):
-    dice_sys[i,0] = dc(out_seg_sys_mean[i,:,:,1],ref_sys[i,:,:,1])  # = RV
-    dice_sys[i,1] = dc(out_seg_sys_mean[i,:,:,2],ref_sys[i,:,:,2])  # = MYO
-    dice_sys[i,2] = dc(out_seg_sys_mean[i,:,:,3],ref_sys[i,:,:,3])  # = LV
+    dice_sys[i,0] = dc(out_seg_sys_mean[i,:,:,1],ref_dia[i,:,:,1])  # = RV
+    dice_sys[i,1] = dc(out_seg_sys_mean[i,:,:,2],ref_dia[i,:,:,2])  # = MYO
+    dice_sys[i,2] = dc(out_seg_sys_mean[i,:,:,3],ref_dia[i,:,:,3])  # = LV
     
 dice_dia = np.zeros((out_seg_dia_mean.shape[0],3))
 
@@ -316,6 +321,38 @@ plt.xlabel('Dice Score')
 plt.ylabel('# Number of slices')
 plt.title('Histogram of Dice Scores for dia model')
 plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
+
+#%% Boxplot
+
+concat_dice_CE = np.concatenate((dice_dia, dice_sys),axis = 1)
+order = [0,3,1,4,2,5]
+
+rear = np.array([concat_dice_CE[:,0],concat_dice_CE[:,3],concat_dice_CE[:,1],concat_dice_CE[:,4],concat_dice_CE[:,2],concat_dice_CE[:,5]])
+rear_dice = np.transpose(rear)
+
+#%%
+plt.figure(dpi=200, figsize =(12,12))
+
+plt.subplot(2,1,1)
+plt.boxplot(rear_dice, vert = False)
+plt.legend()
+plt.xlabel('Dice Score')
+#plt.ylabel('# Number of slices')
+plt.yticks(np.arange(1,7),['RV CE','RV SD','MYO CE','MYO SD','LV CE','LV SD'])
+plt.title('Boxplot of Dice Scores for dia model')
+plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
+
+#%%
+plt.subplot(2,1,2)
+plt.boxplot(dice_sys, vert=False)
+plt.legend()
+plt.xlabel('Dice Score')
+#plt.ylabel('# Number of slices')
+plt.yticks(np.arange(1,4),['RV','MYO','LV'])
+plt.title('Boxplot of Dice Scores for SD dia model')
+plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
+
+
 
 
 #%%%

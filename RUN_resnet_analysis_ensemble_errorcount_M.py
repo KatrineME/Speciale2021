@@ -283,6 +283,7 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
 
 print('Data loaded+concat')
 
+
 #%% Load model if averagered on GPU
 
 path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
@@ -477,14 +478,29 @@ plt.imshow(out_soft_mean[test_slice,3,:,:])
 plt.title('Left ventricle', fontsize=10)
 
 #%%
-test_slice = 25*7
+test_slice = 25*0
 plt.figure(figsize=(15,15),dpi=200)
 for i in range(0,25):
     plt.subplot(5,5,i+1)
-    plt.imshow(out_seg_mean_am[i + test_slice,:,:])
+    plt.imshow(im_test_es_sub[i + test_slice,0,:,:])
+    #plt.imshow(ref[i + test_slice,:,:,1])
     plt.title('slice: {}'.format(i + test_slice), fontsize =15)
     plt.xticks(fontsize=5)
     plt.yticks(fontsize=5)
+
+
+#ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+
+#%%
+plt.figure(dpi=200)
+plt.subplot(1,2,1)
+plt.imshow(im_test_es_sub[187,0,:,:])
+plt.title('Original MRI')
+plt.subplot(1,2,2)
+plt.imshow(im_test_es_sub[187,0,:,:])
+plt.imshow(gt_test_es_sub[187,:,:], alpha=0.6)
+plt.title('Reference without RV')
+
 
 #%% 
 plt.figure(figsize=(15,15),dpi=200)
@@ -662,7 +678,7 @@ plt.title('Left ventricle', fontsize=10)
 os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
-dice = np.zeros((out_seg_mean.shape[0],3))
+dice = np.zeros((out_seg_mean.shape[0],4))
 haus = np.zeros((out_seg_mean.shape[0],3))
 haus95 = np.zeros((out_seg_mean.shape[0],3))
 
@@ -677,6 +693,7 @@ for i in range(0,out_seg_mean.shape[0]):
     dice[i,0] = dc(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
     dice[i,1] = dc(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
     dice[i,2] = dc(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
+    dice[i,3] = dc(out_seg_mean[i,:,:,0],ref[i,:,:,0])
     
     # If there is no prediction or annotation then don't calculate Hausdorff distance and
     # skip to calculation for next class
@@ -753,7 +770,6 @@ plt.title('Histogram of Dice Scores for SD model')
 plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
 
 
-
 #%% ACCURACY
 acc = np.zeros((out_seg_mean.shape[0],3))
 
@@ -802,6 +818,10 @@ var_mcc  = np.var(mcc_cor,  axis=0)
 print('mean mcc   = ',  mean_mcc)  
 print('var mcc    = ',  var_mcc) 
 print('std mcc    = ',  std_mcc) 
+
+#%%
+
+
 
 
 #%% Sensitivty/Recall
