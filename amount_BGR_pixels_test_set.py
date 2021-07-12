@@ -4,7 +4,7 @@ Created on Wed Jun 23 14:40:38 2021
 
 @author: katrine
 """
-ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4)
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4)
 
 s = torch.sum(ref_dia,axis=(1,2))
 

@@ -45,7 +45,7 @@ if user == 'GPU':
     os.chdir('/home/michala/Speciale2021/Speciale2021')
 
  #%%
-user = 'M'
+user = 'K'
 from load_data_gt_im_sub_space import load_data_sub
 
 phase = 'Systole'
@@ -94,11 +94,11 @@ gt_test_sys_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
 #%% Load 
-#path_soft_dia = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_CE.pt'
-#path_soft_sys = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_CE.pt'
+path_soft_dia = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
+path_soft_sys = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
 
-path_soft_dia = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
-path_soft_sys = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_dice.pt'
+#path_soft_dia = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
+#path_soft_sys = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_dice.pt'
 
 soft_dia = torch.load(path_soft_dia ,  map_location=torch.device(device))
 soft_sys = torch.load(path_soft_sys ,  map_location=torch.device(device))
@@ -242,18 +242,18 @@ print('Bias EF  RV=', bias_EF_RV )
 
 #%% std
 
-std_EF_dif  = np.std(EF_ref[0]-EF_target[0])
-std_sys_dif = np.std(EF_ref[1]-EF_target[1])
-std_dia_dif = np.std(EF_ref[2]-EF_target[2])
+std_EF_dif  = np.std(EF_target[0]-EF_ref[0])
+std_sys_dif = np.std(EF_target[1]-EF_ref[1])
+std_dia_dif = np.std(EF_target[2]-EF_ref[2])
 
 print('Std EF =', std_EF_dif )
 print('Std sys vol =', std_sys_dif )
 print('Std dia vol =', std_dia_dif ) 
 print('\n')
 
-std_EF_dif_RV = np.std(EF_ref_RV[0]-EF_target_RV[0])
-std_sys_dif_RV = np.std(EF_ref_RV[1]-EF_target_RV[1])
-std_dia_dif_RV = np.std(EF_ref_RV[2]-EF_target_RV[2])
+std_EF_dif_RV = np.std(EF_target_RV[0]-EF_ref_RV[0])
+std_sys_dif_RV = np.std(EF_target_RV[1]-EF_ref_RV[1])
+std_dia_dif_RV = np.std(EF_target_RV[2]-EF_ref_RV[2])
 
 print('Std EF RV =', std_EF_dif_RV )
 print('Std sys vol RV =', std_sys_dif_RV )

@@ -195,7 +195,7 @@ class BayesUNet(UNet):
 
 if __name__ == "__main__":
     #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
+    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.15)
     unet.cuda()
     #torchsummary.summary(model, (1, 128, 128))
     
@@ -312,6 +312,10 @@ def lv_loss(y_true, y_pred):
 k_folds    = 6
 num_epochs = 150
 
+# weightings
+a = 3.5
+b = 7.2
+
 #loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -357,7 +361,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     unet.apply(weights_init)
     
     # Initialize optimizer
-    optimizer = torch.optim.Adam(unet.parameters(), lr=0.0001, eps=1e-4, weight_decay=1e-4) #LR 
+    optimizer = torch.optim.Adam(unet.parameters(), lr=0.0044, eps=0.0067, weight_decay=0.0017) #LR 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
     #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=80)
     #lr_scheduler =     torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1, last_epoch=-1)
@@ -414,7 +418,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             #print('loss c = ', loss_c)
             #print('loss d =', loss_d)
 
-            loss = loss_d + loss_c + loss_lv#+ loss_lv loss with c
+            loss = loss_d + a*loss_c + b*loss_lv#+ loss_lv loss with c
             
             #print('loss',loss)
 
@@ -472,7 +476,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
             loss_c  = class_loss(labels, output)
             loss_lv = lv_loss(labels, output)
     
-            loss = loss_d + loss_c + loss_lv#+ loss_lv #+ loss_lv + loss_c
+            loss = loss_d + a*loss_c + b*loss_lv#+ loss_lv #+ loss_lv + loss_c
     
             # Calculate loss
             eval_loss += loss.item()
@@ -516,7 +520,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
     fold_eval_incorrect.append(eval_incorrect)
     
     #Save model for each fold
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_150e_fold{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_150e_opt_fold{}.pt".format(fold)
     #PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
     torch.save(unet, PATH_model)
         
@@ -561,7 +565,7 @@ plt.ylabel('incorrect %')
 plt.legend(loc="upper right")
 plt.title("Incorrect")
 
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_150e.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_150e_opt.png')
 #plt.savefig('/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_loss.png')
 
 #%%
@@ -570,6 +574,6 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_150e_train_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt"
 torch.save(T, PATH_results)
 
