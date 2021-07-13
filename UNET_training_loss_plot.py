@@ -482,19 +482,6 @@ for i in range(0,4):
 
 plt.show()
 
-#%% Comparison of MYO
-
-out_soft_mean_dice   = res_dice.mean(axis=0)
-out_soft_mean_lclv   = res_CE.mean(axis=0)
-
-plt.figure(dpi=300, figsize=(4,4))
-plt.suptitle('Softmax probabilies for averaged model at test slice {} (SD)'.format(test_slice), y=0.92, fontsize=18)
-plt.subplot(1,2,1)
-plt.imshow(out_soft_mean_dice[test_slice,2,:,:])
-plt.subplot(1,2,2)
-plt.imshow(out_soft_mean_lclv[test_slice,2,:,:])
-
-
 #%%
 s= 8
 test_slice = 66
