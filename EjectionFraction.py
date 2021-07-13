@@ -117,6 +117,20 @@ out_seg_sys_mean = torch.nn.functional.one_hot(torch.as_tensor(soft_sys_mean_am)
 
 ref_sys = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_sys_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 
+#%%
+
+slice = 27
+
+plt.subplot(1,2,1)
+plt.imshow(soft_dia_mean[slice,1,:,:])
+
+plt.subplot(1,2,2)
+plt.imshow(soft_sys_mean[slice,1,:,:])
+
+
+
+
+
 #%%%%%%%%%%%%%%%%%%%%%%% METRICS %%%%%%%%%%%%%%%%%%%%%
 # Slices per patient
 p = []    # Slices per patient
@@ -288,6 +302,27 @@ from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, r
 dice_sys = np.zeros((out_seg_sys_mean.shape[0],3))
 
 for i in range(0,out_seg_sys_mean.shape[0]):
+    dice_sys[i,0] = dc(out_seg_sys_mean[i,:,:,1],ref_sys[i,:,:,1])  # = RV
+    dice_sys[i,1] = dc(out_seg_sys_mean[i,:,:,2],ref_sys[i,:,:,2])  # = MYO
+    dice_sys[i,2] = dc(out_seg_sys_mean[i,:,:,3],ref_sys[i,:,:,3])  # = LV
+    
+dice_dia = np.zeros((out_seg_dia_mean.shape[0],3))
+
+for i in range(0,out_seg_sys_mean.shape[0]):
+    dice_dia[i,0] = dc(out_seg_dia_mean[i,:,:,1],ref_sys[i,:,:,1])  # = RV
+    dice_dia[i,1] = dc(out_seg_dia_mean[i,:,:,2],ref_sys[i,:,:,2])  # = MYO
+    dice_dia[i,2] = dc(out_seg_dia_mean[i,:,:,3],ref_sys[i,:,:,3])  # = LV
+    
+
+#%% DICE SCORE
+#%% Metrics
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
+
+dice_sys = np.zeros((out_seg_sys_mean.shape[0],3))
+
+for i in range(0,out_seg_sys_mean.shape[0]):
     dice_sys[i,0] = dc(out_seg_sys_mean[i,:,:,1],ref_dia[i,:,:,1])  # = RV
     dice_sys[i,1] = dc(out_seg_sys_mean[i,:,:,2],ref_dia[i,:,:,2])  # = MYO
     dice_sys[i,2] = dc(out_seg_sys_mean[i,:,:,3],ref_dia[i,:,:,3])  # = LV
@@ -298,6 +333,7 @@ for i in range(0,out_seg_sys_mean.shape[0]):
     dice_dia[i,0] = dc(out_seg_dia_mean[i,:,:,1],ref_dia[i,:,:,1])  # = RV
     dice_dia[i,1] = dc(out_seg_dia_mean[i,:,:,2],ref_dia[i,:,:,2])  # = MYO
     dice_dia[i,2] = dc(out_seg_dia_mean[i,:,:,3],ref_dia[i,:,:,3])  # = LV
+    
 #%% Histogram
 plt.figure(dpi=300)
 diff_dia = EF_ref[2]-EF_target[2]
@@ -323,38 +359,43 @@ plt.ylabel('# Number of slices')
 plt.title('Histogram of Dice Scores for dia model')
 plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
 
-#%% Boxplot
-
-concat_dice_CE = np.concatenate((dice_dia, dice_sys),axis = 1)
-order = [0,3,1,4,2,5]
-
-rear = np.array([concat_dice_CE[:,0],concat_dice_CE[:,3],concat_dice_CE[:,1],concat_dice_CE[:,4],concat_dice_CE[:,2],concat_dice_CE[:,5]])
-rear_dice = np.transpose(rear)
-
 #%%
-plt.figure(dpi=200, figsize =(12,12))
 
-plt.subplot(2,1,1)
-plt.boxplot(rear_dice, vert = False)
-plt.legend()
-plt.xlabel('Dice Score')
-#plt.ylabel('# Number of slices')
-plt.yticks(np.arange(1,7),['RV CE','RV SD','MYO CE','MYO SD','LV CE','LV SD'])
-plt.title('Boxplot of Dice Scores for dia model')
-plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
-
+data_SD_dia  = dice_sys
+data_CE_dia   = dice_dia
 #%%
-plt.subplot(2,1,2)
-plt.boxplot(dice_sys, vert=False)
-plt.legend()
-plt.xlabel('Dice Score')
-#plt.ylabel('# Number of slices')
-plt.yticks(np.arange(1,4),['RV','MYO','LV'])
-plt.title('Boxplot of Dice Scores for SD dia model')
-plt.grid(True, color = "grey", linewidth = "0.5", linestyle = "-")
+data_SD_sys  = dice_sys
+data_CE_sys   = dice_dia
+#%%
 
+#fig, ax = plt.subplots()
+plt.figure(dpi=200, figsize=(14,7))
+plt.subplot(1,2,1)
+bp1 = plt.boxplot(data_CE_dia, positions=[1,3,5], widths=0.35, 
+                 patch_artist=True, boxprops=dict(facecolor="C0"),medianprops=dict(color='red'))
+bp2 = plt.boxplot(data_SD_dia, positions=[2,4,6], widths=0.35, 
+                 patch_artist=True, boxprops=dict(facecolor="C2"),medianprops=dict(color='red'))
 
+plt.legend([bp1["boxes"][0], bp2["boxes"][0]], ['Cross-Entropy', 'Soft-Dice'], fontsize=12, loc='lower right')
+plt.xticks(np.arange(1,7),['RV','RV','MYO','MYO','LV','LV'] , fontsize=12)
+plt.ylabel('Dice Score', fontsize=12)
+plt.title('Boxplot of Dice scores for diastolic data', fontsize=15)
+plt.xlim(0.5,7.2)
+plt.ylim(-0.15,1.1)
 
+plt.subplot(1,2,2)
+bp1 = plt.boxplot(data_CE_sys, positions=[1,3,5], widths=0.35, 
+                 patch_artist=True, boxprops=dict(facecolor="C0"),medianprops=dict(color='red'))
+bp2 = plt.boxplot(data_SD_sys, positions=[2,4,6], widths=0.35, 
+                 patch_artist=True, boxprops=dict(facecolor="C2"),medianprops=dict(color='red'))
+
+plt.legend([bp1["boxes"][0], bp2["boxes"][0]], ['Cross-Entropy', 'Soft-Dice'], fontsize=12, loc='lower right')
+plt.xticks(np.arange(1,7),['RV','RV','MYO','MYO','LV','LV'],  fontsize=12 )
+plt.ylabel('Dice Score', fontsize=12)
+plt.title('Boxplot of Dice scores for systolic data', fontsize=15)
+plt.xlim(0.5,7.2)
+plt.ylim(-0.15,1.1)
+plt.show()
 
 #%%%
 
@@ -372,7 +413,7 @@ plt.colorbar()
 
 
 
-
+#%%
 
 
 

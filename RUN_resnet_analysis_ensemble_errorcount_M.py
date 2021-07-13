@@ -530,7 +530,7 @@ def lv_loss(y_pred):
     #print('inside', inside)    
     return inside # torch.sum(Tensor(inside))/(128*128*32)#.cuda()
 
-out_seg_per = Tensor(out_seg_mean).permute(0,3,1,2)
+out_seg_per = Tensor(out_seg_sys_mean).permute(0,3,1,2)
 lv_neigh = lv_loss(out_seg_per)
 
 c_non = np.count_nonzero(lv_neigh, axis = (1,2)) # number of error pixels in each slice
@@ -578,7 +578,7 @@ labeled_image_myo = []
 labeled_image_lv = []
 labeled_image_all = []
 
-out_seg_mean_bin = (out_seg_mean_am > 0).astype(int)
+out_seg_mean_bin = (soft_sys_mean_am > 0).astype(int)
 
 #w = out_seg_mean_bin.astype(int)
 
@@ -608,6 +608,8 @@ multi_lab_myo = []
 multi_lab_lv = []
 multi_lab_all = []
 
+out_seg_mean = out_seg_sys_mean
+ref = ref_dia  
 for i in range(0, (out_seg_mean.shape[0])):
     multi_lab_rv.append(float(labeled_image_rv[i][1] > 1))
     multi_lab_myo.append(float(labeled_image_myo[i][1] > 1))
@@ -623,8 +625,15 @@ tot_lv = np.sum(multi_lab_lv)
 
 print('Total slices with more:', tot_rv, tot_myo, tot_lv, tot_all)
 #%%
-gt_per = (Tensor(ref).permute(0,3,1,2)).detach().numpy()
-out_seg_per = (Tensor(out_seg_mean).permute(0,3,1,2)).detach().numpy()
+soft_sys_mean    = soft_sys.mean(axis=0)
+soft_sys_mean_am = np.argmax(soft_sys_mean, axis=1)
+out_seg_sys_mean = torch.nn.functional.one_hot(torch.as_tensor(soft_sys_mean_am), num_classes=4).detach().cpu().numpy()
+
+ref_sys = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_sys_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+
+
+gt_per = (Tensor(ref_sys).permute(0,3,1,2)).detach().numpy()
+out_seg_per = (Tensor(out_seg_sys_mean).permute(0,3,1,2)).detach().numpy()
 
 ss = np.sum(out_seg_per, axis=(2,3))
 gs = np.sum(gt_per, axis=(2,3))
