@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Thu Jul 15 09:45:55 2021
+
+@author: michalablicher
+"""
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Jun 9 14:55:28 2021
 
 @author: michalablicher
@@ -252,10 +259,9 @@ class DRN(nn.Module):
         else:
             return x
 
-
 class SimpleRSN(nn.Module):
 
-    def __init__(self, block, channels=(16, 32, 64, 128), n_channels_input=3, n_classes=2, drop_prob=0.):
+    def __init__(self, block, channels=(16, 32, 64), n_channels_input=3, n_classes=2, drop_prob=0.):
         super(SimpleRSN, self).__init__()
         self.inplanes = channels[0]
         self.out_dim = channels[-1]
@@ -273,6 +279,7 @@ class SimpleRSN(nn.Module):
         self.layer2 = self._make_layer(block, channels[1], stride=2)
         self.layer3 = self._make_layer(block, channels[2], stride=2)
         self.layer4 = self._make_layer(block, channels[3], stride=2)
+        self.layer5 = self._make_layer(block, channels[4], stride=1)
         self.classifier = nn.Sequential(
             nn.Conv2d(self.inplanes, self.out_dim, kernel_size=1, padding=0),
             nn.ReLU(True),
@@ -292,6 +299,7 @@ class SimpleRSN(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
+        x = self.layer5(x)
         y = self.classifier(x)
         return {'log_softmax': self.log_softmax_layer(y), 'softmax': self.softmax_layer(y)}
 
@@ -363,7 +371,7 @@ if __name__ == "__main__":
     n_channels = 3  # 3
     n_classes  = 2
     #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
+    model = SimpleRSN(BasicBlock, channels=(16, 32, 64,128,256), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     if device == 'cuda':
         model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
@@ -380,13 +388,13 @@ os.chdir("/home/michala/training")                      # Server directory micha
 
 from load_data_gt_im_sub_space import load_data_sub
 
-user = 'GPU'
+user = 'M'
 phase = 'Systole'
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU',phase,'DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU',phase,'HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU',phase,'MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU',phase,'NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU',phase,'RV')
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 
 
 
@@ -621,7 +629,9 @@ for i, (im) in enumerate(im_data):
 #% Load softmax from ensemble models
 
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_train_ResNet.pt'
-PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
+#PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
+PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
+
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
 # mean them over dim=0
@@ -662,7 +672,7 @@ print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 input_concat = torch.cat((im,umap,seg), dim=1)
 
 #%% Distance transform maps
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 #os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from SI_error_func import dist_trans, cluster_min
 
@@ -714,6 +724,17 @@ T_j = np.sum(T_j, axis = 3)
 T_j[T_j >= 1 ] = 1
 
 T = np.expand_dims(T_j, axis=1)
+
+#%%
+inputs = ((input_concat))
+
+output = model(Tensor(inputs))  
+
+#%%
+output = output["log_softmax"]
+
+#%%
+plt.imshow(output[10,0,:,:].detach().numpy())
 
 #%% Training with K-folds
 k_folds    = 6
