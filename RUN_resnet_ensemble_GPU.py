@@ -28,6 +28,8 @@ from torch import nn
 from torch import Tensor
 import scipy.ndimage
 
+BatchNorm = nn.BatchNorm2d
+DropOut   = nn.Dropout2d
 
 if torch.cuda.is_available():
     # Tensor = torch.cuda.FloatTensor
