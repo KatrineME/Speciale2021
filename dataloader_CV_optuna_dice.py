@@ -639,7 +639,7 @@ if __name__ == "__main__":
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
     
-    os.chdir("/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3") 
+    os.chdir("/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3") 
     # Write to txt file
     text_file = open("Best_trial_lclv_dice.txt", "w")
     text_file.write("Study statistics: \n")
@@ -656,73 +656,73 @@ if __name__ == "__main__":
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "eps"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_lr_eps.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_lr_eps.png')
     #plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_eps.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "drop_prob_l"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_lr_drop.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_lr_drop.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "weight_decay"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_lr_wd.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_lr_wd.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["eps", "weight_decay"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_eps_wd.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_eps_wd.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["eps", "drop_prob_l"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_eps_drop.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_eps_drop.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "weight_decay"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_drop_wd.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_drop_wd.png')
     
     """
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "lc_alpha"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_lr_alpha.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_lr_alpha.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "lv_beta"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_lr_beta.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_lr_beta.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lc_alpha"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_eps_alpha.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_eps_alpha.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["eps", "lv_beta"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_eps_beta.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_eps_beta.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "lc_alpha"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_drop_alpha.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_drop_alpha.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "lv_beta"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_drop_beta.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_drop_beta.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["weight_decay", "lc_alpha"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_wd_alpha.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_wd_alpha.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["weight_decay", "lv_beta"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_wd_beta.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_wd_beta.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lc_alpha", "lv_beta"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/optuna_alpha_beta.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/optuna_alpha_beta.png')
     """
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_param_importances(study)
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/importances_optuna.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/importances_optuna.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_optimization_history(study)
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_dia_3/history_optuna.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/dice_lclv_sys_3/history_optuna.png')
 
    
 
