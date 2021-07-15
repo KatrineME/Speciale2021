@@ -206,23 +206,26 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (1, 128, 128))
 
 #%% Specify directory
-user = 'K'
+cwd = os.getcwd()
+#os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")   # Local directory katrine
+#os.chdir('/Users/michalablicher/Desktop/training')     # Local directory michala
+os.chdir("/home/michala/training")                      # Server directory michala
 
-if user == 'M':
-    os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-if user == 'K':
-    os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
-if user == 'GPU':
-    os.chdir('/home/katrine/Speciale2021/Speciale2021')
-    
-    
-from load_data_gt_im_sub import load_data_sub
+#%% Load Data
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
+from load_data_gt_im_sub_space import load_data_sub
+
+user = 'GPU'
+phase = 'Diastole'
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU',phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU',phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU',phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU',phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU',phase,'RV')
+
+
 
 #%% BATCH GENERATOR
 num_train_sub = 12
@@ -257,6 +260,7 @@ gt_test_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num
                                   np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
 
 print('Data loaded+concat')
+
 #%%
 H = 128
 W = 128
@@ -273,7 +277,7 @@ im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=Fal
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
+        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_150e_opt_fold{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
@@ -281,16 +285,22 @@ for fold in range(0,6):
     for i, (im) in enumerate(im_data):
         im = Tensor.numpy(im)
         
-        #out = model(Tensor(im).cuda())
-        out = model(Tensor(im))
+        out = model(Tensor(im).cuda())
+        #out = unet(Tensor(im))
         out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
         
     del path_model, model, out
     print('Done for fold',fold)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg_train_ResNet.pt'
+    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
 if user == 'K':
-    PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_train_ResNet.pt'
+    PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
 torch.save(out_soft, PATH_out_soft)
+
+
+
+
+
+
 
