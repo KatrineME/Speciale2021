@@ -32,7 +32,7 @@ import scipy.ndimage
 
 #%% Import results from training (Loss + Accuracy)
 PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
-PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_sys_150e_train_results.pt'
+PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt'
 #PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_dicew_2lv_dia_200e_train_results.pt'
 res_dice = torch.load(PATH_dice, map_location=torch.device('cpu'))
 res_CE = torch.load(PATH_CE, map_location=torch.device('cpu'))
@@ -165,7 +165,7 @@ plt.yticks(fontsize =14)
 plt.xlabel('Epochs', fontsize = 16)
 plt.ylabel('$Loss_D + Loss_N + Loss_C$',  fontsize = 16)
 plt.legend(loc="upper right", fontsize = 13)
-plt.title('Loss curve (dia)', fontsize =28)
+plt.title('Loss curve (AE)', fontsize =28)
 
 plt.subplot(2,2,2)
 plt.plot(t1, train_acc_1, 'b', label = 'Training accuracy fold 0')
@@ -188,10 +188,10 @@ plt.yticks(fontsize =14)
 plt.xlabel('Epochs', fontsize = 16)
 plt.ylabel('Accuracy %',  fontsize = 16)
 plt.legend(loc="lower right", fontsize = 13)
-plt.title("Accuracy (dia)", fontsize =28)
+plt.title("Accuracy (AE)", fontsize =28)
 
 
-#%%
+
 plt.subplot(2,2,3)
 plt.plot(t2, train_loss_0_CE, 'b', label = 'Training loss fold 0')
 plt.plot(t2 , train_loss_1_CE, 'g', label = 'Training loss fold 1')
@@ -213,9 +213,9 @@ plt.grid(color='k', linestyle='-', linewidth=0.2)
 plt.xticks(np.arange(0, len(t1) + 2, step = 50), fontsize =14)
 plt.yticks(fontsize =14)
 plt.xlabel('Epochs', fontsize = 16)
-plt.ylabel('$Loss_D + Loss_N + Loss_C$',  fontsize = 16)
+plt.ylabel(r'$Loss_D + \alpha Loss_N + \beta Loss_C$',  fontsize = 16)
 plt.legend(loc="upper right", fontsize = 13)
-plt.title('Loss curve (sys)', fontsize =28)
+plt.title('Loss curve (AE opt)', fontsize =28)
 
 plt.subplot(2,2,4)
 plt.plot(t2, train_acc_1_CE, 'b', label = 'Training accuracy fold 0')
@@ -238,7 +238,7 @@ plt.yticks(fontsize =14)
 plt.xlabel('Epochs', fontsize = 16)
 plt.ylabel('Accuracy %',  fontsize = 16)
 plt.legend(loc="lower right", fontsize = 13)
-plt.title("Accuracy (sys)", fontsize =28)
+plt.title("Accuracy (AE opt)", fontsize =28)
 
 
 #%%
@@ -265,24 +265,24 @@ epochs_eval_CE  = np.arange(len(eval_loss_CE))
 plt.figure(figsize=(30, 10),dpi=400)
 #plt.rcParams.update({'font.size': 26})
 plt.subplot(1,3,1)
-plt.plot(epochs_train + 1 , train_loss, 'b', label = 'Training Loss    (dia)')
-plt.plot(epochs_eval  + 1 , eval_loss, 'r', label = 'Validation Loss (dia)')
-plt.plot(epochs_train_CE + 1 , train_loss_CE, 'g', label = 'Training Loss    (sys)')
-plt.plot(epochs_eval_CE  + 1 , eval_loss_CE, 'k', label = 'Validation Loss (sys)')
+plt.plot(epochs_train + 1 , train_loss, 'b', label = 'Training Loss    (AE)')
+plt.plot(epochs_eval  + 1 , eval_loss, 'r', label = 'Validation Loss (AE)')
+plt.plot(epochs_train_CE + 1 , train_loss_CE, 'g', label = 'Training Loss    (AE opt)')
+plt.plot(epochs_eval_CE  + 1 , eval_loss_CE, 'k', label = 'Validation Loss (AE opt)')
 
 plt.grid(color='k', linestyle='-', linewidth=0.2)
 plt.xticks(np.arange(0, len(epochs_train) + 2, step = 50), fontsize =18)
 plt.yticks(fontsize =18)
 plt.xlabel('Epochs', fontsize = 25)
-plt.ylabel('$Loss_D + Loss_N + Loss_C$',  fontsize = 25)
+plt.ylabel(r'$Loss_D + \alpha Loss_N + \beta Loss_C$',  fontsize = 25)
 plt.legend(loc="upper right", fontsize = 28)
 plt.title('Loss function for averaged models', fontsize =28)
 
 plt.subplot(1,3,2)
-plt.plot(epochs_train + 1 , train_acc, 'b', label = 'Training accuracy    (dia)')
-plt.plot(epochs_eval  + 1 , eval_acc,  'r',label = 'Validation accuracy (dia)')
-plt.plot(epochs_train_CE + 1 , train_acc_CE, 'g', label = 'Training accuracy    (sys)')
-plt.plot(epochs_eval_CE  + 1 , eval_acc_CE,  'k',label = 'Validation accuracy (sys)')
+plt.plot(epochs_train + 1 , train_acc, 'b', label = 'Training accuracy    (AE)')
+plt.plot(epochs_eval  + 1 , eval_acc,  'r',label = 'Validation accuracy (AE)')
+plt.plot(epochs_train_CE + 1 , train_acc_CE, 'g', label = 'Training accuracy    (AE opt)')
+plt.plot(epochs_eval_CE  + 1 , eval_acc_CE,  'k',label = 'Validation accuracy (AE opt)')
 
 plt.grid(color='k', linestyle='-', linewidth=0.2)
 plt.xticks(np.arange(0, len(epochs_train) + 2, step = 50), fontsize =18)
@@ -293,10 +293,10 @@ plt.legend(loc="lower right", fontsize = 28)
 plt.title("Accuracy for averaged models", fontsize =28)
 
 plt.subplot(1,3,3)
-plt.semilogy(epochs_train + 1 , train_inc, 'b', label = 'Training incorrect    (dia)')
-plt.semilogy(epochs_eval  + 1 , eval_inc,  'r' ,label = 'Validation incorrect (dia)')
-plt.semilogy(epochs_train_CE + 1 , train_inc_CE, 'g', label = 'Training incorrect    (sys)')
-plt.semilogy(epochs_eval_CE  + 1 , eval_inc_CE,  'k' ,label = 'Validation incorrect (sys)')
+plt.semilogy(epochs_train + 1 , train_inc, 'b', label = 'Training incorrect    (AE)')
+plt.semilogy(epochs_eval  + 1 , eval_inc,  'r' ,label = 'Validation incorrect (AE)')
+plt.semilogy(epochs_train_CE + 1 , train_inc_CE, 'g', label = 'Training incorrect    (AE opt)')
+plt.semilogy(epochs_eval_CE  + 1 , eval_inc_CE,  'k' ,label = 'Validation incorrect (AE opt)')
 
 plt.grid(color='k', linestyle='-', linewidth=0.2)
 plt.xticks(np.arange(0, len(epochs_train) + 2, step = 50), fontsize =18)
@@ -309,8 +309,8 @@ plt.title("Number of incorrect for averaged models", fontsize =28)
 ##################################################################################################################
 ##################################################################################################################
 #%% Import results from training (Loss + Accuracy)
-PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
-PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
+PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
+PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv_opt.pt'
 #PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_dicew_2lv_dia_200e_train_results.pt'
 res_dice = torch.load(PATH_dice, map_location=torch.device('cpu'))
 res_CE = torch.load(PATH_CE, map_location=torch.device('cpu'))
@@ -503,7 +503,7 @@ plt.ylabel('Diastolic', fontsize=15)
 plt.subplot(2,3,4)
 plt.imshow(im_test_es_sub[test_slice,0,:,:])
 plt.title('Original cMRI', fontsize=15)
-plt.ylabel('Systolic', fontsize=15)
+plt.ylabel('Opt', fontsize=15)
 
 plt.subplot(2,3,2)
 out_soft = res_dice

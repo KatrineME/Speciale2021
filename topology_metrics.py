@@ -295,7 +295,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_opt.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -307,7 +307,7 @@ out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
-ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 
 #%%
 def lv_loss(y_pred):
@@ -336,6 +336,7 @@ lv_neigh = lv_loss(out_seg_per)
 c_non = np.count_nonzero(lv_neigh, axis = (1,2)) # number of error pixels in each slice
 
 cnon_slice = np.count_nonzero(c_non) # number of slices with erros 
+print('Number of LV neighbouring pixels: ', np.sum(c_non))
 print('Number of slices with errors:', cnon_slice)
 print('Percentage of slices with errors:', (cnon_slice/len(c_non))*100,'%')
 #print('Number of errornous neighbour pixels:', c_non.sum())

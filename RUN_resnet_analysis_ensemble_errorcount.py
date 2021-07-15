@@ -291,7 +291,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv_opt.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -565,16 +565,17 @@ std_haus95  = np.std(haus95,  axis=0)
 var_haus95  = np.var(haus95,  axis=0)
 
 print('mean dice   = ',mean_dice)  
-print('std dice    = ',  std_dice) 
 print('var dice    = ',  var_dice) 
+print('std dice    = ',  std_dice) 
+
 
 print('mean haus   = ',mean_haus)
-print('mean haus95 = ',mean_haus95)
+print('var haus    = ', var_haus) 
 
 print('std haus    = ',  std_haus)
 print('std haus95  = ',  std_haus95)
 
-print('var haus    = ', var_haus) 
+print('mean haus95 = ',mean_haus95)
 print('var haus95  = ', var_haus95)
 
 #%% ACCURACY
