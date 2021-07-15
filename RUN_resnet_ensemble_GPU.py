@@ -108,7 +108,7 @@ seg_met = np.argmax(out_softmax_unet, axis=1)
 
 # One hot encode
 seg_oh = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
-ref_oh = torch.nn.functional.one_hot(Tensor(gt_test_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
 #%% E-map
 import scipy.stats
@@ -127,7 +127,7 @@ for i in range(0, emap.shape[0]):
 emap = np.expand_dims(emap, axis=1)
 #%%
 #% Wrap all inputs together
-im     = Tensor(im_test_es_res)
+im     = Tensor(im_train_es_res)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met, axis = 1))
 
