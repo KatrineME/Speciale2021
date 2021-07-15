@@ -286,7 +286,7 @@ for fold in range(0,6):
         im = Tensor.numpy(im)
         
         #out = model(Tensor(im).cuda())
-        out = model(Tensor(im))
+        out = unet(Tensor(im))
         out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
         
     del path_model, model, out
