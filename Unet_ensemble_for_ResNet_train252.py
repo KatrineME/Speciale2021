@@ -200,9 +200,11 @@ class BayesUNet(UNet):
 if __name__ == "__main__":
     #import torchsummary
     unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    unet.cuda()
-    #torchsummary.summary(model, (1, 128, 128))
     
+    if device == 'cuda':
+        unet.cuda()
+    #torchsummary.summary(model, (1, 128, 128))
+
 #%% Specify directory
 cwd = os.getcwd()
 #os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")   # Local directory katrine
@@ -283,8 +285,8 @@ for fold in range(0,6):
     for i, (im) in enumerate(im_data):
         im = Tensor.numpy(im)
         
-        #out = model(Tensor(im).cuda())
-        out = unet(Tensor(im))
+        out = model(Tensor(im).cuda())
+        #out = unet(Tensor(im))
         out_soft[fold,i,:,:,:] = out["softmax"].detach().cpu().numpy() 
         
     del path_model, model, out
