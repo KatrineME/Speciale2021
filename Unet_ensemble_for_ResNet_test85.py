@@ -267,7 +267,7 @@ im_data = torch.utils.data.DataLoader(im_test_es_res, batch_size=1, shuffle=Fals
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_dia_150e_opt_fold{}.pt'.format(fold)
+        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_dia_150e_opt_fold{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_CE_dia_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
@@ -287,4 +287,12 @@ if user == 'GPU':
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
 torch.save(out_soft, PATH_out_soft)
+
+
+
+
+
+
+
+
 
