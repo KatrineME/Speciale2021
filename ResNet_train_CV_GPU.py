@@ -370,26 +370,25 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
+cwd = os.getcwd()
+#os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")   # Local directory katrine
+#os.chdir('/Users/michalablicher/Desktop/training')     # Local directory michala
+os.chdir("/home/michala/training")                      # Server directory michala
+
+#%% Load Data
+#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
-#os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
-from load_data_gt_im_sub import load_data_sub
+
+from load_data_gt_im_sub_space import load_data_sub
+
 user = 'GPU'
-#user = 'K' 
+phase = 'Systole'
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU',phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU',phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU',phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU',phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU',phase,'RV')
 
-"""
-data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
-data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
-data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
-data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,'Systole','NOR')
-data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,'Systole','RV')
-"""
-
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
@@ -423,8 +422,6 @@ gt_test_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num
                                   np.concatenate(data_gt_ed_MINF[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
-
-
 
 #%% Load U-NET
 #% BayesUNet
@@ -625,7 +622,7 @@ for i, (im) in enumerate(im_data):
 #% Load softmax from ensemble models
 
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_train_ResNet.pt'
-PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg_train_ResNet.pt'
+PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
 # mean them over dim=0
@@ -721,7 +718,7 @@ T = np.expand_dims(T_j, axis=1)
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 500
+num_epochs = 10
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -781,7 +778,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     # Initialize optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, eps=1e-4, weight_decay=1e-4) #LR 
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=25)
+    #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=25)
     
     #% Training
     train_losses  = []
@@ -923,9 +920,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
         
         
         # Learning rate scheduler
-        lr_get = lr_scheduler.get_last_lr()[0]
-        lr_scheduler.step()
-        print('lr =', lr_get)
+        #lr_get = lr_scheduler.get_last_lr()[0]
+        #lr_scheduler.step()
+        #print('lr =', lr_get)
         #optimizer.param_groups[0]['lr']
         
     fold_train_losses.append(train_losses)
@@ -947,7 +944,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_CE_dia_fold_500{}.pt".format(fold)
+    PATH_model = "/home/katrine/Speciale2021/Speciale2021/Trained_Detection_dice_lclv_dia_fold_150{}.pt".format(fold)
     torch.save(model, PATH_model)
 
         
