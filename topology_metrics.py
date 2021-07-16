@@ -295,7 +295,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_opt.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
