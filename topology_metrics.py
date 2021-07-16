@@ -295,7 +295,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -495,37 +495,55 @@ for i in range(0,test_index):
 print('Number of patient volumes w.any error:',np.count_nonzero(overall_count_pt))
 print('Percentage of patient volumes w. any error:',(np.count_nonzero(overall_count_pt)/len(p))*100)   
 
-#%% PLot of anantomical errors
+#%% Plot of anantomical errors
 
 alpha = 0.4
 
 slice_myo = 28
 slice_com = 34
 slice_dis = 67
+slice_nor = 56
 
-plt.figure(dpi=400, figsize=(15,10))
-plt.suptitle('Examples of anatomical errors', fontsize=25)
-plt.subplot(2,3,1)
+plt.figure(dpi=400, figsize=(17,13))
+plt.suptitle('Examples of anatomical errors', fontsize=25, y=0.95)
+
+plt.subplot(3,4,1)
 plt.imshow(out_seg_mean_am[slice_myo,:,:])
-plt.imshow(im_test_ed_sub[slice_myo,0,:,:], alpha = alpha)
+#plt.imshow(im_test_ed_sub[slice_myo,0,:,:], alpha = alpha)
 plt.title('LV not fully surrounded by MYO', fontsize=17)
-plt.subplot(2,3,1+3)
+plt.ylabel('Segmentation', fontsize=17)
+plt.subplot(3,4,1+4)
+plt.imshow(gt_test_ed_sub[slice_myo,:,:])
+plt.ylabel('Reference', fontsize=17)
+plt.subplot(3,4,1+8)
 plt.imshow(im_test_ed_sub[slice_myo,0,:,:])
+plt.ylabel('Original cMRI', fontsize=17)
 
 
-plt.subplot(2,3,2)
+plt.subplot(3,4,2)
 plt.imshow(out_seg_mean_am[slice_com,:,:])
-plt.imshow(im_test_ed_sub[slice_com,0,:,:], alpha = alpha)
+#plt.imshow(im_test_ed_sub[slice_com,0,:,:], alpha = alpha)
 plt.title('Not single components', fontsize=17)
-plt.subplot(2,3,2+3)
+plt.subplot(3,4,2+4)
+plt.imshow(gt_test_ed_sub[slice_com,:,:])
+plt.subplot(3,4,2+8)
 plt.imshow(im_test_ed_sub[slice_com,0,:,:])
 
 
-plt.subplot(2,3,3)
+plt.subplot(3,4,3)
 plt.imshow(out_seg_mean_am[slice_dis,:,:])
-plt.imshow(im_test_ed_sub[slice_dis,0,:,:], alpha = alpha)
+#plt.imshow(im_test_ed_sub[slice_dis,0,:,:], alpha = alpha)
 plt.title('Disconnected components', fontsize=17)
-plt.subplot(2,3,3+3)
+plt.subplot(3,4,3+4)
+plt.imshow(gt_test_ed_sub[slice_dis,:,:])
+plt.subplot(3,4,3+8)
 plt.imshow(im_test_ed_sub[slice_dis,0,:,:])
 
-
+plt.subplot(3,4,4)
+plt.imshow(out_seg_mean_am[slice_nor,:,:])
+#plt.imshow(im_test_ed_sub[slice_nor,0,:,:], alpha = alpha)
+plt.title('No anatomical errors', fontsize=17)
+plt.subplot(3,4,4+4)
+plt.imshow(gt_test_ed_sub[slice_nor,:,:])
+plt.subplot(3,4,4+8)
+plt.imshow(im_test_ed_sub[slice_nor,0,:,:])

@@ -226,14 +226,15 @@ cor_dia_RV = np.corrcoef(target_vol_dia_RV, ref_vol_dia_RV)
 cor_sys_RV = np.corrcoef(target_vol_sys_RV, ref_vol_sys_RV)
 
 #EF
-print('Correlation EF LV =', cor_EF[1,0]) 
+print('Correlation EF LV           =', cor_EF[1,0]) 
 # LV
 print('Correlation diastole LV vol =', cor_dia[1,0]) 
 print('Correlation systole  LV vol =', cor_sys[1,0]) 
 print('\n')
+
 # RV
-print('Correlation diastole RV vol =', cor_dia_RV[1,0]) 
-print('Correlation systole  RV vol =', cor_sys_RV[1,0]) 
+#print('Correlation diastole RV vol =', cor_dia_RV[1,0]) 
+#print('Correlation systole  RV vol =', cor_sys_RV[1,0]) 
 
 
 #%% Bias
@@ -273,16 +274,19 @@ print('Std EF RV =', std_EF_dif_RV )
 print('Std sys vol RV =', std_sys_dif_RV )
 print('Std dia vol RV =', std_dia_dif_RV ) 
 
-#%% MAE
+#%% MAE  OBS STANDRAD DEVIATION PÅ MAE
 
 # LV
 MAE_sys_vol = np.sum(np.abs(EF_target[1]-EF_ref[1]))/EF_ref[1].shape[0]
 MAE_dia_vol = np.sum(np.abs(EF_target[2]-EF_ref[2]))/EF_ref[2].shape[0]
 MAE_EF      = np.sum(np.abs(EF_ref[0]-EF_target[0]))/EF_ref[0].shape[0]
 
-print('MAE EF =', MAE_EF )
+print('MAE EF      =', MAE_EF )
+print('MAE EF std  =', np.std(np.abs(EF_ref[0]-EF_target[0]))/EF_ref[0].shape[0] )
 print('MAE sys vol =', MAE_sys_vol )
+print('MAE sys std =', np.std(np.abs(EF_target[2]-EF_ref[2]))/EF_ref[2].shape[0] )
 print('MAE dia vol =', MAE_dia_vol ) 
+print('MAE dia std =', np.std(np.abs(EF_target[2]-EF_ref[2]))/EF_ref[2].shape[0]) 
 print('\n')
 # RV
 MAE_sys_vol_RV = np.sum(np.abs(EF_target_RV[1]-EF_ref_RV[1]))/EF_ref_RV[1].shape[0]
