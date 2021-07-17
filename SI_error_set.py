@@ -23,52 +23,91 @@ from torch import Tensor
 os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
+user = 'K'
+
 # Load data function
-from load_data_gt_im import load_data
+from load_data_gt_im_sub_space import load_data_sub
+phase = 'Systole'
 
-data_im_es, data_gt_es = load_data('K','Systole')
-data_im_ed, data_gt_ed = load_data('K','Diastole')
+data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,phase,'DCM')
+data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,phase,'HCM')
+data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,phase,'MINF')
+data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,phase,'NOR')
+data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,phase,'RV')
 
-#%% Load test subjects
-nor = 60
-num_train = nor+5 #0
-num_eval  = 3#0
-num_test  =10#0
+phase = 'Diastole'
 
-lim_eval  = num_train + num_eval
-lim_test  = lim_eval + num_test
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 
-gt_es_flat = np.concatenate(data_gt_es[lim_eval:lim_test]).astype(None)
-gt_ed_flat = np.concatenate(data_gt_ed[lim_eval:lim_test]).astype(None)
 
-im_es_flat = np.concatenate(data_im_es[lim_eval:lim_test]).astype(None)
-im_ed_flat= np.concatenate(data_im_ed[lim_eval:lim_test]).astype(None)
+#%% BATCH GENERATOR
+num_train_sub = 12
+num_eval_sub = num_train_sub
+num_test_sub = num_eval_sub + 8
+"""
+im_train_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[0:num_train_sub]).astype(None)))
 
+gt_train_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
+
+gt_test_ed_sub = gt_train_ed_sub
+im_test_ed_sub = im_train_ed_sub
+"""
+im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 #%% Load model
-PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
-PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
+PATH_model_es = "C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt"
+PATH_model_ed = "C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt"
 
-unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
-unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
+unet_es_soft = torch.load(PATH_model_es, map_location=torch.device('cpu'))
+unet_ed_soft = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
-#%% Running  models 
-unet_es.eval()
-out_trained_es = unet_es(Tensor(im_es_flat))
-out_image_es   = out_trained_es["softmax"]
+unet_es_mean    = unet_es_soft.mean(axis=0)
+unet_ed_mean    = unet_ed_soft.mean(axis=0)
 
-unet_ed.eval()
-out_trained_ed = unet_ed(Tensor(im_ed_flat))
-out_image_ed   = out_trained_ed["softmax"]
+unet_es_mean_am = np.argmax(unet_es_mean, axis=1)
+unet_ed_mean_am = np.argmax(unet_ed_mean, axis=1)
+
+unet_es   = torch.nn.functional.one_hot(torch.as_tensor(unet_es_mean_am), num_classes=4).detach().cpu().numpy()
+unet_ed   = torch.nn.functional.one_hot(torch.as_tensor(unet_ed_mean_am), num_classes=4).detach().cpu().numpy()
+
 
 #%% Onehot encode class channels
-gt_es_oh = torch.nn.functional.one_hot(Tensor(gt_es_flat).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
-gt_ed_oh = torch.nn.functional.one_hot(Tensor(gt_ed_flat).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
+gt_es_oh = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
+gt_ed_oh = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
 
-seg_met_sys = np.argmax(out_image_es.detach().numpy(), axis=1)
-seg_met_dia = np.argmax(out_image_ed.detach().numpy(), axis=1)
-
-seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().numpy()
-seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().numpy()
 
 
 #%% Distance transform maps
@@ -85,8 +124,8 @@ dt_ed = dist_trans(gt_ed_oh, error_margin_inside,error_margin_outside)
 #%% filter cluster size
 cluster_size = 10
 
-dia_new_label = cluster_min(seg_dia, gt_ed_oh, cluster_size)
-sys_new_label = cluster_min(seg_sys, gt_es_oh, cluster_size)
+dia_new_label = cluster_min(unet_ed, gt_ed_oh, cluster_size)
+sys_new_label = cluster_min(unet_es, gt_es_oh, cluster_size)
 
 #%% Apply both cluster size and dt map 
 roi_target_map_es = np.zeros((dt_es.shape))
@@ -101,43 +140,88 @@ for i in range(0, dt_ed.shape[0]):
         roi_target_map_ed[i,:,:,j] = np.logical_and(dt_ed[i,:,:,j], dia_new_label[i,:,:,j])
 
 #%% plot all results
-test_slice = 7
+test_slice = 29
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
-plt.figure(dpi=200)
+plt.figure(dpi=200, figsize=(9,6))
 
+alpha = 0.35
+s = 10
 for i in range (0,4):
     plt.subplot(3,4,i+1)
     plt.imshow(dt_ed[test_slice,:,:,i])
     cbar = plt.colorbar(fraction=0.06)
     cbar.ax.locator_params(nbins=5)
-    cbar.ax.tick_params(labelsize=5)
-    plt.imshow(im_ed_flat[test_slice,0,:,:], alpha =0.2)
-    plt.title(class_title[i], fontsize =10)
+    cbar.ax.tick_params(labelsize=8)
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha*0.5)
+    plt.title(class_title[i], fontsize =s)
     plt.subplots_adjust(hspace = 0.4, wspace = 0.5)
-    plt.xticks([])
-    plt.yticks([])
+    #plt.xticks([])
+    #plt.yticks([])
     
     if i == 0:
-        plt.ylabel('Distance transform', fontsize=7)
+        plt.ylabel('Distance transform', fontsize=s)
     
     plt.subplot(3,4,i+1+4)
     plt.imshow(dia_new_label[test_slice,:,:,i])
-    plt.imshow(im_ed_flat[test_slice,0,:,:], alpha =0.5)
-    plt.xticks([])
-    plt.yticks([])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha)
+    #plt.xticks([])
+    #plt.yticks([])
     
     if i == 0:
-        plt.ylabel('Filtered cluster', fontsize=7)
+        plt.ylabel('Filtered cluster', fontsize=s)
     
     plt.subplot(3,4,i+1+8)
     plt.imshow(roi_target_map_ed[test_slice,:,:,i])
-    plt.imshow(im_ed_flat[test_slice,0,:,:], alpha =0.5)
-    plt.xticks([])
-    plt.yticks([])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha)
+    #plt.xticks([])
+    #plt.yticks([])
     
     if i == 0:
-        plt.ylabel('Resulting SI set', fontsize = 7)
+        plt.ylabel('Resulting SI set', fontsize = s)
         
+#%% plot all results
+test_slice = 10
+class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
+plt.figure(dpi=200, figsize=(11,8))
+
+alpha = 0.35
+
+s = 15
+
+for i in range (0,4):
+    plt.subplot(4,4,i*4+1)
+    plt.imshow(dt_ed[test_slice,:,:,i])
+    cbar = plt.colorbar(fraction=0.06)
+    cbar.ax.locator_params(nbins=5)
+    cbar.ax.tick_params(labelsize=s/2)
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha*0.5)
+    
+    if i == 0 or 4 or 8 or 12:
+        plt.ylabel(class_title[i], fontsize =s)
+    if i == 0:
+        plt.title('Distance transform', fontsize=s)
+
+    plt.subplot(4,4,i*4+2)
+    plt.imshow(dia_new_label[test_slice,:,:,i])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha)
+    
+    if i == 0:
+        plt.title('Filtered clusters', fontsize=s)
+
+    plt.subplot(4,4,i*4+3)
+    plt.imshow(roi_target_map_ed[test_slice,:,:,i])
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha)
+
+    if i == 0:
+        plt.title('Resulting SI set', fontsize = s)
+
+    plt.subplot(4,4,i*4+4)
+    plt.imshow(im_test_ed_sub[test_slice,0,:,:])
+    
+    if i == 0:
+        plt.title('Original cMRI', fontsize = s)
+
+
 #%% Sample patches
 patch_size = 8
 patch_grid = int(roi_target_map_ed.shape[1]/patch_size)

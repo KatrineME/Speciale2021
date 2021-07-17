@@ -29,10 +29,16 @@ from torch import Tensor
 
 
 #%% Specify directory
-if device == 'cuda':
-    user = 'GPU'
+if torch.cuda.is_available():
+    # Tensor = torch.cuda.FloatTensor
+    device = 'cuda'
 else:
-    user = 'K'
+    # Tensor = torch.FloatTensor
+    device = 'cpu'
+torch.cuda.manual_seed_all(808)
+
+
+user = 'K'
 
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -41,7 +47,7 @@ if user == 'K':
 if user == 'GPU':
     os.chdir('/home/michala/Speciale2021/Speciale2021')
 #%%
-user = 'M'
+user = 'K'
 from load_data_gt_im_sub_space import load_data_sub
 
 phase = 'Systole'
@@ -110,7 +116,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-#path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -120,11 +126,15 @@ out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
-ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 
 #%% Cluster filter
 
 from scipy.ndimage import label
+
+# Rename variables
+seg_sys = out_seg_mean
+ref_sys = ref
 
 
 seg_error_sys = abs(seg_sys - ref_sys)
@@ -171,55 +181,39 @@ plt.title('Reference')
 
 
 #%% Show Results from clustering 
-show_slice = 11
+show_slice = 29
 show_class = 1
-alpha = 0.5
+alpha = 0.35
 for i in range(1,2):
-    plt.figure(dpi=2000)
-    plt.subplot(2,2,1)
-    plt.subplots_adjust(hspace = 0.35)
+    plt.figure(dpi=300, figsize=(16,12))
+    plt.subplot(1,4,1)
+    #plt.subplots_adjust(hspace = 0.35)
     plt.imshow(seg_sys[show_slice,:,:,i])
     plt.imshow(im_test_es_sub[show_slice,0,:,:],alpha=alpha)
-    plt.title('Segmentation', fontsize =10)
-    plt.xticks(
-    fontweight='light',
-    fontsize=7)
-    plt.yticks(
-    fontweight='light',
-    fontsize=7)
-    plt.subplot(2,2,2)
-    plt.subplots_adjust(hspace = 0.35, wspace = 0)
+    plt.title('Segmentation', fontsize =17)
+    #plt.xticks(fontweight='light', fontsize=7)
+    #plt.yticks(fontweight='light', fontsize=7)
+    plt.subplot(1,4,2)
+    #plt.subplots_adjust(hspace = 0.35, wspace = 0)
     plt.imshow(ref_sys[show_slice,:,:,i])
     plt.imshow(im_test_es_sub[show_slice,0,:,:],alpha=alpha)
-    plt.title('Reference', fontsize =10)
-    plt.xticks(
-    fontweight='light',
-    fontsize=7)
-    plt.yticks(
-    fontweight='light',
-    fontsize=7)
-    plt.subplot(2,2,3)
-    plt.subplots_adjust(hspace = 0.35, wspace = 0)
+    plt.title('Reference', fontsize =17)
+    #plt.xticks(fontweight='light', fontsize=7)
+    #plt.yticks(fontweight='light', fontsize=7)
+    plt.subplot(1,4,3)
+    #plt.subplots_adjust(hspace = 0.35, wspace = 0)
     plt.imshow(seg_error_sys[show_slice,:,:,i])
     plt.imshow(im_test_es_sub[show_slice,0,:,:],alpha=alpha)
-    plt.title('Difference', fontsize =10)
-    plt.xticks(
-    fontweight='light',
-    fontsize=7)
-    plt.yticks(
-    fontweight='light',
-    fontsize=7)
-    plt.subplot(2,2,4)
-    plt.subplots_adjust(hspace = 0.35, wspace = 0)
+    plt.title('Difference', fontsize =17)
+    #plt.xticks(fontweight='light', fontsize=7)
+    #plt.yticks(fontweight='light', fontsize=7)
+    plt.subplot(1,4,4)
+    #plt.subplots_adjust(hspace = 0.35, wspace = 0)
     plt.imshow(new_label_slice_sys[show_slice,:,:,i])
     plt.imshow(im_test_es_sub[show_slice,0,:,:],alpha=alpha)
-    plt.title('Cluster min 10', fontsize =10)
-    plt.xticks(
-    fontweight='light',
-    fontsize=7)
-    plt.yticks(
-    fontweight='light',
-    fontsize=7)
+    plt.title('Filtered clusters', fontsize =17)
+    #plt.xticks(fontweight='light', fontsize=7)
+    #plt.yticks(fontweight='light', fontsize=7)
 
 
 
