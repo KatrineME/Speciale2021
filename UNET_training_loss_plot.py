@@ -31,9 +31,11 @@ import scipy.ndimage
 #!pip install opencv-python
 
 #%% Import results from training (Loss + Accuracy)
-PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
-PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt'
-#PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_dicew_2lv_dia_200e_train_results.pt'
+#PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
+#PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt'
+PATH_dice = '/Users/michalablicher/Desktop/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
+PATH_CE   = '/Users/michalablicher/Desktop/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt'
+
 res_dice = torch.load(PATH_dice, map_location=torch.device('cpu'))
 res_CE = torch.load(PATH_CE, map_location=torch.device('cpu'))
 
@@ -309,8 +311,8 @@ plt.title("Number of incorrect for averaged models", fontsize =28)
 ##################################################################################################################
 ##################################################################################################################
 #%% Import results from training (Loss + Accuracy)
-PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
-PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
+PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
+PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv_opt.pt'
 #PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_dicew_2lv_dia_200e_train_results.pt'
 res_dice = torch.load(PATH_dice, map_location=torch.device('cpu'))
 res_CE = torch.load(PATH_CE, map_location=torch.device('cpu'))
@@ -492,9 +494,8 @@ plt.colorbar(orientation='horizontal', ticks=[0,0.2,0.4,0.6,0.8,1.0])
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
-test_slice = 27
 plt.figure(dpi=300, figsize=(10,7))
-plt.suptitle('Segmentations for averaged models at test slice 27', y=0.98, fontsize=20)
+plt.suptitle('Segmentations for averaged models at test slice 31', y=0.98, fontsize=20)
 
 plt.subplot(2,3,1)
 plt.imshow(im_test_ed_sub[test_slice,0,:,:])
@@ -511,7 +512,7 @@ out_soft = res_dice
 out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
-#plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Segmentation', fontsize=15)
 
 plt.subplot(2,3,5)
@@ -519,55 +520,50 @@ out_soft = res_CE
 out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
-#plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Segmentation', fontsize=15)
 
 plt.subplot(2,3,3)
 plt.imshow(gt_test_ed_sub[test_slice,:,:])
-#plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Reference', fontsize=15)
 
 plt.subplot(2,3,6)
 plt.imshow(gt_test_es_sub[test_slice,:,:])
-#plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Reference', fontsize=15)
 
 #%% Argmax model
-
-test_slice = 104
-
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
 plt.figure(dpi=300, figsize=(12,7))
-plt.suptitle('Segmentations for averaged models at test slice {}'.format(test_slice), y=0.75, fontsize=20)
+plt.suptitle('Segmentations for averaged models at test slice 31', y=0.75, fontsize=20)
 
 plt.subplot(1,4,1)
 plt.imshow(im_test_ed_sub[test_slice,0,:,:])
 plt.title('Original cMRI', fontsize=15)
 
-plt.subplot(1,4,2)
+plt.subplot(1,4,3)
 out_soft = res_dice
 out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
-#plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-plt.title('SD loss', fontsize=15)
+plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('Soft-Dice', fontsize=15)
 
-plt.subplot(1,4,3)
+plt.subplot(1,4,2)
 out_soft = res_CE
 out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
-#plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
-plt.title('AE loss', fontsize=15)
+plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('Cross-Entropy', fontsize=15)
 
 plt.subplot(1,4,4)
 plt.imshow(gt_test_ed_sub[test_slice,:,:])
-#plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Reference', fontsize=15)
-
-
 
 
 #%%%%%%%%%%%%%%%%%%%%%%% METRICS %%%%%%%%%%%%%%%%%%%%%
