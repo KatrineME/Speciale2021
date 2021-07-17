@@ -39,27 +39,55 @@ def SI_set(user, phase, start, stop):
         data_im_es, data_gt_es = load_data(user,'Diastole')
     
     #%% Load  subjects
+    user = 'K'
+    from load_data_gt_im_sub_space import load_data_sub
     
-    # SYSTOLIC
-    im_flat_train_es = np.concatenate(data_im_es[start:stop]).astype(None)
-    gt_flat_train_es = np.concatenate(data_gt_es[start:stop]).astype(None)
-
-
-    #im_flat_eval_es = np.concatenate(data_im_es[num_train:lim_eval]).astype(None)
-    #gt_flat_eval_es = np.concatenate(data_gt_es[num_train:lim_eval]).astype(None)
-
-    #im_flat_test_es = np.concatenate(data_im_es[lim_eval:lim_test]).astype(None)
-    #gt_flat_test_es = np.concatenate(data_gt_es[lim_eval:lim_test]).astype(None)
+    phase = 'Systole'
     
-    # DIASTOLIC
-    #im_flat_train_ed = np.concatenate(data_im_ed[0:num_train]).astype(None)
-    #gt_flat_train_ed = np.concatenate(data_gt_ed[0:num_train]).astype(None)
+    data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,phase,'DCM')
+    data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,phase,'HCM')
+    data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,phase,'MINF')
+    data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,phase,'NOR')
+    data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,phase,'RV')
+    
+    phase = 'Diastole'
+    
+    data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
+    data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
+    data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
+    data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,phase,'NOR')
+    data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
+    
+    
+    #%% BATCH GENERATOR
+    num_train_sub = 12
+    num_eval_sub = num_train_sub
+    num_test_sub = num_eval_sub + 8
 
-    #im_flat_eval_ed = np.concatenate(data_im_ed[num_train:lim_eval]).astype(None)
-    #gt_flat_eval_ed = np.concatenate(data_gt_ed[num_train:lim_eval]).astype(None)
-
-    #im_flat_test_ed = np.concatenate(data_im_ed[lim_eval:lim_test]).astype(None)
-    #gt_flat_test_ed = np.concatenate(data_gt_ed[lim_eval:lim_test]).astype(None)
+    im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+    
+    gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+    
+    im_flat_train_es = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_im_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+    
+    gt_flat_train_es = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                      np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+    print('Data loaded+concat')
     
 #%% BayesUNet
     # recursive implementation of Unet
@@ -227,8 +255,8 @@ def SI_set(user, phase, start, stop):
         unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
     #%% Load model
     if user == 'K':
-        PATH_model_es = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_sys_nor20.pt"
-        PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
+        PATH_model_es = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt'
+        PATH_model_ed = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
     elif user == 'GPU':
         PATH_model_es = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_big_batch_100.pt"  
         PATH_model_ed = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_big_batch_100.pt"                    # Server directory michala

@@ -18,21 +18,63 @@ os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 
 # Load data function
-from load_data_gt_im import load_data
 
-_ , data_gt_es = load_data('K','Systole')
-_, data_gt_ed = load_data('K','Diastole')
+user = 'K'
+from load_data_gt_im_sub_space import load_data_sub
+
+phase = 'Systole'
+
+data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,phase,'DCM')
+data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,phase,'HCM')
+data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,phase,'MINF')
+data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,phase,'NOR')
+data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,phase,'RV')
+
+phase = 'Diastole'
+
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
+
+num_train_sub = 12
+num_eval_sub = num_train_sub
+num_test_sub = num_eval_sub + 8
+
+"""
+im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+"""
+gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+"""
+im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+"""
+gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
 #%% Load ground truth data 
-gt_es_flat = np.concatenate(data_gt_es).astype(None)
-gt_ed_flat = np.concatenate(data_gt_ed).astype(None)
 
 # Onehot encode class channels
-gt_es_oh = torch.nn.functional.one_hot(Tensor(gt_es_flat).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
-gt_ed_oh = torch.nn.functional.one_hot(Tensor(gt_ed_flat).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
+gt_es_oh = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
+gt_ed_oh = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
 
 # Get rid of unecessary variables
-del gt_ed_flat, gt_es_flat, data_gt_ed, data_gt_es
+#del gt_ed_flat, gt_es_flat, data_gt_ed, data_gt_es
 
 #%% Compute distance tarnsform maps
 
