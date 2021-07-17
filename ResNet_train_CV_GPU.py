@@ -382,11 +382,11 @@ from load_data_gt_im_sub_space import load_data_sub
 
 user = 'GPU'
 phase = 'Diastole'
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU',phase,'DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU',phase,'HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU',phase,'MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU',phase,'NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU',phase,'RV')
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 
 
 
@@ -397,243 +397,48 @@ num_eval_sub  = num_train_sub
 num_train_res = num_eval_sub + 6
 num_test_res  = num_train_res + 2
 
-im_train_es_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_train_res]).astype(None),
+im_train_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_im_ed_MINF[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_im_ed_NOR[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_im_ed_RV[num_eval_sub:num_train_res]).astype(None)))
 
-gt_train_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_train_res]).astype(None),
+gt_train_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_HCM[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_MINF[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_train_res]).astype(None)))
 
 
-im_test_es_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_res:num_test_res]).astype(None),
+im_test_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_im_ed_MINF[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_im_ed_NOR[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_im_ed_RV[num_train_res:num_test_res]).astype(None)))
 
-gt_test_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_test_res]).astype(None),
+gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_HCM[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_MINF[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
 
-#%% Load U-NET
-#% BayesUNet
-# recursive implementation of Unet
-"""
-def weights_init(m):
-    classname = m.__class__.__name__
-    if classname.find('Conv2d') != -1:
-    
-        nn.init.kaiming_normal_(m.weight)
-        m.bias.data.zero_()
-"""
-"""
-class UNet(nn.Module):
-    def __init__(self, num_classes=3, in_channels=1, initial_filter_size=64, kernel_size=3, num_downs=4,
-                 norm_layer=nn.InstanceNorm2d, drop_prob=0.):
-        super(UNet, self).__init__()
-        self.drop_prob = drop_prob
-        # construct UNet structure
-        unet_block = UnetSkipConnectionBlock(in_channels=initial_filter_size * 2 ** (num_downs-1), out_channels=initial_filter_size * 2 ** num_downs,
-                                             num_classes=num_classes, kernel_size=kernel_size, norm_layer=norm_layer,
-                                             innermost=True, drop_prob=self.drop_prob)
-        for i in range(1, num_downs):
-            unet_block = UnetSkipConnectionBlock(in_channels=initial_filter_size * 2 ** (num_downs-(i+1)),
-                                                 out_channels=initial_filter_size * 2 ** (num_downs-i),
-                                                 num_classes=num_classes, kernel_size=kernel_size, submodule=unet_block,
-                                                 norm_layer=norm_layer, drop_prob=self.drop_prob
-                                                 )
-            
-        unet_block = UnetSkipConnectionBlock(in_channels=in_channels, out_channels=initial_filter_size,
-                                             num_classes=num_classes, kernel_size=kernel_size, submodule=unet_block, norm_layer=norm_layer,
-                                             outermost=True, drop_prob=self.drop_prob)
 
-        self.model = unet_block
-        self.log_softmax = nn.LogSoftmax(dim=1)
-        self.softmax = nn.Softmax(dim=1)
-        self.apply(weights_init)
-
-    def forward(self, x):
-        out = self.model(x)
-        return {'log_softmax': self.log_softmax(out), 'softmax': self.softmax(out)}
-
-
-# Defines the submodule with skip connection.
-# X -------------------identity---------------------- X
-#   |-- downsampling -- |submodule| -- upsampling --|
-class UnetSkipConnectionBlock(nn.Module):
-    def __init__(self, in_channels=None, out_channels=None, num_classes=1, kernel_size=3,
-                 submodule=None, outermost=False, innermost=False, norm_layer=nn.InstanceNorm2d, drop_prob=0.):
-        super(UnetSkipConnectionBlock, self).__init__()
-        self.use_dropout = True if drop_prob > 0. else False
-        self.drop_prob = drop_prob
-        self.outermost = outermost
-        # downconv
-        pool = nn.MaxPool2d(2, stride=2)
-        conv1 = self.contract(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, norm_layer=norm_layer)
-        conv2 = self.contract(in_channels=out_channels, out_channels=out_channels, kernel_size=kernel_size, norm_layer=norm_layer)
-
-        # upconv
-        conv3 = self.expand(in_channels=out_channels*2, out_channels=out_channels, kernel_size=kernel_size)
-        conv4 = self.expand(in_channels=out_channels, out_channels=out_channels, kernel_size=kernel_size)
-
-        if outermost:
-            final = nn.Conv2d(out_channels, num_classes, kernel_size=1)
-            if self.use_dropout:
-                down = [conv1, conv2, nn.Dropout2d(self.drop_prob)]
-            else:
-                down = [conv1, conv2]
-            if self.use_dropout:
-                up = [conv3, nn.Dropout2d(self.drop_prob), conv4, nn.Dropout2d(self.drop_prob), final]
-            else:
-                up = [conv3, conv4, final]
-            model = down + [submodule] + up
-        elif innermost:
-            upconv = nn.ConvTranspose2d(in_channels*2, in_channels,
-                                        kernel_size=2, stride=2)
-            model = [pool, conv1, conv2, upconv]
-        else:
-            upconv = nn.ConvTranspose2d(in_channels*2, in_channels, kernel_size=2, stride=2)
-
-            down = [pool, conv1, conv2]
-            up = [conv3, conv4, upconv]
-
-            if self.use_dropout:
-                model = down + [nn.Dropout2d(self.drop_prob)] + [submodule] + up + [nn.Dropout2d(self.drop_prob)]
-            else:
-                model = down + [submodule] + up
-
-        self.model = nn.Sequential(*model)
-
-    @staticmethod
-    def contract(in_channels, out_channels, kernel_size=3, norm_layer=nn.InstanceNorm2d):
-        layer = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size, padding=1),
-            norm_layer(out_channels),
-            nn.LeakyReLU(inplace=True))
-        return layer
-
-    @staticmethod
-    def expand(in_channels, out_channels, kernel_size=3):
-        layer = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size, padding=1),
-            nn.LeakyReLU(inplace=True),
-        )
-        return layer
-
-    @staticmethod
-    def center_crop(layer, target_width, target_height):
-        batch_size, n_channels, layer_width, layer_height = layer.size()
-
-        xy1 = (layer_width - target_width) // 2
-        xy2 = (layer_height - target_height) // 2
-        return layer[:, :, xy1:(xy1 + target_width), xy2:(xy2 + target_height)]
-
-    def forward(self, x):
-        if self.outermost:
-            out = self.model(x)
-            return out
-        else:
-            crop = self.center_crop(self.model(x), x.size()[2], x.size()[3])
-            out = torch.cat([x, crop], 1)
-            return out
-
-
-class BayesUNet(UNet):
-
-    def __init__(self, num_classes=3, in_channels=1, initial_filter_size=64, kernel_size=3, num_downs=4,
-                 norm_layer=nn.InstanceNorm2d, drop_prob=0.):
-        super(BayesUNet, self).__init__(num_classes, in_channels, initial_filter_size, kernel_size, num_downs,
-                 norm_layer=norm_layer, drop_prob=drop_prob)
-
-    def train(self, mode=True, mc_dropout=False):"""
-""" Sets the module in training mode.
-             OVERWRITING STANDARD PYTORCH METHOD for nn.Module
-
-            OR
-                if mc_dropout=True and mode=False (use dropout during inference) we set all modules
-                to train-mode=False except for DROPOUT layers
-                In this case it is important that the module_name matches BayesDRNSeg.dropout_layer
-
-        Returns:
-            Module: self
-        """ """
-        self.training = mode
-        for module_name, module in self.named_modules():
-            module.training = mode
-            if mc_dropout and not mode:
-                if isinstance(module, nn.Dropout2d):
-                    # print("WARNING - nn.Module.train - {}".format(module_name))
-                    module.training = True
-
-        return self
-
-    def eval(self, mc_dropout=False):"""
-"""Sets the module in evaluation mode.
-
-        This has any effect only on certain modules. See documentations of
-        particular modules for details of their behaviors in training/evaluation
-        mode, if they are affected, e.g. :class:`Dropout`, :class:`BatchNorm`,
-        etc.
-        """
-"""
-        return self.train(False, mc_dropout=mc_dropout)
-
-if __name__ == "__main__":
-    #import torchsummary
-    unet = BayesUNet(num_classes=4, in_channels=1, drop_prob=0.1)
-    unet.cuda() """
-    
-#%% Load Model
-
-# OBS INFERENCE IS ALREADY DONE IN OTHER SCRIPT - JUST LOAD THE OUTPUT PROBABILITIES
-"""
-PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CrossVal_500.pt'
-#PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
-
-# Load
-print('device = ', device)
-unet_es = torch.load(PATH_model_es, map_location=torch.device(device))
-#unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
-
-#%% Dataloader - Run model
-im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=1, shuffle=False, sampler=None,
-           batch_sampler=None, collate_fn=None,
-           pin_memory=False, drop_last=False, timeout=0,
-           worker_init_fn=None, prefetch_factor=2, num_workers=0)
-    
-out_image_es = np.zeros((im_train_es_res.shape[0],4,128,128))
-
-for i, (im) in enumerate(im_data):
-    unet_es.eval()
-    im = Tensor.numpy(im)
-    im = Tensor(im).cuda()
-    out_trained_es = unet_es(im)
-    out_image_es[i,:,:,:] = out_trained_es["softmax"].detach().cpu().numpy()    
-"""
-# LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
-#% Load softmax from ensemble models
+#%% Load softmax from ensemble models
 
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_train_ResNet.pt'
-PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
+PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
+#PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop//Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
 # mean them over dim=0
 out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
 
-
 #%% One hot encoding
+seg_met = np.argmax(out_softmax_unet, axis=1)
 
-seg_met_sys = np.argmax(out_softmax_unet, axis=1)
-
-seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
-ref_sys = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+#seg = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
+seg_oh = torch.nn.functional.one_hot(Tensor(seg_met).to(torch.int64), num_classes=4).detach().cpu().numpy()
+ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
 #%%%%%%%%%%%%%%%% Create input for ResNet %%%%%%%%%%%%%%%%
 
@@ -653,9 +458,9 @@ for i in range(0, emap.shape[0]):
 emap = np.expand_dims(emap, axis=1)
 
 #% Wrap all inputs together
-im     = Tensor(im_train_es_res)
+im     = Tensor(im_train_res)
 umap   = Tensor(emap)
-seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
+seg    = Tensor(np.expand_dims(seg_met, axis=1))
 
 print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
@@ -670,11 +475,11 @@ error_margin_inside  = 2
 error_margin_outside = 3
 
 # Distance transform map
-dt_es_train = dist_trans(ref_sys, error_margin_inside, error_margin_outside)
+dt_es_train = dist_trans(ref_oh, error_margin_inside, error_margin_outside)
 
 #%% Filter cluster size
 cluster_size = 10
-sys_new_label_train = cluster_min(seg_sys, ref_sys, cluster_size)
+sys_new_label_train = cluster_min(seg_oh, ref_oh, cluster_size)
 
 roi_es_train = np.zeros((dt_es_train.shape))
 
@@ -714,6 +519,8 @@ T_j = np.sum(T_j, axis = 3)
 T_j[T_j >= 1 ] = 1
 
 T = np.expand_dims(T_j, axis=1)
+
+#%%%%%%%%%%%%%%%% Training ResNet %%%%%%%%%%%%%%%%
 
 #%% Training with K-folds
 k_folds    = 6
@@ -943,7 +750,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_lclv_dia_fold_150{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_dia_fold_150{}.pt".format(fold)
     torch.save(model, PATH_model)
 
         
@@ -988,7 +795,7 @@ plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_lclv_dia_fold_150.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_dia_fold_150.png')
 
 
 #%%
@@ -997,7 +804,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_lclv_dia_fold_150_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_dia_fold_150_results.pt"
 #PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
 torch.save(T, PATH_results)
 

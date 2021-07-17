@@ -42,7 +42,7 @@ if user == 'GPU':
     os.chdir('/home/katrine/Speciale2021/Speciale2021')
     
     
-from load_data_gt_im_sub import load_data_sub
+from load_data_gt_im_sub_space import load_data_sub
 
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
@@ -87,7 +87,7 @@ print('Data loaded+concat')
 # LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
 #% Load softmax from ensemble models
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
-PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_test_ResNet.pt'
+PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_test_ResNet.pt'
 
 #PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
@@ -128,24 +128,54 @@ print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
 input_concat = torch.cat((im,umap,seg), dim=1)
 
-image = 2
+image = 4*10
 
-plt.figure(dpi=200)
-plt.subplot(1,4,1)
-plt.subplots_adjust(wspace = 0.4)
-plt.imshow(im[image,0,:,:])
-plt.title('cMRI') 
-plt.subplot(1,4,2)
-plt.imshow(seg[image,0,:,:])
-plt.title('Segmentation') 
-plt.subplot(1,4,3)
-plt.imshow(umap[image,0,:,:])   
-plt.title('U-map') 
-plt.subplot(1,4,4)
-plt.imshow(gt_test_es_res[image,:,:])   
-plt.title('Reference') 
+plt.figure(dpi=200, figsize = (15,15))
+
+for i in range(0, 4):
+    plt.subplot(4,4,1+i)
+    #plt.subplots_adjust(wspace = 0.4)
+    plt.imshow(im[i+image,0,:,:])
+    plt.title('cMRI') 
+    
+    plt.subplot(4,4,5+i)
+    plt.imshow(seg[i+image,0,:,:])
+    plt.title('Segmentation') 
+   
+    plt.subplot(4,4,9+i)
+    plt.imshow(umap[i+image,0,:,:])   
+    plt.title('U-map') 
+    
+    plt.subplot(4,4,13+i)
+    plt.imshow(gt_test_es_res[i+image,:,:])   
+    plt.title('Reference') 
 
 #%%
+#%%
+
+plt.figure(dpi=200, figsize = (15,15))
+i = 0
+image = 29
+plt.subplot(4,1,1)
+#plt.suptitle('Input for detection network', y=0.67, fontsize=25)
+#plt.subplots_adjust(wspace = 0.4)
+plt.imshow(im[i+image,0,:,:])
+#plt.title('cMRI', fontsize=20) 
+
+plt.subplot(4,1,2)
+plt.imshow(umap[i+image,0,:,:])   
+#plt.title('Segmentation', fontsize=20) 
+   
+plt.subplot(4,1,3)
+plt.imshow(seg[i+image,0,:,:])
+#plt.title('U-map', fontsize=20) 
+
+plt.subplot(4,1,4)
+plt.imshow(gt_test_es_res[i+image,:,:])   
+#plt.title('U-map', fontsize=15) 
+
+#%%
+"""
 H = 16
 W = 16
 CV_folds = 6
@@ -187,16 +217,21 @@ if user == 'M':
     PATH_out_patch = '/Users/michalablicher/Desktop/Out_patch_fold_500_avg.pt'
     
 torch.save(out_patch, PATH_out_patch)
+"""
+#%%
+
+out_patch_load = '/Users/michalablicher/Desktop/Out_patch_avg_dice_lclv_dia_fold_150.pt'
+out_patch_softmax_fold = torch.load(out_patch_load ,  map_location=torch.device(device))
 
 #%% Plot
-mean_patch = out_patch.mean(axis=0)
+mean_patch = out_patch_softmax_fold.mean(axis=0)
 
-threshold = 0.3
-m_patch = mean_patch > threshold
+m_patch = mean_patch > 0.15
 
 size = 6
 slice = 32
-
+#%%
+"""
 plt.figure(dpi=200)
 plt.subplot(2,4,1)
 plt.imshow(out_patch[5,slice,1,:,:])
@@ -227,13 +262,16 @@ plt.subplot(2,4,6)
 plt.imshow(out_patch[5,slice,1,:,:])
 plt.title('Softmax patch fold 5',fontsize=size)
 plt.colorbar()
+"""
+#%%
+slice = 3
 
-plt.subplot(2,4,7)
+plt.subplot(1,2,1)
 plt.imshow(mean_patch[slice,1,:,:])
 plt.title('Mean softmax patch',fontsize=size)
 plt.colorbar()
 
-plt.subplot(2,4,8)
+plt.subplot(1,2,2)
 plt.imshow(m_patch[slice,1,:,:])
 plt.title('Binarized at {}'.format('threshold'),fontsize=size)
 plt.colorbar()
@@ -268,7 +306,7 @@ p.append(data_gt_ed_RV[num_train_res:num_test_res][1].shape[0])
 #%% Upsample
 
 #% Upsample
-image = slice
+image = 77
 upper_image = image - 1
 lower_image = image + 1
 
@@ -286,7 +324,7 @@ plt.subplot(1,4,1)
 plt.subplots_adjust(wspace = 0.4)
 plt.imshow(input_concat[image,2,:,:])
 #plt.imshow(up_im[0,0,:,:])
-plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
+#plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
 plt.title('Segmentation',fontsize=size)
 
 plt.subplot(1,4,2)
@@ -296,7 +334,7 @@ plt.title('Error patch',fontsize=size)
 
 plt.subplot(1,4,3)
 plt.imshow(difference)
-plt.title('Difference between ref+seg',fontsize=size)
+plt.title('Difference between ref-seg',fontsize=size)
 
 plt.subplot(1,4,4)
 plt.imshow(up_im[0,1,:,:])
@@ -304,152 +342,3 @@ plt.imshow(np.argmax((ref_oh[image,:,:,:]),axis=2), alpha= 0.6)
 plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
 plt.title('Reference w. error',fontsize=size)
 
-
-#%%
-#Plot softmax probabilities for a single slice
-test_slice = 300
-alpha = 0.4
-
-fig = plt.figure()
-
-class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
-ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4)
-plt.figure(dpi=200, figsize=(18,32))
-
-w = 0.1
-
-for fold_model in range (0,6):
-    out_img_ed = np.squeeze(out_soft[fold_model,test_slice,:,:,:])
-    seg_met_dia = np.argmax(out_soft[fold_model,:,:,:], axis=1)
-    seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4)
-    
-    #Reference annotation
-    plt.suptitle('Diastolic phase: test image at slice %i for CV folds' %test_slice, fontsize=30, y=0.9)
-    plt.subplot(7, 4, 1)
-    plt.subplots_adjust(hspace = 0.05, wspace = w)
-    plt.imshow(ref_dia[test_slice,:,:,0])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    plt.ylabel('Reference', fontsize=16)
-    plt.title('Background', fontsize=16)
-    
-    plt.subplot(7, 4, 2)
-    plt.subplots_adjust(hspace = 0.05, wspace = w)
-    plt.imshow(ref_dia[test_slice,:,:,1])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    plt.title('Right ventricle', fontsize=16)
-    
-    plt.subplot(7, 4, 3)
-    plt.subplots_adjust(hspace = 0.05, wspace = w)
-    plt.imshow(ref_dia[test_slice,:,:,2])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    plt.title('Myocardium', fontsize=16)
-    
-    plt.subplot(7, 4, 4)
-    plt.subplots_adjust(hspace = 0.05, wspace = w)
-    plt.imshow(ref_dia[test_slice,:,:,3])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    plt.title('Left ventricle', fontsize=16)
-    
-    
-    #CV model segmentations
-    plt.subplot(7, 4, 1+4*(fold_model+1))
-    plt.subplots_adjust(hspace = 0.05, wspace = w)
-    plt.imshow(seg_dia[test_slice,:,:,0])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    plt.ylabel('CV fold {}'.format(fold_model), fontsize=16)
-    
-    plt.subplot(7, 4, 2+4*(fold_model+1))
-    plt.subplots_adjust(hspace = 0.05, wspace = w)
-    plt.imshow(seg_dia[test_slice,:,:,1])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    
-    plt.subplot(7, 4, 3+4*(fold_model+1))
-    plt.subplots_adjust(hspace = 0.05, wspace = w)
-    plt.imshow(seg_dia[test_slice,:,:,2])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    
-    plt.subplot(7, 4, 4+4*(fold_model+1))
-    plt.subplots_adjust(hspace = 0.05, wspace = w)
-    plt.imshow(seg_dia[test_slice,:,:,3])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-        
-    
-    """
-    plt.imshow(seg_dia[test_slice,:,:,i])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    plt.title(class_title[i], fontsize =16)
-    plt.xticks(rotation=40, fontweight='light', fontsize=7)
-    plt.yticks(horizontalalignment='right',fontweight='light',fontsize=7)
-   
-    if i == 0:
-        plt.ylabel('Argmax fold {}'.format(fold_model), fontsize=14)
-        
-
-    plt.subplot(7, 4, i+1+4)     
-    plt.subplots_adjust(hspace = 0.05, wspace = 0.2)
-    plt.imshow(ref_dia[test_slice,:,:,i])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-    if i == 0:
-        plt.ylabel('Reference', fontsize=14)
-        
-    """
-plt.show()  
-
-#%%
-#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-from metrics import EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
-
-dice = np.zeros((out_seg_mean.shape[0],3))
-haus = np.zeros((out_seg_mean.shape[0],3))
-
-# OBS OBS OBS OBS
-# dim[0] = BG
-# dim[1] = RV
-# dim[2] = MYO
-# dim[3] = LV
-
-for i in range(0,out_seg_mean.shape[0]):
-      
-    dice[i,0] = dc(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
-    dice[i,1] = dc(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
-    dice[i,2] = dc(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
-    
-    # If there is no prediction or annotation then don't calculate Hausdorff distance and
-    # skip to calculation for next class
-    h_count = 0
-    
-    if len(np.unique(ref[i,:,:,1]))!=1 and len(np.unique(out_seg_mean[i,:,:,1]))!=1:
-        haus[i,0]    = hd(out_seg_mean[i,:,:,1],ref[i,:,:,1])  
-        h_count += 1
-    else:
-        pass
-    
-    if len(np.unique(ref_dia[i,:,:,2]))!=1 and len(np.unique(out_seg_mean[i,:,:,2]))!=1:      
-        haus[i,1]    = hd(out_seg_mean[i,:,:,2],ref[i,:,:,2])  
-        h_count += 1
-    else:
-        pass
-    
-    if len(np.unique(ref_dia[i,:,:,3]))!=1 and len(np.unique(out_seg_mean[i,:,:,3]))!=1:
-        haus[i,2]    = hd(out_seg_mean[i,:,:,3],ref[i,:,:,3])  
-        h_count += 1
-    else:
-        pass
-    
-        pass        
-    if h_count!= 3:
-        print('Haus not calculated for all classes for slice: ', i)
-    else:
-        pass 
-    
-mean_dice = np.mean(dice, axis=0)  
-std_dice = np.std(dice,  axis=0)
-
-mean_haus = np.mean(haus, axis=0)
-std_haus = np.std(haus,  axis=0)
-
-print('mean dice = ',mean_dice)  
-print('std dice = ', std_dice) 
-
-print('mean haus = ',mean_haus)
-print('std haus = ', std_haus)
