@@ -382,11 +382,11 @@ from load_data_gt_im_sub_space import load_data_sub
 
 user = 'GPU'
 phase = 'Diastole'
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub('GPU',phase,'DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub('GPU',phase,'HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub('GPU',phase,'MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub('GPU',phase,'NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU',phase,'RV')
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 
 
 
@@ -427,6 +427,7 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_te
 
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_train_ResNet.pt'
 PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
+#PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop//Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
 # mean them over dim=0
@@ -435,7 +436,8 @@ out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
 #%% One hot encoding
 seg_met = np.argmax(out_softmax_unet, axis=1)
 
-seg = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
+#seg = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
+seg = torch.nn.functional.one_hot(Tensor(seg_met).to(torch.int64), num_classes=4).detach().cpu().numpy()
 ref = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
 #%%%%%%%%%%%%%%%% Create input for ResNet %%%%%%%%%%%%%%%%
@@ -477,7 +479,7 @@ dt_es_train = dist_trans(ref, error_margin_inside, error_margin_outside)
 
 #%% Filter cluster size
 cluster_size = 10
-sys_new_label_train = cluster_min(seg_met, ref, cluster_size)
+sys_new_label_train = cluster_min(seg, ref, cluster_size)
 
 roi_es_train = np.zeros((dt_es_train.shape))
 
