@@ -437,8 +437,8 @@ out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
 seg_met = np.argmax(out_softmax_unet, axis=1)
 
 #seg = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
-seg = torch.nn.functional.one_hot(Tensor(seg_met).to(torch.int64), num_classes=4).detach().cpu().numpy()
-ref = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+seg_oh = torch.nn.functional.one_hot(Tensor(seg_met).to(torch.int64), num_classes=4).detach().cpu().numpy()
+ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
 #%%%%%%%%%%%%%%%% Create input for ResNet %%%%%%%%%%%%%%%%
 
@@ -475,11 +475,11 @@ error_margin_inside  = 2
 error_margin_outside = 3
 
 # Distance transform map
-dt_es_train = dist_trans(ref, error_margin_inside, error_margin_outside)
+dt_es_train = dist_trans(ref_oh, error_margin_inside, error_margin_outside)
 
 #%% Filter cluster size
 cluster_size = 10
-sys_new_label_train = cluster_min(seg, ref, cluster_size)
+sys_new_label_train = cluster_min(seg_oh, ref_oh, cluster_size)
 
 roi_es_train = np.zeros((dt_es_train.shape))
 
