@@ -477,7 +477,7 @@ dt_es_train = dist_trans(ref, error_margin_inside, error_margin_outside)
 
 #%% Filter cluster size
 cluster_size = 10
-sys_new_label_train = cluster_min(seg, ref, cluster_size)
+sys_new_label_train = cluster_min(seg_met, ref, cluster_size)
 
 roi_es_train = np.zeros((dt_es_train.shape))
 
