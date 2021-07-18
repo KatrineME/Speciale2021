@@ -680,7 +680,7 @@ def objective(trial):
         labs_eval = next(iter(eval_dataloader_label))
            
         # Init the neural network
-        model_resnet.apply(weights_init)
+        #model_resnet.apply(weights_init)
         
         # Initialize optimizer
         #optimizer = torch.optim.Adam(model_resnet.parameters(), lr=0.0001, eps=1e-4, weight_decay=1e-4) #LR 
