@@ -707,7 +707,7 @@ def objective(trial):
         for epoch in range(num_epochs):  # loop over the dataset multiple times
     
             model_resnet.train()
-            print('Epoch train =',epoch)
+            #print('Epoch train =',epoch)
             #0.0  
             for i, train_data in enumerate(zip(ins_train, labs_train)):
                 # get the inputs
