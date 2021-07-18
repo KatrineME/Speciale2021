@@ -386,7 +386,7 @@ def define_model(trial):
     #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     #model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.1)
     
-    drop_prob_t = trial.suggest_float("drop_prob_l", 0.0, 0.5) 
+    drop_prob_t = trial.suggest_float("drop_prob_l", 0.1, 0.5) 
     model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=drop_prob_t)
     model.cuda()
     
