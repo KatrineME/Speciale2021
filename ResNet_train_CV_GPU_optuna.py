@@ -565,7 +565,7 @@ def objective(trial):
     
     #%% Filter cluster size
     #cluster_size = 10
-    cluster_size = trial.suggest_float("cluster_size", 4, 10)
+    cluster_size = trial.suggest_int("cluster_size", 4, 10)
     
     sys_new_label_train = cluster_min(seg_oh, ref_oh, cluster_size)
     
