@@ -774,12 +774,13 @@ def objective(trial):
                 predicted_e = torch.exp(output[:,1,:,:])
                 predicted_e[predicted_e < 0.1] = 0
                 predicted_e[predicted_e > 0.1] = 1
-                
+                predicted_d = predicted_e.detach().numpy()
+                labels_d = labels.detach().numpy()
                 total_e     += (labels.shape[0])*(16*16)
                 correct_e   += (predicted_e == labels).sum().item()
                 incorrect_e += (predicted_e != labels).sum().item()
                 
-                dice_e += dc(Tensor(predicted_e), Tensor(labels))
+                dice_e += dc(predicted_d, labels_d)
             eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
             #eval_losses.append(np.mean(eval_loss))
             eval_loss = 0.0
@@ -795,6 +796,7 @@ def objective(trial):
             correct_e   = 0.0
             total_e     = 0.0
             incorrect_e = 0.0
+            dice_e      = 0.0
 
             trial.report(eval_dice_float, epoch)
             
