@@ -253,11 +253,11 @@ T_j = np.sum(T_j, axis = 3)
 # Plot a final patch
 # Binarize
 T_j[T_j >= 1 ] = 1
-
-plt.figure(dpi=2000)
+#%%
+plt.figure(dpi=200)
 plt.imshow(T_j[test_slice,:,:])
 plt.title('Binary $t_j$ label', fontsize=14)
-plt.xticks(np.arange(0,16, 2))
+plt.xticks(np.arange(0,16, 1))
 
 #%% Upsample
 up      = nn.Upsample(scale_factor=8, mode='bilinear', align_corners=True)
@@ -270,11 +270,13 @@ up_im[up_im >0] =1
 #%%
 # plot
 plt.figure(dpi=200)
-plt.imshow(up_im[test_slice,0,:,:])
-plt.colorbar()
-plt.imshow(im_ed_flat[test_slice,0,:,:], alpha= 0.6)
-plt.imshow(seg_met_dia[test_slice,:,:], alpha= 0.6)
-plt.title('Patches containing seg. failures', fontsize=14)
+plt.imshow(unet_ed_mean_am[test_slice,:,:])
+plt.imshow(up_im[test_slice,0,:,:], alpha= 0.3)
+
+#plt.colorbar()
+#plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha= 0.6)
+
+plt.title('Patches containing seg. errors', fontsize=14)
 
 
 
