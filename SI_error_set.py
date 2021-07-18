@@ -45,9 +45,11 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 
 
 #%% BATCH GENERATOR
+"""
 num_train_sub = 12
 num_eval_sub = num_train_sub
 num_test_sub = num_eval_sub + 8
+"""
 """
 im_train_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
@@ -63,6 +65,7 @@ gt_train_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]
 
 gt_test_ed_sub = gt_train_ed_sub
 im_test_ed_sub = im_train_ed_sub
+"""
 """
 im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
@@ -87,9 +90,43 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_es_MINF[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_NOR[num_eval_sub:num_test_sub]).astype(None),
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
+"""
+#%% BATCH GENERATOR
+num_train_sub = 12
+num_eval_sub  = num_train_sub
+
+num_train_res = num_eval_sub + 6
+num_test_res  = num_train_res + 2
+
+im_train_ed_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_train_res]).astype(None)))
+
+gt_train_ed_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_train_res]).astype(None)))
+
+
+im_test_ed_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_train_res:num_test_res]).astype(None)))
+
+gt_test_ed_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
+print('Data loaded+concat')
+
 #%% Load model
-PATH_model_es = "C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt"
-PATH_model_ed = "C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt"
+PATH_model_es = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_test_ResNet.pt"
+PATH_model_ed = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_test_ResNet.pt"
 
 unet_es_soft = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 unet_ed_soft = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
@@ -105,8 +142,8 @@ unet_ed   = torch.nn.functional.one_hot(torch.as_tensor(unet_ed_mean_am), num_cl
 
 
 #%% Onehot encode class channels
-gt_es_oh = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
-gt_ed_oh = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
+gt_es_oh = torch.nn.functional.one_hot(Tensor(gt_test_ed_res).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
+gt_ed_oh = torch.nn.functional.one_hot(Tensor(gt_test_ed_res).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
 
 
 
@@ -152,7 +189,7 @@ for i in range (0,4):
     cbar = plt.colorbar(fraction=0.06)
     cbar.ax.locator_params(nbins=5)
     cbar.ax.tick_params(labelsize=8)
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha*0.5)
+    plt.imshow(im_test_ed_res[test_slice,0,:,:], alpha =alpha*0.5)
     plt.title(class_title[i], fontsize =s)
     plt.subplots_adjust(hspace = 0.4, wspace = 0.5)
     #plt.xticks([])
@@ -163,7 +200,7 @@ for i in range (0,4):
     
     plt.subplot(3,4,i+1+4)
     plt.imshow(dia_new_label[test_slice,:,:,i])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha)
+    plt.imshow(im_test_ed_res[test_slice,0,:,:], alpha =alpha)
     #plt.xticks([])
     #plt.yticks([])
     
@@ -172,7 +209,7 @@ for i in range (0,4):
     
     plt.subplot(3,4,i+1+8)
     plt.imshow(roi_target_map_ed[test_slice,:,:,i])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha)
+    plt.imshow(im_test_ed_res[test_slice,0,:,:], alpha =alpha)
     #plt.xticks([])
     #plt.yticks([])
     
@@ -194,7 +231,7 @@ for i in range (0,4):
     cbar = plt.colorbar(fraction=0.06)
     cbar.ax.locator_params(nbins=5)
     cbar.ax.tick_params(labelsize=s/2)
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha*0.5)
+    plt.imshow(im_test_ed_res[test_slice,0,:,:], alpha =alpha*0.5)
     
     if i == 0 or 4 or 8 or 12:
         plt.ylabel(class_title[i], fontsize =s)
@@ -203,20 +240,20 @@ for i in range (0,4):
 
     plt.subplot(4,4,i*4+2)
     plt.imshow(dia_new_label[test_slice,:,:,i])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha)
+    plt.imshow(im_test_ed_res[test_slice,0,:,:], alpha =alpha)
     
     if i == 0:
         plt.title('Filtered clusters', fontsize=s)
 
     plt.subplot(4,4,i*4+3)
     plt.imshow(roi_target_map_ed[test_slice,:,:,i])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha =alpha)
+    plt.imshow(im_test_ed_res[test_slice,0,:,:], alpha =alpha)
 
     if i == 0:
         plt.title('Resulting SI set', fontsize = s)
 
     plt.subplot(4,4,i*4+4)
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:])
+    plt.imshow(im_test_ed_res[test_slice,0,:,:])
     
     if i == 0:
         plt.title('Original cMRI', fontsize = s)
@@ -253,11 +290,22 @@ T_j = np.sum(T_j, axis = 3)
 # Plot a final patch
 # Binarize
 T_j[T_j >= 1 ] = 1
+
 #%%
+n = im_test_ed_res.shape[0]
+
+t = np.count_nonzero(T_j.sum(axis=(1,2)))
+print('Number of slices containing min. 1 patch: ', (t/n)*100 ,'%' )
+print('Avg. patches pr. slice: ', (T_j.sum()/n))
+
+
+#%%
+test_slice = 1
+
 plt.figure(dpi=200)
 plt.imshow(T_j[test_slice,:,:])
-plt.title('Binary $t_j$ label', fontsize=14)
-plt.xticks(np.arange(0,16, 1))
+plt.title('Binary $t_j$ label at slice {}'.format(test_slice), fontsize=14)
+plt.xticks(np.arange(0,16, 2))
 
 #%% Upsample
 up      = nn.Upsample(scale_factor=8, mode='bilinear', align_corners=True)
@@ -267,8 +315,10 @@ up_im   = up(Tj_temp)
 # Binarize
 up_im[up_im >0] =1
 
-#%%
-# plot
+
+test_slice = 21
+
+#% plot
 plt.figure(dpi=200)
 plt.imshow(unet_ed_mean_am[test_slice,:,:])
 plt.imshow(up_im[test_slice,0,:,:], alpha= 0.3)
@@ -276,7 +326,7 @@ plt.imshow(up_im[test_slice,0,:,:], alpha= 0.3)
 #plt.colorbar()
 #plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha= 0.6)
 
-plt.title('Patches containing seg. errors', fontsize=14)
+plt.title('Patches containing seg. errors at slice {}'.format(test_slice), fontsize=14)
 
 
 

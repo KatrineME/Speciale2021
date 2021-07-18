@@ -105,7 +105,7 @@ gt_dia = np.concatenate(gt_trial).astype(None)
 
 
 
-plt.imshow(gt_dia[])
+#plt.imshow(gt_dia[])
 
 
 
