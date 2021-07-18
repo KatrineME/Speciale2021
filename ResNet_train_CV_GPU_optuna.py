@@ -625,7 +625,7 @@ def objective(trial):
 
     #%% Training with K-folds
     k_folds    = 6
-    num_epochs = 200
+    num_epochs = 10 #200
     loss_function = nn.CrossEntropyLoss()
     
     # For fold results
