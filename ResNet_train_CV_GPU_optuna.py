@@ -587,7 +587,7 @@ def objective(trial):
 
     #%% Training with K-folds
     k_folds    = 6
-    num_epochs = 10 #200
+    num_epochs = 200 #200
     loss_function = nn.CrossEntropyLoss()
     
     # For fold results
@@ -817,7 +817,7 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=10, timeout=108000 ) # 72000 s = 20 h # 50000 s = 14 h
+    study.optimize(objective, n_trials=20, timeout=108000 ) # 72000 s = 20 h # 50000 s = 14 h
 
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -836,7 +836,7 @@ if __name__ == "__main__":
     
     os.chdir("/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia") 
     # Write to txt file
-    text_file = open("Best_trial_lclv_dice.txt", "w")
+    text_file = open("Best_trial_dice.txt", "w")
     text_file.write("Study statistics: \n")
     text_file.write("  Number of finished trials: %s \n" % len(study.trials))
     text_file.write("  Number of complete trials: %s \n" % len(complete_trials))
@@ -878,7 +878,6 @@ if __name__ == "__main__":
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "cluster_size"])
     plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/optuna_lr_cluster.png')
-    
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["eps", "cluster_size"])
