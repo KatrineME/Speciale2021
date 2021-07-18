@@ -380,7 +380,7 @@ os.chdir("/home/michala/training")                      # Server directory micha
 
 from load_data_gt_im_sub_space import load_data_sub
 
-user = 'GPU'
+user = 'K'
 phase = 'Diastole'
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
@@ -425,8 +425,8 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_te
 
 #%% Load softmax from ensemble models
 
-#PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_train_ResNet.pt'
-PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
+PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
+#PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
 #PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop//Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
@@ -525,7 +525,7 @@ T = np.expand_dims(T_j, axis=1)
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 200
+num_epochs = 1
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -682,10 +682,14 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             #inputs, labels = data
             inputs = Tensor(ims)
             #print('train_data = ', inputs.shape)
+            """
             inputs = inputs.cuda()
-            
+            """
             labels = Tensor(np.squeeze(la))
+            
+            """
             labels = labels.cuda()
+            """
             #print('i=',i)
             # wrap them in Variable
             inputs, labels = Variable(inputs), Variable(labels)
@@ -703,8 +707,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             
             # Set total and correct
             predicted_e = torch.exp(output[:,1,:,:])
-            predicted_e[predicted_e < 0.5] = 0
-            predicted_e[predicted_e > 0.5] = 1
+            predicted_e[predicted_e < 0.1] = 0
+            predicted_e[predicted_e > 0.1] = 1
             total_e     += (labels.shape[0])*(16*16)
             correct_e   += (predicted_e == labels).sum().item()
             incorrect_e += (predicted_e != labels).sum().item()
@@ -751,7 +755,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_dia_fold_150{}.pt".format(fold)
+    #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_dia_fold_150{}.pt".format(fold)
+    PATH_model = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Trained_Detection_dice_dia_fold_150{}.pt'.format(fold)
     torch.save(model, PATH_model)
 
         
