@@ -774,8 +774,8 @@ def objective(trial):
                 predicted_e = torch.exp(output[:,1,:,:])
                 predicted_e[predicted_e < 0.1] = 0
                 predicted_e[predicted_e > 0.1] = 1
-                predicted_d = predicted_e.detach().numpy()
-                labels_d = labels.detach().numpy()
+                predicted_d = predicted_e.detach().cpu().numpy()
+                labels_d    = labels.detach().cpu().numpy()
                 total_e     += (labels.shape[0])*(16*16)
                 correct_e   += (predicted_e == labels).sum().item()
                 incorrect_e += (predicted_e != labels).sum().item()
