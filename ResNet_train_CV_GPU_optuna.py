@@ -779,7 +779,7 @@ def objective(trial):
                 correct_e   += (predicted_e == labels).sum().item()
                 incorrect_e += (predicted_e != labels).sum().item()
                 
-                dice_e += dc(predicted_e, labels)
+                dice_e += dc(Tensor(predicted_e), Tensor(labels))
             eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
             #eval_losses.append(np.mean(eval_loss))
             eval_loss = 0.0
