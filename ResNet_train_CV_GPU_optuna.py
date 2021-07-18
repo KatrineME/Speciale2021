@@ -493,64 +493,26 @@ print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 input_concat = torch.cat((im,umap,seg), dim=1)
 
 
-#%% Distance transform maps
-"""
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
-from SI_error_func import dist_trans, cluster_min
-
-error_margin_inside  = 2
-error_margin_outside = 3
-
-# Distance transform map
-dt_es_train = dist_trans(ref_oh, error_margin_inside, error_margin_outside)
-
-#%% Filter cluster size
-cluster_size = 10
-
-sys_new_label_train = cluster_min(seg_oh, ref_oh, cluster_size)
-
-roi_es_train = np.zeros((dt_es_train.shape))
-
-for i in range(0, dt_es_train.shape[0]):
-    for j in range(0, dt_es_train.shape[3]):
-        roi_es_train[i,:,:,j] = np.logical_and(dt_es_train[i,:,:,j], sys_new_label_train[i,:,:,j])
-        
-#%% Sample patches
-patch_size = 8
-patch_grid = int(roi_es_train.shape[1]/patch_size)
-
-lin    = np.linspace(0,roi_es_train.shape[1]-patch_size,patch_grid).astype(int)
-
-# Preallocate
-_temp  = np.zeros((patch_grid,patch_grid))
-lin    = np.linspace(0,roi_es_train.shape[1]-patch_size,patch_grid).astype(int)
-_ctemp = np.zeros((patch_grid,patch_grid,roi_es_train.shape[3]))
-T_j    = np.zeros((roi_es_train.shape[0],patch_grid,patch_grid,roi_es_train.shape[3]))
-
-for j in range (0,roi_es_train.shape[0]):
-    for c in range(0,4):
-        for pp in range(0,16):
-            for p, i in enumerate(lin):
-                _temp[pp,p] = np.count_nonzero(roi_es_train[j,lin[pp]:lin[pp]+8 , i:i+8, c])
-                #_temp[pp,p] = np.sum(~np.isnan(roi_es_train[j,lin[pp]:lin[pp]+8 , i:i+8, c]))
-        _ctemp[:,:,c] = _temp
-    T_j[j,:,:,:] = _ctemp
-
-
-# BACKGROUND SEG FAILURES ARE REMOVED
-T_j = T_j[:,:,:,1:] 
-
-# Summing all tissue channels together
-T_j = np.sum(T_j, axis = 3)
-
-# Binarize
-T_j[T_j >= 1 ] = 1
-
-T = np.expand_dims(T_j, axis=1)
-"""
 #%%%%%%%%%%%%%%%% Training ResNet %%%%%%%%%%%%%%%%
-
+def dc(result, reference):
+    """
+    Dice coefficient
+    """
+    
+    result = np.atleast_1d(result.astype(np.bool))
+    reference = np.atleast_1d(reference.astype(np.bool))
+    
+    intersection = np.count_nonzero(result & reference)
+    
+    size_i1 = np.count_nonzero(result)
+    size_i2 = np.count_nonzero(reference)
+    
+    try:
+        dc = 2. * intersection / float(size_i1 + size_i2)
+    except ZeroDivisionError:
+        dc = 1#0.0
+    
+    return dc
 
 #%% Training with K-folds
 def objective(trial):
@@ -565,7 +527,7 @@ def objective(trial):
     
     #%% Filter cluster size
     #cluster_size = 10
-    cluster_size = trial.suggest_int("cluster_size", 4, 10)
+    cluster_size = trial.suggest_int("cluster_size", 5, 15)
     
     sys_new_label_train = cluster_min(seg_oh, ref_oh, cluster_size)
     
@@ -687,20 +649,28 @@ def objective(trial):
         #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=25)
         
         #% Training
-        train_losses  = []
-        train_results = []
+        train_losses    = []
+        train_accuracy  = []
         train_incorrect = []
-        eval_losses   = []
-        eval_results  = []
-        eval_incorrect = []
-        eval_loss     = 0.0
-        train_loss    = 0.0
-        total         = 0.0
-        correct       = 0.0
-        incorrect     = 0.0
-        total_e         = 0.0
-        correct_e       = 0.0
-        incorrect_e     = 0.0
+        eval_losses     = []
+        eval_accuracy   = []
+        eval_incorrect  = []
+        
+        train_dice       = []
+        eval_dice        = []
+        
+        eval_loss      = 0.0
+        train_loss     = 0.0
+        total          = 0.0
+        correct        = 0.0
+        incorrect      = 0.0
+        total_e        = 0.0
+        correct_e      = 0.0
+        incorrect_e    = 0.0
+        
+        dice_t   = 0.0
+        dice_e   = 0.0
+        
         ims = np.zeros((ins_train.shape))
         la = np.zeros((labs_eval.shape))
        
@@ -748,8 +718,8 @@ def objective(trial):
                 
                 # Set total and correct
                 predicted  = torch.exp(output[:,1,:,:])
-                predicted[predicted < 0.5] = 0
-                predicted[predicted > 0.5] = 1
+                predicted[predicted < 0.1] = 0
+                predicted[predicted > 0.1] = 1
                 total     += (labels.shape[0])*(16*16)
                 correct   += (predicted == labels).sum().item()
                 incorrect += (predicted != labels).sum().item()
@@ -762,7 +732,7 @@ def objective(trial):
             
             # Print accuracy
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
-            train_results.append(100.0 * correct / total)
+            train_accuracy.append(100.0 * correct / total)
             #print('epoch accuracy = ', train_results)
             train_incorrect.append(incorrect)
             correct   = 0.0
@@ -802,42 +772,45 @@ def objective(trial):
                 
                 # Set total and correct
                 predicted_e = torch.exp(output[:,1,:,:])
-                predicted_e[predicted_e < 0.5] = 0
-                predicted_e[predicted_e > 0.5] = 1
+                predicted_e[predicted_e < 0.1] = 0
+                predicted_e[predicted_e > 0.1] = 1
                 
                 total_e     += (labels.shape[0])*(16*16)
                 correct_e   += (predicted_e == labels).sum().item()
                 incorrect_e += (predicted_e != labels).sum().item()
                 
+                dice_e += dc(predicted_e, labels)
             eval_losses.append(eval_loss/(j+1)) # This is normalised by batch size (i = 12)
             #eval_losses.append(np.mean(eval_loss))
             eval_loss = 0.0
             
             # Print accuracy
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
-            eval_results.append(100.0 * correct_e / total_e)
-            eval_accuracy_float = float(eval_results[-1])
+            eval_accuracy.append(100.0 * correct_e / total_e)
+            #eval_accuracy_float = float(eval_results[-1])
+            eval_dice.append(dice_e/(j+1))
+            eval_dice_float = float(eval_dice[-1])
             
             eval_incorrect.append(incorrect_e)
             correct_e   = 0.0
             total_e     = 0.0
             incorrect_e = 0.0
 
-            trial.report(eval_accuracy_float, epoch)
+            trial.report(eval_dice_float, epoch)
             
         fold_train_losses.append(train_losses)
         
         fold_eval_losses.append(eval_losses)
         
-        fold_train_res.append(train_results)
+        fold_train_res.append(train_accuracy)
         
-        fold_eval_res.append(eval_results)
+        fold_eval_res.append(eval_accuracy)
         
         fold_train_incorrect.append(train_incorrect)
         
         fold_eval_incorrect.append(eval_incorrect)
         
-    return eval_accuracy_float  #eval_accuracy_float
+    return eval_dice_float  #eval_accuracy_float
 
 
 if __name__ == "__main__":
