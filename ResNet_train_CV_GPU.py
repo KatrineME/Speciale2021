@@ -362,8 +362,8 @@ if __name__ == "__main__":
 
     n_channels = 3  # 3
     n_classes  = 2
-    #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
+    model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
+    #model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     if device == 'cuda':
         model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
@@ -426,8 +426,8 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_te
 #%% Load softmax from ensemble models
 
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_train_ResNet.pt'
-PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
-#PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop//Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
+#PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
+PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop//Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
 # mean them over dim=0
@@ -465,6 +465,7 @@ seg    = Tensor(np.expand_dims(seg_met, axis=1))
 print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
 input_concat = torch.cat((im,umap,seg), dim=1)
+
 
 #%% Distance transform maps
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
