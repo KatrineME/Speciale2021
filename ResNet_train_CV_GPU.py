@@ -617,10 +617,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             
             #inputs, labels = data
             inputs = Tensor(ims)
-            inputs = inputs.cuda()
+            #inputs = inputs.cuda()
             
             labels = Tensor(np.squeeze(la))
-            labels = labels.cuda()
+            #labels = labels.cuda()
             #print('i=',i)
             # wrap them in Variable
             inputs, labels = Variable(inputs), Variable(labels)
