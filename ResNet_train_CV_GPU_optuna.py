@@ -816,11 +816,14 @@ def objective(trial):
             # Print accuracy
             #print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
             eval_results.append(100.0 * correct_e / total_e)
+            eval_accuracy_float = float(eval_results[-1])
+            
             eval_incorrect.append(incorrect_e)
             correct_e   = 0.0
             total_e     = 0.0
             incorrect_e = 0.0
 
+            trial.report(eval_accuracy_float, epoch)
             
         fold_train_losses.append(train_losses)
         
