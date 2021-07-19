@@ -507,7 +507,7 @@ for fold in range(0,6):
     print('Done for fold',fold)
 
 if user == 'GPU':
-    PATH_out_patch = '/home/michala/Speciale2021/Speciale2021/Out_patch_avg_dice_dia_fold_150.pt'
+    PATH_out_patch = '/home/michala/Speciale2021/Speciale2021/Out_patch_avg_dice_opt_dia_fold_150.pt'
 if user == 'K':
     PATH_out_patch = 'C:/Users/katrine/Desktop/Optuna/Out_patch_fold_500_avg.pt'
 if user == 'M':
