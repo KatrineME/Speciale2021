@@ -540,6 +540,8 @@ def get_loss(log_pred_probs, lbls, pred_probs=None):
 
     # pred_probs last 2 dimensions need to be merged because lbls has shape [batch_size, w, h ]
     #pred_probs = pred_probs.view(pred_probs.size(0), 2, -1)
+    print('log_pred_probs', log_pred_probs.shape)
+    print('lbls.float()', lbls.float().shape)
     fn_soft = (log_pred_probs) * lbls.float()
     
     # fn_nonzero = torch.nonzero(fn_soft.data).size(0)
