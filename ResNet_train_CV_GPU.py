@@ -551,7 +551,7 @@ def get_loss(log_pred_probs, lbls, pred_probs=None):
     # same for false positive
     
     ones = torch.ones(lbls.size()).cuda()
-    fp_soft = (ones - lbls.float()) * (log_pred_probs[:,1,:,:]))
+    fp_soft = (ones - lbls.float()) * (log_pred_probs[:,1,:,:])
     # fp_nonzero = torch.nonzero(fp_soft).size(0)
     fp_soft = torch.sum(fp_soft) * 1 / float(batch_size)
     # print(b_loss.item(), (self.fn_penalty_weight * fn_soft + self.fp_penalty_weight * fp_soft).item())
