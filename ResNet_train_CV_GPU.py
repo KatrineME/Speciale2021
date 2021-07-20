@@ -669,7 +669,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
 
             # Find loss
             loss = get_loss(output, labels)
-            print('loss',loss)
+            #print('loss',loss)
             #print('loss = ', loss)
             
             # Calculate gradients
