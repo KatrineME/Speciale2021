@@ -522,11 +522,45 @@ T_j[T_j >= 1 ] = 1
 
 T = np.expand_dims(T_j, axis=1)
 
+
+def get_loss(log_pred_probs, lbls, pred_probs=None):
+    """
+    :param log_pred_probs: LOG predicted probabilities [batch_size, 2, w * h]
+    :param lbls: ground truth labels [batch_size, w * h]
+    :param pred_probs: [batch_size, 2, w * h]
+    :return: torch scalar
+    """
+    # print("INFO - get_loss - log_pred_probs.shape, lbls.shape ", log_pred_probs.shape, lbls.shape)
+    # NOTE: this was a tryout (not working) for hard negative mining
+    # batch_loss_indices = RegionDetector.hard_negative_mining(pred_probs, lbls)
+    # b_loss_idx_preds = batch_loss_indices.unsqueeze(1).expand_as(log_pred_probs)
+    # The input given through a forward call is expected to contain log-probabilities of each class
+    loss_function = nn.CrossEntropyLoss()
+    b_loss = loss_function(log_pred_probs, lbls)
+
+    # pred_probs last 2 dimensions need to be merged because lbls has shape [batch_size, w, h ]
+    pred_probs = pred_probs.view(pred_probs.size(0), 2, -1)
+    fn_soft = pred_probs[:, 0] * lbls.float()
+    # fn_nonzero = torch.nonzero(fn_soft.data).size(0)
+    batch_size = pred_probs.size(0)
+    fn_soft = torch.sum(fn_soft) * 1 / float(batch_size)
+    # same for false positive
+    ones = torch.ones(lbls.size()).cuda()
+    fp_soft = (ones - lbls.float()) * pred_probs[:, 1]
+    # fp_nonzero = torch.nonzero(fp_soft).size(0)
+    fp_soft = torch.sum(fp_soft) * 1 / float(batch_size)
+    # print(b_loss.item(), (self.fn_penalty_weight * fn_soft + self.fp_penalty_weight * fp_soft).item())
+    fn_penalty_weight = 1.2
+    fp_penalty_weight = 0.085
+    b_loss = b_loss + fn_penalty_weight * fn_soft + fp_penalty_weight * fp_soft
+
+    return b_loss
+    
 #%%%%%%%%%%%%%%%% Training ResNet %%%%%%%%%%%%%%%%
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 200
+num_epochs = 50 #200
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -637,7 +671,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             #print('output shape = ', output.shape)
 
             # Find loss
-            loss = loss_function(output, labels)
+            loss = get_loss(output, labels)
             #print('loss = ', loss)
             
             # Calculate gradients
@@ -701,7 +735,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             output = model(inputs)     
             output = output["log_softmax"]
             # Find loss
-            loss = loss_function(output, labels)
+            loss = get_loss(output, labels)
             
             # Calculate loss
             #eval_loss.append(loss.item())
