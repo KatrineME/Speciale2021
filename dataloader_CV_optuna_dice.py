@@ -323,7 +323,7 @@ def lv_loss(y_true, y_pred):
     return torch.sum(Tensor(inside))/(128*128*32)#.cuda()
  
 
-    #%%
+    
 def dc(result, reference):
     """
     Dice coefficient
