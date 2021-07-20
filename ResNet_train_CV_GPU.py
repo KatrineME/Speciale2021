@@ -465,8 +465,8 @@ seg    = Tensor(np.expand_dims(seg_met, axis=1))
 
 print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
-input_concat = torch.cat((im,umap,seg), dim=1)
-
+#input_concat = torch.cat((im,umap,seg), dim=1)
+input_concat = torch.cat((umap,seg), dim=1)
 
 #%% Distance transform maps
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -789,7 +789,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_opt_dia_fold_150{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_nocmri_opt_dia_fold_150{}.pt".format(fold)
     #PATH_model = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Trained_Detection_dice_dia_fold_150{}.pt'.format(fold)
     torch.save(model, PATH_model)
 
@@ -835,7 +835,7 @@ plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_opt_dia_fold_150.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_nocmri_opt_dia_fold_150.png')
 
 #%%
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
@@ -843,7 +843,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_opt_dia_fold_150_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_nocmri_opt_dia_fold_150_results.pt"
 #PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
 torch.save(T, PATH_results)
 
