@@ -538,7 +538,7 @@ def get_loss(log_pred_probs, lbls, pred_probs=None):
     loss_function = nn.CrossEntropyLoss()
     b_loss = loss_function(log_pred_probs, lbls)
     
-    pred_probs = np.exp(log_pred_probs)
+    pred_probs = torch.exp(log_pred_probs)
     # pred_probs last 2 dimensions need to be merged because lbls has shape [batch_size, w, h ]
     #pred_probs = pred_probs.view(pred_probs.size(0), 2, -1)
     #print('log_pred_probs', log_pred_probs.shape)
