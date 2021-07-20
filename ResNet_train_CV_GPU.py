@@ -360,7 +360,7 @@ class CombinedRSN(SimpleRSN):
 if __name__ == "__main__":
     #import torchsummary
 
-    n_channels = 3  # 3
+    n_channels = 2  # 3
     n_classes  = 2
     #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.37)
