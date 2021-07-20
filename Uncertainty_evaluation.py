@@ -214,26 +214,9 @@ plt.title('U-map')
 plt.colorbar()
 
 #%%
-def dc(result, reference):
-    """
-    Dice coefficient
-    """
-    
-    result = np.atleast_1d(result.astype(np.bool))
-    reference = np.atleast_1d(reference.astype(np.bool))
-    
-    intersection = np.count_nonzero(result & reference)
-    
-    size_i1 = np.count_nonzero(result)
-    size_i2 = np.count_nonzero(reference)
-    
-    try:
-        dc = 2. * intersection / float(size_i1 + size_i2)
-    except ZeroDivisionError:
-        dc = 1#0.0
-    
-    return dc
-#%%
+os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
+
 umap_bin = umap > 0.5
 umap_bin_s = np.squeeze(umap_bin)
 
@@ -284,12 +267,6 @@ plt.imshow(db[image,:,:])
 plt.imshow(umap_bin_s[image,:,:],alpha=0.4)  
 plt.title('Difference') 
 
-#%%
-os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
-from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
-
-
-
 
 #%%
 
@@ -326,181 +303,6 @@ plt.imshow(gt_test_es_res[i+image,:,:])
 #%%
 plt.figure(dpi=200, figsize = (5,5))
 plt.imshow(umap[i+image,0,:,:])   
-
-
-#%%
-out_patch_load = '/Users/michalablicher/Desktop/Out_patch_avg_dice_lclv_dia_fold_150.pt'
-
-out_patch_softmax_fold = torch.load(out_patch_load ,  map_location=torch.device(device))
-
-#%% Plot
-#mean_patch = out_patch_softmax_fold.mean(axis=0)
-
-mean_patch = out_patch_softmax_fold[:,:,:,:,:]
-
-
-m_patch_am = np.argmax(mean_patch, axis=1)
-
-
-m_patch = mean_patch > 0.1
-#%%
-size = 5
-slice = 15
-plt.figure(dpi=200, figsize = (10,4))
-for i in range(0,6):
-    plt.subplot(2,6,1+i)
-    plt.imshow(mean_patch[i,slice,1,:,:])
-    plt.title('Mean softmax patch',fontsize=size)
-    plt.colorbar(fraction=0.045)
-    
-    plt.subplot(2,6,7+i)
-    plt.imshow(m_patch[i,slice,1,:,:])
-    plt.title('Binarized at {}'.format('threshold'),fontsize=size)
-    #plt.colorbar(fraction=0.045)
-
-#%% Metrics on slices with failures
-
-#failure_per_slice = np.sum(m_patch_am[:,:,:], axis=(1,2))
-failure_per_slice = np.sum(m_patch[:,1,:,:], axis=(1,2))
-
-failures = (np.count_nonzero(failure_per_slice)/failure_per_slice.shape[0])*100
-print('Failures in {} % of test slices'.format(failures))
-
-p = []
-
-p.append(data_gt_ed_DCM[num_train_res:num_test_res][0].shape[0])
-p.append(data_gt_ed_DCM[num_train_res:num_test_res][1].shape[0])
-
-
-p.append(data_gt_ed_HCM[num_train_res:num_test_res][0].shape[0])
-p.append(data_gt_ed_HCM[num_train_res:num_test_res][1].shape[0])
-p.append(data_gt_ed_MINF[num_train_res:num_test_res][0].shape[0])
-p.append(data_gt_ed_MINF[num_train_res:num_test_res][1].shape[0])
-
-
-p.append(data_gt_ed_NOR[num_train_res:num_test_res][0].shape[0])
-p.append(data_gt_ed_NOR[num_train_res:num_test_res][1].shape[0])
-
-p.append(data_gt_ed_RV[num_train_res:num_test_res][0].shape[0])
-p.append(data_gt_ed_RV[num_train_res:num_test_res][1].shape[0])  
-
-#failure_per_patient = 
-    
-
-#%% Upsample
-mean_patch = out_patch_softmax_fold.mean(axis=0)
-m_patch = mean_patch > 0.1
-
-
-#% Upsample
-image = 15
-upper_image = image - 1
-lower_image = image + 1
-
-test_im = Tensor(np.expand_dims(m_patch[upper_image:lower_image,1,:,:],axis=0))
-up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
-up_im = up(test_im) > 0
-
-size = 16
-difference = (gt_test_es_res[image,:,:]-seg[image,0,:,:].detach().numpy())
-db = np.array(difference != 0)
-
-plt.figure(dpi=200, figsize =(12,7))
-plt.subplot(1,4,1)
-plt.suptitle('Slice {}'.format(image), y = 0.75, fontsize = 20)
-#plt.subplots_adjust(wspace = 0.4)
-plt.imshow(up_im[0,1,:,:])
-plt.imshow(input_concat[image,2,:,:], alpha = 0.6)
-#plt.imshow(up_im[0,0,:,:])
-#plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
-plt.title('Segmentation',fontsize=size)
-
-plt.subplot(1,4,2)
-plt.imshow(up_im[0,1,:,:])
-plt.imshow(np.argmax((ref_oh[image,:,:,:]),axis=2), alpha =0.6)
-#plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
-plt.title('Reference',fontsize=size)
-
-plt.subplot(1,4,3)
-plt.imshow(up_im[0,1,:,:])
-plt.imshow(db, cmap='coolwarm', alpha = 0.6)
-plt.title('Difference',fontsize=size)
-
-plt.subplot(1,4,4)
-#plt.imshow(up_im[0,1,:,:])
-plt.imshow(umap[15,0,:,:]) 
-#plt.imshow(input_concat[image,0,:,:], alpha= 0.6)
-plt.title('cMRI',fontsize=size)
-
-
-#%% Metrics
-up_im = np.zeros((85,2,128,128))
-
-for i in range(1,85):
-    #% Upsample
-    image = i
-    upper_image = image - 1
-    lower_image = image + 1
-    
-    test_im = Tensor(np.expand_dims(m_patch[upper_image:lower_image,1,:,:],axis=0))
-    up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
-    up_im[i,:,:,:] = up(test_im) > 0
-
-
-size = 16
-difference = (gt_test_es_res[:,:,:]-seg[:,0,:,:].detach().numpy())
-db = np.array(difference != 0)    
-
-
-
-#%% Sensitivty/Recall
-sen = np.zeros((out_seg_mean.shape[0],3))
-
-for i in range(0,out_seg_mean.shape[0]):
-    sen[i,0] = sensitivity(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
-    sen[i,1] = sensitivity(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
-    sen[i,2] = sensitivity(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
-
-mean_sen = np.mean(sen, axis=0)  
-std_sen  = np.std(sen,  axis=0)
-var_sen  = np.var(sen,  axis=0)
-
-print('mean sen   = ',mean_sen)  
-print('var sen    = ',  var_sen) 
-#print('std sen    = ',  std_sen) 
-#%% Specificity
-spec = np.zeros((out_seg_mean.shape[0],3))
-
-for i in range(0,out_seg_mean.shape[0]):
-    spec[i,0] = specificity(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
-    spec[i,1] = specificity(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
-    spec[i,2] = specificity(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
-
-mean_spec = np.mean(spec, axis=0)  
-std_spec  = np.std(spec,  axis=0)
-var_spec  = np.var(spec,  axis=0)
-
-print('mean spec   = ',mean_spec)  
-print('var spec    = ',  var_spec) 
-print('std spec    = ',  std_spec) 
-#%% Precision
-prec = np.zeros((out_seg_mean.shape[0],3))
-
-for i in range(0,out_seg_mean.shape[0]):
-    prec[i,0] = precision(out_seg_mean[i,:,:,1],ref[i,:,:,1])  # = RV
-    prec[i,1] = precision(out_seg_mean[i,:,:,2],ref[i,:,:,2])  # = MYO
-    prec[i,2] = precision(out_seg_mean[i,:,:,3],ref[i,:,:,3])  # = LV
-
-mean_prec = np.mean(prec, axis=0)  
-std_prec  = np.std(prec,  axis=0)
-var_prec  = np.var(prec,  axis=0)
-
-print('mean prec   = ',mean_prec)  
-print('var prec    = ',  var_prec) 
-#print('std prec    = ',  std_prec)
-
-
-
 
 
 

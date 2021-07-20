@@ -124,7 +124,7 @@ emap = np.expand_dims(emap, axis=1)
 im     = Tensor(im_test_es_res)
 umap   = Tensor(emap)
 seg    = Tensor(np.expand_dims(seg_met, axis = 1))
-#%%
+
 print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
 input_concat = torch.cat((im,umap,seg), dim=1)
@@ -152,81 +152,9 @@ for i in range(0, 4):
     plt.title('Reference') 
 
 #%%
-image = 78
-difference = (gt_test_es_res[image,:,:]-seg[image,0,:,:].detach().numpy())
-db = np.array(difference != 0)
+os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
-
-plt.figure(dpi=200, figsize = (12,7))
-
-plt.subplot(2,4,1)
-#plt.subplots_adjust(wspace = 0.4)
-plt.imshow(im[image,0,:,:])
-plt.title('cMRI slice {}'.format(image))
-plt.ylabel('Errors')
-
-plt.subplot(2,4,2)
-plt.imshow(seg[image,0,:,:])
-plt.title('Segmentation') 
-   
-plt.subplot(2,4,3)
-plt.imshow(gt_test_es_res[image,:,:])    
-plt.title('Reference') 
-
-plt.subplot(2,4,4)
-plt.imshow(umap[image,0,:,:])   
-plt.title('U-map') 
-
-
-image = 79
-#plt.figure(dpi=200, figsize = (12,7))
-
-plt.subplot(2,4,5)
-#plt.subplots_adjust(wspace = 0.4)
-plt.imshow(im[image,0,:,:])
-plt.title('cMRI slice {}'.format(image)) 
-plt.ylabel('No Errors')
-
-plt.subplot(2,4,6)
-plt.imshow(seg[image,0,:,:])
-plt.title('Segmentation') 
-   
-plt.subplot(2,4,7)
-plt.imshow(gt_test_es_res[image,:,:])    
-plt.title('Reference') 
-
-plt.subplot(2,4,8)
-plt.imshow(umap[image,0,:,:])   
-plt.title('U-map') 
-plt.colorbar(fraction=0.04)
-
-#%%
-plt.figure(dpi=200)
-plt.imshow(umap_bin[image,0,:,:])   
-plt.title('U-map') 
-plt.colorbar()
-
-#%%
-def dc(result, reference):
-    """
-    Dice coefficient
-    """
-    
-    result = np.atleast_1d(result.astype(np.bool))
-    reference = np.atleast_1d(reference.astype(np.bool))
-    
-    intersection = np.count_nonzero(result & reference)
-    
-    size_i1 = np.count_nonzero(result)
-    size_i2 = np.count_nonzero(reference)
-    
-    try:
-        dc = 2. * intersection / float(size_i1 + size_i2)
-    except ZeroDivisionError:
-        dc = 1#0.0
-    
-    return dc
-#%%
 umap_bin = umap > 0.5
 umap_bin_s = np.squeeze(umap_bin)
 
@@ -248,80 +176,6 @@ print('var dice', np.var(dice_umap))
 
 
 #%%
-image = 57
-
-plt.figure(dpi=200, figsize=(7,2))
-plt.subplot(1,3,1)
-plt.imshow(umap[image,0,:,:])  
-plt.title('U-map') 
-
-plt.subplot(1,3,2)
-plt.imshow(umap_bin_s[image,:,:])   
-plt.title('Binarized U-map') 
-
-plt.subplot(1,3,3)
-plt.imshow(db[image,:,:])   
-#plt.imshow(umap_bin_s[image,:,:],alpha=0.6)  
-plt.title('Difference') 
-
-#%%
-plt.subplot(1,4,4)
-plt.imshow(difference_u[image,:,:])     
-plt.title('Difference') 
-
-#%%
-difference_u = (umap_bin_s[:,:,:].detach().numpy()-db_b[:,:,:])
- 
-plt.figure(dpi=200)
-plt.imshow(db[image,:,:])   
-plt.imshow(umap_bin_s[image,:,:],alpha=0.4)  
-plt.title('Difference') 
-
-#%%
-os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
-from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
-
-
-
-
-#%%
-
-dice_78 = dc(seg[78,:,:,:].detach().numpy() ,gt_test_es_res[78,:,:]) 
-
-dice_79 = dc(seg[79,:,:,:].detach().numpy() ,gt_test_es_res[79,:,:]) 
-
-print('dice_78', dice_78)
-print('dice_79', dice_79)
-
-#%%
-"""
-plt.figure(dpi=200, figsize = (15,15))
-i = 0
-image = 39
-plt.subplot(4,1,1)
-#plt.suptitle('Input for detection network', y=0.67, fontsize=25)
-#plt.subplots_adjust(wspace = 0.4)
-plt.imshow(im[i+image,0,:,:])
-#plt.title('cMRI', fontsize=20) 
-
-plt.subplot(4,1,2)
-plt.imshow(umap[i+image,0,:,:])   
-#plt.title('Segmentation', fontsize=20) 
-   
-plt.subplot(4,1,3)
-plt.imshow(seg[i+image,0,:,:])
-#plt.title('U-map', fontsize=20) 
-
-plt.subplot(4,1,4)
-plt.imshow(gt_test_es_res[i+image,:,:])   
-#plt.title('U-map', fontsize=15) 
-"""
-#%%
-plt.figure(dpi=200, figsize = (5,5))
-plt.imshow(umap[i+image,0,:,:])   
-
-
-#%%
 out_patch_load = '/Users/michalablicher/Desktop/Out_patch_avg_dice_lclv_dia_fold_150.pt'
 
 out_patch_softmax_fold = torch.load(out_patch_load ,  map_location=torch.device(device))
@@ -330,8 +184,6 @@ out_patch_softmax_fold = torch.load(out_patch_load ,  map_location=torch.device(
 #mean_patch = out_patch_softmax_fold.mean(axis=0)
 
 mean_patch = out_patch_softmax_fold[:,:,:,:,:]
-
-
 m_patch_am = np.argmax(mean_patch, axis=1)
 
 
@@ -350,6 +202,7 @@ for i in range(0,6):
     plt.imshow(m_patch[i,slice,1,:,:])
     plt.title('Binarized at {}'.format('threshold'),fontsize=size)
     #plt.colorbar(fraction=0.045)
+
 
 #%% Metrics on slices with failures
 
@@ -384,6 +237,22 @@ p.append(data_gt_ed_RV[num_train_res:num_test_res][1].shape[0])
 mean_patch = out_patch_softmax_fold.mean(axis=0)
 m_patch = mean_patch > 0.1
 
+size = 5
+slice = 15
+plt.figure(dpi=200, figsize = (10,4))
+
+plt.subplot(1,2,1)
+plt.imshow(mean_patch[slice,1,:,:])
+plt.title('Mean softmax patch',fontsize=size)
+plt.colorbar(fraction=0.045)
+
+plt.subplot(1,2,2)
+plt.imshow(m_patch[slice,1,:,:])
+plt.title('Binarized at {}'.format('threshold'),fontsize=size)
+#plt.colorbar(fraction=0.045)
+
+
+#%%
 
 #% Upsample
 image = 15
