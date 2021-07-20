@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jul 19 11:50:59 2021
+
+@author: michalablicher
+"""
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jun  9 11:41:06 2021
