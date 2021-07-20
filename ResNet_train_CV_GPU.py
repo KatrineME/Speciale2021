@@ -540,7 +540,7 @@ def get_loss(log_pred_probs, lbls, pred_probs=None):
 
     # pred_probs last 2 dimensions need to be merged because lbls has shape [batch_size, w, h ]
     #pred_probs = pred_probs.view(pred_probs.size(0), 2, -1)
-    fn_soft = np.squeeze(log_pred_probs) * lbls.float()
+    fn_soft = (log_pred_probs) * lbls.float()
     
     # fn_nonzero = torch.nonzero(fn_soft.data).size(0)
     batch_size = log_pred_probs.size(0)
@@ -549,7 +549,7 @@ def get_loss(log_pred_probs, lbls, pred_probs=None):
     # same for false positive
     
     ones = torch.ones(lbls.size()).cuda()
-    fp_soft = (ones - lbls.float()) * np.squeeze(log_pred_probs)
+    fp_soft = (ones - lbls.float()) * (log_pred_probs)
     # fp_nonzero = torch.nonzero(fp_soft).size(0)
     fp_soft = torch.sum(fp_soft) * 1 / float(batch_size)
     # print(b_loss.item(), (self.fn_penalty_weight * fn_soft + self.fp_penalty_weight * fp_soft).item())
