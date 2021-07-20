@@ -452,7 +452,7 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_te
 #%% Load softmax from ensemble models
 
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_train_ResNet.pt'
-PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
+PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
 #PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop//Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
@@ -834,9 +834,9 @@ if __name__ == "__main__":
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
     
-    os.chdir("/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia") 
+    os.chdir("/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv") 
     # Write to txt file
-    text_file = open("Best_trial_dice.txt", "w")
+    text_file = open("Best_trial_dice_lclv.txt", "w")
     text_file.write("Study statistics: \n")
     text_file.write("  Number of finished trials: %s \n" % len(study.trials))
     text_file.write("  Number of complete trials: %s \n" % len(complete_trials))
@@ -851,55 +851,55 @@ if __name__ == "__main__":
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "eps"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/optuna_lr_eps.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/optuna_lr_eps.png')
     #plt.savefig('/home/michala/Speciale2021/Speciale2021/optuna_lr_eps.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "drop_prob_l"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/optuna_lr_drop.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/optuna_lr_drop.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "weight_decay"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/optuna_lr_wd.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/optuna_lr_wd.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["eps", "weight_decay"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/optuna_eps_wd.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/optuna_eps_wd.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["eps", "drop_prob_l"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/optuna_eps_drop.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/optuna_eps_drop.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "weight_decay"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/optuna_drop_wd.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/optuna_drop_wd.png')
     
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["lr", "cluster_size"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/optuna_lr_cluster.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/optuna_lr_cluster.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["eps", "cluster_size"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/optuna_eps_cluster.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/optuna_eps_cluster.png')
     
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["drop_prob_l", "cluster_size"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/optuna_drop_cluster.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/optuna_drop_cluster.png')
      
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_contour(study, params=["weight_decay", "cluster_size"])
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/optuna_wd_cluster.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/optuna_wd_cluster.png')
     
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_param_importances(study)
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/importances_optuna.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/importances_optuna.png')
     
     plt.figure(dpi=200)
     optuna.visualization.matplotlib.plot_optimization_history(study)
-    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia/history_optuna.png')
+    plt.savefig('/home/katrine/Speciale2021/Speciale2021/Optuna/detect_dice_dia_lclv/history_optuna.png')
 
    
 
