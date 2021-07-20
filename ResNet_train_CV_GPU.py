@@ -539,23 +539,14 @@ def get_loss(log_pred_probs, lbls, pred_probs=None):
     b_loss = loss_function(log_pred_probs, lbls)
     
     pred_probs = torch.exp(log_pred_probs)
-    # pred_probs last 2 dimensions need to be merged because lbls has shape [batch_size, w, h ]
-    #pred_probs = pred_probs.view(pred_probs.size(0), 2, -1)
-    #print('log_pred_probs', log_pred_probs.shape)
-    #print('lbls.float()', lbls.float().shape)
     fn_soft = (pred_probs[:,0,:,:]) * lbls.float()
-    
-    # fn_nonzero = torch.nonzero(fn_soft.data).size(0)
     batch_size = pred_probs.size(0)
-    
     fn_soft = torch.sum(fn_soft) * 1 / float(batch_size)
-    # same for false positive
     
     ones = torch.ones(lbls.size()).cuda()
     fp_soft = (ones - lbls.float()) * (pred_probs[:,1,:,:])
-    # fp_nonzero = torch.nonzero(fp_soft).size(0)
     fp_soft = torch.sum(fp_soft) * 1 / float(batch_size)
-    # print(b_loss.item(), (self.fn_penalty_weight * fn_soft + self.fp_penalty_weight * fp_soft).item())
+
     fn_penalty_weight = 1.2
     fp_penalty_weight = 0.085
     b_loss = b_loss + fn_penalty_weight * fn_soft + fp_penalty_weight * fp_soft
@@ -566,7 +557,7 @@ def get_loss(log_pred_probs, lbls, pred_probs=None):
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 50 #200
+num_epochs = 100 #200
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -798,7 +789,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_opt_dia_fold_150{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_opt_dia_fold_150{}.pt".format(fold)
     #PATH_model = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Trained_Detection_dice_dia_fold_150{}.pt'.format(fold)
     torch.save(model, PATH_model)
 
@@ -844,7 +835,7 @@ plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_opt_dia_fold_150.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_opt_dia_fold_150.png')
 
 #%%
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
@@ -852,7 +843,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_opt_dia_fold_150_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_opt_dia_fold_150_results.pt"
 #PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
 torch.save(T, PATH_results)
 
