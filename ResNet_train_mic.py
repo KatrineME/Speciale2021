@@ -367,12 +367,12 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
-#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 #os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 from load_data_gt_im_sub import load_data_sub
-#user = 'M'
-user = 'K' 
+user = 'M'
+#user = 'K' 
 data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
 data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
 data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
@@ -609,7 +609,7 @@ if __name__ == "__main__":
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed  = 'C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_CrossVal_mc01.pt'
+#PATH_model_ed  = 'C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_CrossVal_mc01.pt'
 #PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 #PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt'
