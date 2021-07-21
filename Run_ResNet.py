@@ -386,9 +386,9 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 
 #%% BATCH GENERATOR
-num_train_sub = 16 
-num_eval_sub  = num_train_sub + 1
-num_test_sub  = num_eval_sub + 1
+num_train_sub = 12
+num_eval_sub  = num_train_sub + 6
+num_test_sub  = num_eval_sub + 2
 
 
 im_test_es_sub = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_test_sub]).astype(None),
@@ -590,14 +590,29 @@ if __name__ == "__main__":
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_sub_batch_100.pt'
+PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_dia_150e_opt_test_ResNet.pt'
 
 #PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt'
 #PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
 
+#PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
+out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
+
+# mean them over dim=0
+#out_softmax_unet = out_softmax_unet_fold[:,252:,:,:,:].mean(axis=0)
+out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
+
+#Argmax
+seg_met = np.argmax(out_softmax_unet, axis=1)
+
+# One hot encode
+#seg_oh = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
+#ref_oh = torch.nn.functional.one_hot(Tensor(gt_test_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+
+
 # Load
 #unet_es = torch.load(PATH_model_es, map_location=torch.device('cpu'))
-unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
+#unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
 
@@ -606,16 +621,16 @@ unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 #out_image_es   = out_trained_es["softmax"]
 
 #im_flat_test_ed = im_flat_test_ed.cuda()
-
+"""
 unet_ed.eval()
 out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
 out_image_ed   = out_trained_ed["softmax"]
-
+"""
 
 #%% One hot encoding
-seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
+#seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
 
-seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
+seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
 """
 seg_met_sys = np.argmax(out_image_es.detach().cpu().numpy(), axis=1)
@@ -625,13 +640,13 @@ ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), nu
 """
 
 #%% E-map
-import scipy.stats
 
-emap = np.zeros((out_image_ed.shape[0],out_image_ed.shape[2],out_image_ed.shape[3]))
+import scipy.stats
+emap = np.zeros((seg_dia.shape[0],seg_dia.shape[1],seg_dia.shape[2]))
 
 for i in range(0, emap.shape[0]):
 
-    out_img = (out_image_ed[i,:,:].detach().cpu().numpy())
+    out_img = out_softmax_unet[i,:,:,:]#.detach().cpu().numpy())
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
@@ -641,12 +656,11 @@ for i in range(0, emap.shape[0]):
 
 emap = np.expand_dims(emap, axis=1)
 
-
 #%% Plot
 #% Wrap all inputs together
 im     = Tensor(im_test_ed_sub)
 umap   = Tensor(emap)
-seg    = Tensor(np.expand_dims(seg_met_dia, axis=1))
+seg    = Tensor(np.expand_dims(seg_met, axis=1))
 
 input_concat = torch.cat((im,umap,seg), dim=1)
 
@@ -655,15 +669,61 @@ out    = model(input_concat)
 output = out['softmax'].detach().cpu().numpy()
 
 
-#%% Load T_j
-#os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
-os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
-#os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
-from SI_func_mic import SI_set
+#%% Distance transform maps
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+from SI_error_func import dist_trans, cluster_min
 
-lim_eval = 1
-lim_test = 1
-T_j = SI_set('M', 'dia')
+error_margin_inside  = 2
+error_margin_outside = 3
+
+ref_oh = ref_dia
+seg_oh = seg_dia
+# Distance transform map
+dt_es_train = dist_trans(ref_oh, error_margin_inside, error_margin_outside)
+
+#%% Filter cluster size
+cluster_size = 10
+sys_new_label_train = cluster_min(seg_oh, ref_oh, cluster_size)
+
+roi_es_train = np.zeros((dt_es_train.shape))
+
+for i in range(0, dt_es_train.shape[0]):
+    for j in range(0, dt_es_train.shape[3]):
+        roi_es_train[i,:,:,j] = np.logical_and(dt_es_train[i,:,:,j], sys_new_label_train[i,:,:,j])
+        
+#%% Sample patches
+patch_size = 8
+patch_grid = int(roi_es_train.shape[1]/patch_size)
+
+lin    = np.linspace(0,roi_es_train.shape[1]-patch_size,patch_grid).astype(int)
+
+# Preallocate
+_temp  = np.zeros((patch_grid,patch_grid))
+lin    = np.linspace(0,roi_es_train.shape[1]-patch_size,patch_grid).astype(int)
+_ctemp = np.zeros((patch_grid,patch_grid,roi_es_train.shape[3]))
+T_j    = np.zeros((roi_es_train.shape[0],patch_grid,patch_grid,roi_es_train.shape[3]))
+
+for j in range (0,roi_es_train.shape[0]):
+    for c in range(0,4):
+        for pp in range(0,16):
+            for p, i in enumerate(lin):
+                _temp[pp,p] = np.count_nonzero(roi_es_train[j,lin[pp]:lin[pp]+8 , i:i+8, c])
+                #_temp[pp,p] = np.sum(~np.isnan(roi_es_train[j,lin[pp]:lin[pp]+8 , i:i+8, c]))
+        _ctemp[:,:,c] = _temp
+    T_j[j,:,:,:] = _ctemp
+
+
+# BACKGROUND SEG FAILURES ARE REMOVED
+T_j = T_j[:,:,:,1:] 
+
+# Summing all tissue channels together
+T_j = np.sum(T_j, axis = 3)
+
+# Binarize
+T_j[T_j >= 1 ] = 1
+
+T = np.expand_dims(T_j, axis=1)
 
 
 #%% Prep data

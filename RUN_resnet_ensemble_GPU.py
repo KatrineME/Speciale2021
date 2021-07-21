@@ -431,7 +431,7 @@ print('Data loaded+concat')
 # LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
 #% Load softmax from ensemble models
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
-PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_test_ResNet.pt'
+PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_test_ResNet.pt'
 
 #PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
@@ -488,7 +488,7 @@ input_data = torch.utils.data.DataLoader(input_concat, batch_size=1, shuffle=Fal
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_nocmri_opt_dia_fold_150{}.pt'.format(fold)
+        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_all_opt_dia_fold_150{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Detection_CE_dia_fold_500{}.pt'.format(fold)
     if user == 'M':
@@ -507,7 +507,7 @@ for fold in range(0,6):
     print('Done for fold',fold)
 
 if user == 'GPU':
-    PATH_out_patch = '/home/michala/Speciale2021/Speciale2021/Out_patch_avg_dice_loss_nomri_opt_dia_fold_150.pt'
+    PATH_out_patch = '/home/michala/Speciale2021/Speciale2021/Out_patch_avg_dice_loss_all_opt_dia_fold_150.pt'
 if user == 'K':
     PATH_out_patch = 'C:/Users/katrine/Desktop/Optuna/Out_patch_fold_500_avg.pt'
 if user == 'M':
