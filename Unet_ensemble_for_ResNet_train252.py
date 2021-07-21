@@ -299,12 +299,12 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_tes
 H = 128
 W = 128
 CV_folds = 6
-data_im = im_train_res.shape[0]
+data_im = im_test_res.shape[0]
 
 
 out_soft = np.zeros((CV_folds, data_im, 4, H, W))
 
-im_data = torch.utils.data.DataLoader(im_train_res, batch_size=1, shuffle=False, sampler=None,
+im_data = torch.utils.data.DataLoader(im_test_res, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None, prefetch_factor=2, num_workers=0)
