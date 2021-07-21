@@ -488,7 +488,7 @@ input_data = torch.utils.data.DataLoader(input_concat, batch_size=1, shuffle=Fal
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_all_opt_dia_fold_150{}.pt'.format(fold)
+        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_all_dia_fold_150{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Detection_CE_dia_fold_500{}.pt'.format(fold)
     if user == 'M':
