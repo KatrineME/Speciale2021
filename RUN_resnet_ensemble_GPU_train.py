@@ -402,6 +402,7 @@ data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
 data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
 
 #%% BATCH GENERATOR
+"""
 num_train_sub = 12
 num_eval_sub  = num_train_sub
 
@@ -433,12 +434,43 @@ gt_test_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num
                                   np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
 print('Data loaded+concat')
+"""
+num_train_sub = 12
+num_eval_sub = num_train_sub
+num_test_sub = num_eval_sub + 8
+
+im_train_res = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[0:num_train_sub]).astype(None)))
+
+gt_train_res = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
+
+
+im_test_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+
 
 #%% U-Net
 # LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
 #% Load softmax from ensemble models
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
-PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
+PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
 
 #PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
@@ -452,7 +484,7 @@ seg_met = np.argmax(out_softmax_unet, axis=1)
 
 # One hot encode
 seg_oh = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
-ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
 #%% E-map
 import scipy.stats

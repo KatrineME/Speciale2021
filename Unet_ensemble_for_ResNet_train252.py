@@ -264,9 +264,9 @@ print('Data loaded+concat')
 """
 
 
-num_train_sub = 10
+num_train_sub = 12
 num_eval_sub = num_train_sub
-num_test_sub = num_eval_sub + 10
+num_test_sub = num_eval_sub + 8
 
 im_train_res = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
                                   np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
