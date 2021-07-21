@@ -306,14 +306,3 @@ plt.imshow(umap[i+image,0,:,:])
 
 
 
-
-
-
-
-
-
-
-
-
-
-
