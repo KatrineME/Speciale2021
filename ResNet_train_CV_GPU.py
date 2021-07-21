@@ -601,6 +601,19 @@ def get_loss(log_pred_probs, lbls, pred_probs=None):
 
     return b_loss
     
+
+def soft_dice_loss(y_true, y_pred):
+     """ Calculate soft dice loss for each class
+        y_pred = bs x c x h x w
+        y_true = bs x c x h x w (one hot)
+     """
+     eps = 1e-6
+     
+     numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
+     denominator = torch.sum((torch.square(y_pred) + torch.square(y_true)), (2,3))
+     
+     return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
+
 #%%%%%%%%%%%%%%%% Training ResNet %%%%%%%%%%%%%%%%
 
 #%% Training with K-folds
@@ -714,10 +727,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             # Forward Pass
             output = model(inputs)     
             output = output["log_softmax"]
+            output = torch.exp(output)
             #print('output shape = ', output.shape)
 
             # Find loss
-            loss = get_loss(output, labels)
+            loss = soft_dice_loss(output, labels)
             #print('loss',loss)
             #print('loss = ', loss)
             
@@ -781,8 +795,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             # Forward pass
             output = model(inputs)     
             output = output["log_softmax"]
+            output = torch.exp(output)
             # Find loss
-            loss = get_loss(output, labels)
+            loss = soft_dice_loss(output, labels)
             
             # Calculate loss
             #eval_loss.append(loss.item())
@@ -828,7 +843,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_umap_dia_fold_150{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_umap_dia_fold_150{}.pt".format(fold)
     #PATH_model = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Trained_Detection_dice_dia_fold_150{}.pt'.format(fold)
     torch.save(model, PATH_model)
 
@@ -874,7 +889,7 @@ plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_umap_dia_fold_150.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_umap_dia_fold_150.png')
 
 #%%
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
@@ -882,7 +897,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_loss_umap_dia_fold_150_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_umap_dia_fold_150_results.pt"
 #PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
 torch.save(T, PATH_results)
 
