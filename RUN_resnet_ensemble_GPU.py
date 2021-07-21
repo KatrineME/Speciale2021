@@ -470,8 +470,8 @@ seg    = Tensor(np.expand_dims(seg_met, axis = 1))
 
 print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
-"input_concat = torch.cat((umap,seg), dim=1)
-input_concat = umap#torch.cat((umap), dim=1)
+#input_concat = torch.cat((umap,seg), dim=1)
+input_concat = umap #torch.cat((umap), dim=1)
 
 #%%
 H = 16
