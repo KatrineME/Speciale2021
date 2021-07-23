@@ -370,71 +370,49 @@ if __name__ == "__main__":
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 #os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
-from load_data_gt_im_sub import load_data_sub
-#user = 'M'
-user = 'K' 
-data_im_es_DCM,  data_gt_es_DCM  = load_data_sub(user,'Systole','DCM')
-data_im_es_HCM,  data_gt_es_HCM  = load_data_sub(user,'Systole','HCM')
-data_im_es_MINF, data_gt_es_MINF = load_data_sub(user,'Systole','MINF')
-data_im_es_NOR,  data_gt_es_NOR  = load_data_sub(user,'Systole','NOR')
-data_im_es_RV,   data_gt_es_RV   = load_data_sub(user,'Systole','RV')
-"""
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
-"""
+from load_data_gt_im_sub_space import load_data_sub
+
+user = 'K'
+phase = 'Diastole'
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
+
+
 
 #%% BATCH GENERATOR
 num_train_sub = 12
 num_eval_sub  = num_train_sub
 
-
-num_train_res  = num_eval_sub + 6
+num_train_res = num_eval_sub + 6
 num_test_res  = num_train_res + 2
 
-im_train_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_im_es_RV[num_eval_sub:num_train_res]).astype(None)))
+im_train_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_train_res]).astype(None)))
 
-gt_train_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_train_res]).astype(None),
-                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_train_res]).astype(None)))
-
-
-im_test_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_im_es_HCM[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_im_es_MINF[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_im_es_NOR[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_im_es_RV[num_train_res:num_test_res]).astype(None)))
-
-gt_test_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_gt_es_HCM[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_gt_es_MINF[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_gt_es_NOR[num_train_res:num_test_res]).astype(None),
-                                  np.concatenate(data_gt_es_RV[num_train_res:num_test_res]).astype(None)))
+gt_train_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_train_res]).astype(None)))
 
 
+im_test_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_train_res:num_test_res]).astype(None)))
 
-"""
-
-im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-
-gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-"""
+gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
 
 
 #%% Load U-NET
@@ -609,18 +587,24 @@ if __name__ == "__main__":
 #PATH_model_ed = "C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_nor_20e.pt"
 
 #PATH_model_es = '/Users/michalablicher/Desktop/Trained_Unet_CE_sys_sub_batch_100.pt'
-PATH_model_ed  = 'C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_CrossVal_mc01.pt'
+#PATH_model_ed  = 'C:/Users/katrine/Documents/Universitet/Speciale/Trained_Unet_CE_dia_CrossVal_mc01.pt'
+PATH_model_ed  = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
 #PATH_model_ed = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 #PATH_model_es = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_sys_sub_batch_100.pt'
 #PATH_model_ed = '/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_sub_batch_100.pt'
 
 # Load
-unet_es  = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
+unet_es   = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
+unet_pred = unet_es.mean(axis=0)
+unet_am = torch.argmax(Tensor(unet_pred), axis=1)
+seg_sys = torch.nn.functional.one_hot(unet_am.to(torch.int64), num_classes=4).detach().cpu().numpy()
+ref_sys = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 #unet_ed = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
 
 #im_flat_test_es = im_flat_test_es.cuda()
 #%% Data loader
+"""
 from torch.utils.data import DataLoader
 
 im_data = torch.utils.data.DataLoader(im_train_es_res, batch_size=2, shuffle=False, sampler=None,
@@ -648,29 +632,28 @@ out_image_es = torch.cat(out_image_es)
 #unet_ed.eval()
 #out_trained_ed = unet_ed(Tensor(im_test_ed_sub))
 #out_image_ed   = out_trained_ed["softmax"]
-
+"""
 #%% One hot encoding
 """
 seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
 
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
-"""
+
 seg_met_sys = np.argmax(out_image_es.detach().cpu().numpy(), axis=1)
 
 seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
 ref_sys = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
-
+"""
 
 #%% E-map
 import scipy.stats
 
-#emap = np.zeros((out_image_ed.shape[0],out_image_ed.shape[2],out_image_ed.shape[3]))
-emap = np.zeros((out_image_es.shape[0],out_image_es.shape[2],out_image_es.shape[3]))
+emap = np.zeros((unet_pred.shape[0],unet_pred.shape[2],unet_pred.shape[3]))
 
 for i in range(0, emap.shape[0]):
 
-    out_img = (out_image_es[i,:,:].detach().cpu().numpy())
+    out_img = unet_pred[i,:,:,:]#.detach().cpu().numpy())
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
@@ -680,11 +663,20 @@ for i in range(0, emap.shape[0]):
 
 emap = np.expand_dims(emap, axis=1)
 
+#% Wrap all inputs together
+im     = Tensor(im_train_res)
+umap   = Tensor(emap)
+seg    = Tensor(np.expand_dims(unet_am, axis=1))
+
+print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
+
+input_concat = torch.cat((im,umap,seg), dim=1)
+
 #%% Plot
 #% Wrap all inputs together
-im     = Tensor(im_train_es_res)
+im     = Tensor(im_train_res)
 umap   = Tensor(emap)
-seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
+seg    = Tensor(np.expand_dims(unet_am, axis=1))
 
 image = 10
 
@@ -722,7 +714,7 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 #                                               step_size=3,
 #                                               gamma=0.1)
 
-num_epoch = 3
+num_epoch = 2
 
 print('Number of epochs = ',num_epoch)
 #%% Load T_j
@@ -790,7 +782,7 @@ T_j[T_j >= 1 ] = 1
 T = np.expand_dims(T_j, axis=1)
 
 
-train_amount = 58
+train_amount = 10
 
 input_concat_train = input_concat[0:train_amount,:,:,:]
 input_concat_eval  = input_concat[train_amount:,:,:,:]
@@ -804,7 +796,7 @@ eval_losses  = []
 eval_loss    = 0.0
 train_loss   = 0.0
 
-trainloader = input_concat#_train
+trainloader = input_concat_train
 
 for epoch in range(num_epoch):  # loop over the dataset multiple times
     
@@ -832,6 +824,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Forward Pass
         output = model(inputs)     
         output = output["log_softmax"]
+        output = torch.exp(output)
 
         loss = criterion(output, labels)
         #loss = loss #+ fn_penalty_weight * fn_soft + fp_penalty_weight * fp_soft
@@ -871,6 +864,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
         # Forward Pass
         output = model(inputs)     
         output = output["log_softmax"]
+        output = torch.exp(output)
         
         # Find loss
         loss = criterion(output, labels)
@@ -922,21 +916,26 @@ seg_met_dia = np.argmax(out_image_ed.detach().cpu().numpy(), axis=1)
 seg_dia = torch.nn.functional.one_hot(torch.as_tensor(seg_met_dia), num_classes=4).detach().cpu().numpy()
 ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4).detach().cpu().numpy()
 """
-seg_met_sys = np.argmax(out_image_es.detach().cpu().numpy(), axis=1)
 
-seg_sys = torch.nn.functional.one_hot(torch.as_tensor(seg_met_sys), num_classes=4).detach().cpu().numpy()
-ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_es_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+PATH_model_ed  = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_test_ResNet.pt'
+
+# Load
+unet_es   = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
+unet_pred = unet_es.mean(axis=0)
+unet_am = torch.argmax(Tensor(unet_pred), axis=1)
+seg_sys = torch.nn.functional.one_hot(unet_am.to(torch.int64), num_classes=4).detach().cpu().numpy()
+ref_sys = torch.nn.functional.one_hot(Tensor(gt_test_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+
 
 
 #%% E-map
 import scipy.stats
 
-#emap = np.zeros((out_image_ed.shape[0],out_image_ed.shape[2],out_image_ed.shape[3]))
-emap = np.zeros((out_image_es.shape[0],out_image_es.shape[2],out_image_es.shape[3]))
+emap = np.zeros((unet_pred.shape[0],unet_pred.shape[2],unet_pred.shape[3]))
 
 for i in range(0, emap.shape[0]):
 
-    out_img = (out_image_es[i,:,:].detach().cpu().numpy())
+    out_img = unet_pred[i,:,:,:]#.detach().cpu().numpy())
     entropy2 = scipy.stats.entropy(out_img)
     
     # Normalize 
@@ -946,13 +945,22 @@ for i in range(0, emap.shape[0]):
 
 emap = np.expand_dims(emap, axis=1)
 
+#% Wrap all inputs together
+im     = Tensor(im_test_res)
+umap   = Tensor(emap)
+seg    = Tensor(np.expand_dims(unet_am, axis=1))
+
+print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
+
+input_concat = torch.cat((im,umap,seg), dim=1)
+
 #%% Plot
 #% Wrap all inputs together
-im     = Tensor(im_test_es_res)
+im     = Tensor(im_test_res)
 umap   = Tensor(emap)
-seg    = Tensor(np.expand_dims(seg_met_sys, axis=1))
+seg    = Tensor(np.expand_dims(unet_am, axis=1))
 
-image = 2
+image = 10
 
 plt.figure(dpi=200)
 plt.subplot(1,4,1)
@@ -966,13 +974,14 @@ plt.subplot(1,4,3)
 plt.imshow(umap[image,0,:,:])   
 plt.title('U-map') 
 plt.subplot(1,4,4)
-plt.imshow(gt_test_es_res[image,:,:])   
+plt.imshow(gt_test_res[image,:,:])   
 plt.title('ref') 
 
 input_concat = torch.cat((im,umap,seg), dim=1)
 
-
-out_test    = model(input_concat)
+#%%
+model.eval()
+out_test    = model(input_concat_eval)
 output_test = out_test['softmax'].detach().numpy()
 
 #%% Visualize output from detection network
@@ -981,7 +990,7 @@ image = 2
 k = np.zeros((output_test.shape[0],2,16,16))
 
 for i in range (0,output_test.shape[0]):
-    k[i,:,:,:] = output_test[i,:,:,:] > 0.1
+    k[i,:,:,:] = output_test[i,:,:,:] > 0.001
     
 plt.figure(dpi=200)
 plt.subplot(1,3,1)
@@ -999,9 +1008,9 @@ plt.subplot(1,3,3)
 plt.imshow(k[image,1,:,:])
 plt.title('bin 0.1')
 #plt.colorbar(fraction=0.05)
-#%%
+
 #% Upsample
-image = 2
+
 upper_image = image - 1
 lower_image = image + 1
 

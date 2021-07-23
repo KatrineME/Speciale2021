@@ -63,8 +63,8 @@ gt_train_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]
                                   np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
                                   np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
 
-gt_test_ed_sub = gt_train_ed_sub
-im_test_ed_sub = im_train_ed_sub
+im_test_ed_res = gt_train_ed_sub
+im_test_ed_res = im_train_ed_sub
 """
 """
 im_test_ed_sub = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
@@ -110,6 +110,9 @@ gt_train_ed_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_train_res]).astype(None)))
 
+#im_train_ed_res = im_train_ed_res
+#gt_test_ed_res  = gt_train_ed_res
+
 
 im_test_ed_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_train_res:num_test_res]).astype(None),
@@ -125,8 +128,8 @@ gt_test_ed_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num
 print('Data loaded+concat')
 
 #%% Load model
-PATH_model_es = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_test_ResNet.pt"
-PATH_model_ed = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_test_ResNet.pt"
+PATH_model_es = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_test_ResNet.pt"
+PATH_model_ed = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_test_ResNet.pt"
 
 unet_es_soft = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 unet_ed_soft = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
@@ -177,7 +180,7 @@ for i in range(0, dt_ed.shape[0]):
         roi_target_map_ed[i,:,:,j] = np.logical_and(dt_ed[i,:,:,j], dia_new_label[i,:,:,j])
 
 #%% plot all results
-test_slice = 29
+test_slice = 10
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
 plt.figure(dpi=200, figsize=(9,6))
 
@@ -292,7 +295,7 @@ T_j = np.sum(T_j, axis = 3)
 T_j[T_j >= 1 ] = 1
 
 #%%
-n = im_test_ed_res.shape[0]
+n = im_train_ed_res.shape[0]
 
 t = np.count_nonzero(T_j.sum(axis=(1,2)))
 print('Number of slices containing min. 1 patch: ', (t/n)*100 ,'%' )
@@ -315,12 +318,19 @@ up_im   = up(Tj_temp)
 # Binarize
 up_im[up_im >0] =1
 
+#%%
+PATH_Tj = "C:/Users/katrine/Desktop/Optuna/Final resnet models/SI_Tj_85_dice_opt.pt"
+torch.save(T_j,PATH_Tj)
+PATH_up_im = "C:/Users/katrine/Desktop/Optuna/Final resnet models/SI_UpIm_85_dice_opt.pt"
+torch.save(torch.squeeze(up_im),PATH_up_im)
+#%%
 
-test_slice = 21
+test_slice = 10
 
 #% plot
 plt.figure(dpi=200)
 plt.imshow(unet_ed_mean_am[test_slice,:,:])
+plt.imshow(gt_test_ed_res[test_slice,:,:], alpha =0.3)
 plt.imshow(up_im[test_slice,0,:,:], alpha= 0.3)
 
 #plt.colorbar()
