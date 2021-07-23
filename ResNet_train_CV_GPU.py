@@ -360,10 +360,10 @@ class CombinedRSN(SimpleRSN):
 if __name__ == "__main__":
     #import torchsummary
 
-    n_channels = 3  # 3
+    n_channels = 1  # 3
     n_classes  = 2
     #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.37)
+    model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.1)
     if device == 'cuda':
         model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
@@ -392,11 +392,12 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 
 
 #%% BATCH GENERATOR
+
 num_train_sub = 12
 num_eval_sub  = num_train_sub
 
-num_train_res = num_eval_sub + 6
-num_test_res  = num_train_res + 2
+num_train_res = num_eval_sub + 8
+num_test_res  = num_train_res + 0
 
 im_train_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_eval_sub:num_train_res]).astype(None),
@@ -410,7 +411,7 @@ gt_train_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_tr
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_train_res]).astype(None)))
 
-
+"""
 im_test_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_im_ed_MINF[num_train_res:num_test_res]).astype(None),
@@ -422,13 +423,46 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_te
                                   np.concatenate(data_gt_ed_MINF[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
+"""
+"""
 
+num_train_sub = 12
+num_eval_sub = num_train_sub
+num_test_sub = num_eval_sub + 8
+
+im_train_res = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[0:num_train_sub]).astype(None)))
+
+gt_train_res = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
+
+
+im_test_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+
+"""
 
 #%% Load softmax from ensemble models
 
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
-PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
-#PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop//Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
+PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_150dia_dice_opt.pt'
+#PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop//Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
 # mean them over dim=0
@@ -465,8 +499,8 @@ seg    = Tensor(np.expand_dims(seg_met, axis=1))
 
 print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
-input_concat = torch.cat((im,umap,seg), dim=1)
-
+#input_concat = torch.cat((im,umap,seg), dim=1)
+input_concat = umap #torch.cat((umap), dim=1)
 
 #%% Distance transform maps
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -480,7 +514,7 @@ error_margin_outside = 3
 dt_es_train = dist_trans(ref_oh, error_margin_inside, error_margin_outside)
 
 #%% Filter cluster size
-cluster_size = 6
+cluster_size = 10
 sys_new_label_train = cluster_min(seg_oh, ref_oh, cluster_size)
 
 roi_es_train = np.zeros((dt_es_train.shape))
@@ -522,11 +556,69 @@ T_j[T_j >= 1 ] = 1
 
 T = np.expand_dims(T_j, axis=1)
 
+#%%    
+"""
+image = 34
+upper_image = image - 1
+lower_image = image + 1
+
+test_im = Tensor(np.expand_dims(T[upper_image:lower_image,0,:,:],axis=0))
+up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
+up_im = up(test_im) > 0
+
+plt.imshow(up_im[0,1,:,:])
+plt.imshow(input_concat[image,0,:,:],alpha=0.6)
+"""
+#%%
+
+def get_loss(log_pred_probs, lbls, pred_probs=None):
+    """
+    :param log_pred_probs: LOG predicted probabilities [batch_size, 2, w * h]
+    :param lbls: ground truth labels [batch_size, w * h]
+    :param pred_probs: [batch_size, 2, w * h]
+    :return: torch scalar
+    """
+    # print("INFO - get_loss - log_pred_probs.shape, lbls.shape ", log_pred_probs.shape, lbls.shape)
+    # NOTE: this was a tryout (not working) for hard negative mining
+    # batch_loss_indices = RegionDetector.hard_negative_mining(pred_probs, lbls)
+    # b_loss_idx_preds = batch_loss_indices.unsqueeze(1).expand_as(log_pred_probs)
+    # The input given through a forward call is expected to contain log-probabilities of each class
+    loss_function = nn.CrossEntropyLoss()
+    b_loss = loss_function(log_pred_probs, lbls)
+    
+    pred_probs = torch.exp(log_pred_probs)
+    fn_soft = (pred_probs[:,0,:,:]) * lbls.float()
+    batch_size = pred_probs.size(0)
+    fn_soft = torch.sum(fn_soft) * 1 / float(batch_size)
+    
+    ones = torch.ones(lbls.size()).cuda()
+    fp_soft = (ones - lbls.float()) * (pred_probs[:,1,:,:])
+    fp_soft = torch.sum(fp_soft) * 1 / float(batch_size)
+
+    fn_penalty_weight = 1.2
+    fp_penalty_weight = 0.085
+    b_loss = b_loss + fn_penalty_weight * fn_soft + fp_penalty_weight * fp_soft
+
+    return b_loss
+    
+
+def soft_dice_loss(y_true, y_pred):
+     """ Calculate soft dice loss for each class
+        y_pred = bs x c x h x w
+        y_true = bs x c x h x w (one hot)
+     """
+     eps = 1e-6
+     
+     numerator   = 2. * torch.sum(y_pred * y_true, (2,3)) 
+     denominator = torch.sum((torch.square(y_pred) + torch.square(y_true)), (2,3))
+     
+     return 1 - torch.mean((numerator + eps) / (denominator + eps)) 
+
 #%%%%%%%%%%%%%%%% Training ResNet %%%%%%%%%%%%%%%%
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 200
+num_epochs = 100 #200
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -585,10 +677,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     #model.apply(weights_init)
     
     # Initialize optimizer
-    optimizer = torch.optim.Adam(model.parameters(),  lr=0.007, eps=0.006, weight_decay=0.0005) # Optuna
+    optimizer = torch.optim.Adam(model.parameters(),  lr=0.0001, eps=0.0001, weight_decay=0.0001) # Optuna
     #optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, eps=0.0001 weight_decay=0.0001) # Initial
     #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=25)
-    
+
+ 
     #% Training
     train_losses  = []
     train_results = []
@@ -621,7 +714,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             inputs = Tensor(ims)
             inputs = inputs.cuda()
             
-            labels = Tensor(np.squeeze(la))
+            #labels = Tensor(np.squeeze(la))
+            labels = Tensor((la))
             labels = labels.cuda()
             #print('i=',i)
             # wrap them in Variable
@@ -634,10 +728,12 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             # Forward Pass
             output = model(inputs)     
             output = output["log_softmax"]
+            output = torch.exp(output)
             #print('output shape = ', output.shape)
 
             # Find loss
-            loss = loss_function(output, labels)
+            loss = soft_dice_loss(output, labels)
+            #print('loss',loss)
             #print('loss = ', loss)
             
             # Calculate gradients
@@ -687,9 +783,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             
             inputs = inputs.cuda()
             
-            labels = Tensor(np.squeeze(la))
-            
-            
+            #labels = Tensor(np.squeeze(la))
+            labels = Tensor((la))
             labels = labels.cuda()
             
             #print('i=',i)
@@ -700,8 +795,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             # Forward pass
             output = model(inputs)     
             output = output["log_softmax"]
+            output = torch.exp(output)
             # Find loss
-            loss = loss_function(output, labels)
+            loss = soft_dice_loss(output, labels)
             
             # Calculate loss
             #eval_loss.append(loss.item())
@@ -727,16 +823,6 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
         total_e     = 0.0
         incorrect_e = 0.0
         #print('eval_results', eval_results)
-
-        #print('--------------------------------')
-        #results[fold] = 100.0 * (correct_e / total_e)
-        
-        
-        # Learning rate scheduler
-        #lr_get = lr_scheduler.get_last_lr()[0]
-        #lr_scheduler.step()
-        #print('lr =', lr_get)
-        #optimizer.param_groups[0]['lr']
         
     fold_train_losses.append(train_losses)
     #print('fold loss = ', fold_train_losses)
@@ -757,7 +843,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_opt_dia_fold_150{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_umap_dia_fold_150{}.pt".format(fold)
     #PATH_model = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Trained_Detection_dice_dia_fold_150{}.pt'.format(fold)
     torch.save(model, PATH_model)
 
@@ -803,7 +889,7 @@ plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_opt_dia_fold_150.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_umap_dia_fold_150.png')
 
 #%%
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
@@ -811,7 +897,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_opt_dia_fold_150_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_umap_dia_fold_150_results.pt"
 #PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
 torch.save(T, PATH_results)
 

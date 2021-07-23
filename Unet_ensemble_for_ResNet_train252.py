@@ -228,6 +228,7 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub('GPU',phase,'RV')
 
 
 #%% BATCH GENERATOR
+"""
 num_train_sub = 12
 num_eval_sub  = num_train_sub
 
@@ -246,7 +247,7 @@ gt_train_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_tr
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_train_res]).astype(None)))
 
-"""
+
 im_test_es_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_im_ed_MINF[num_train_res:num_test_res]).astype(None),
@@ -258,19 +259,52 @@ gt_test_es_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num
                                   np.concatenate(data_gt_ed_MINF[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
-"""
+
 print('Data loaded+concat')
+"""
+
+
+num_train_sub = 12
+num_eval_sub = num_train_sub
+num_test_sub = num_eval_sub + 8
+
+im_train_res = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[0:num_train_sub]).astype(None)))
+
+gt_train_res = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
+
+
+im_test_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+
 
 #%%
 H = 128
 W = 128
 CV_folds = 6
-data_im = im_train_res.shape[0]
+data_im = im_test_res.shape[0]
 
 
 out_soft = np.zeros((CV_folds, data_im, 4, H, W))
 
-im_data = torch.utils.data.DataLoader(im_train_res, batch_size=1, shuffle=False, sampler=None,
+im_data = torch.utils.data.DataLoader(im_test_res, batch_size=1, shuffle=False, sampler=None,
            batch_sampler=None, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None, prefetch_factor=2, num_workers=0)
@@ -293,7 +327,7 @@ for fold in range(0,6):
     print('Done for fold',fold)
 
 if user == 'GPU':
-    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
+    PATH_out_soft = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_dia_150e_opt_train_all_ResNet.pt'
 if user == 'K':
     PATH_out_soft = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_train_ResNet.pt'
 torch.save(out_soft, PATH_out_soft)
