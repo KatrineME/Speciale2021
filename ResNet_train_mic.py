@@ -367,8 +367,8 @@ if __name__ == "__main__":
     #torchsummary.summary(model, (n_channels, 80, 80))
     
 #%% Specify directory
-os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
-#os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
+#os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
+os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 #os.chdir("/home/michala/Speciale2021/Speciale2021/Speciale2021/Speciale2021") 
 from load_data_gt_im_sub_space import load_data_sub
 
@@ -805,7 +805,7 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     for i, data_train in enumerate(trainloader, 0):
         # get the inputs
         #inputs, labels = data
-        inputs = input_concat 
+        inputs = input_concat
         #inputs = inputs.cuda()
         labels = Tensor(T)#_train)
         #labels = labels.cuda()
@@ -990,7 +990,7 @@ image = 2
 k = np.zeros((output_test.shape[0],2,16,16))
 
 for i in range (0,output_test.shape[0]):
-    k[i,:,:,:] = output_test[i,:,:,:] > 0.001
+    k[i,:,:,:] = output_test[i,:,:,:] > 0.00
     
 plt.figure(dpi=200)
 plt.subplot(1,3,1)

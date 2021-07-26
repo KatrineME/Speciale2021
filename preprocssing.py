@@ -21,8 +21,8 @@ import torch
 import matplotlib.pyplot as plt
 
     
-#os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")
-os.chdir('/Users/michalablicher/Desktop/training')
+os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/training")
+#os.chdir('/Users/michalablicher/Desktop/training')
 
 
 phase = 'Diastole'
@@ -50,7 +50,7 @@ ori_resol = np.zeros((100,2))
 gt_crop = [] #np.zeros((H,W,100))
 im_crop = []
 
-for i in range(0,7):
+for i in range(0,38):
     #print('i =',i)
     nimg = nib.load(frame_im[i])
     img  = nimg.get_fdata()
@@ -100,16 +100,16 @@ for i in range(0,7):
 
 s = 19
 plt.figure(dpi=200, figsize=(14,9))
-plt.subplot(1,3,1)
+plt.subplot(1,2,1)
 plt.imshow(img[:,:,c_slice])
 plt.title('Original cMRI', fontsize=s)
-plt.subplot(1,3,3)
+plt.subplot(1,2,2)
 plt.imshow(gt[:,:,c_slice])
 plt.title('Manual segmentation', fontsize=s)
-plt.subplot(1,3,2)
-plt.imshow(gt[:,:,c_slice])
-plt.imshow(img[:,:,c_slice], alpha= 0.5)
-plt.title('Overlay', fontsize=s)
+#plt.subplot(1,3,2)
+#plt.imshow(gt[:,:,c_slice])
+#plt.imshow(img[:,:,c_slice], alpha= 0.5)
+#plt.title('Overlay', fontsize=s)
 
 
 
