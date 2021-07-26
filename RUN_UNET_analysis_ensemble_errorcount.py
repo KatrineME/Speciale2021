@@ -213,7 +213,7 @@ if __name__ == "__main__":
 if device == 'cuda':
     user = 'GPU'
 else:
-    user = 'K'
+    user = 'M'
 
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -291,7 +291,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt'
+#path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
