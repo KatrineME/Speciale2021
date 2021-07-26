@@ -306,7 +306,7 @@ im_data = torch.utils.data.DataLoader(im_test_es_sub, batch_size=1, shuffle=Fals
 
 for fold in range(0,6):
     if user == 'GPU':
-        path_model ='/home/michala/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_sys_150e_opt_fold{}.pt'.format(fold)
+        path_model ='/home/katrine/Speciale2021/Speciale2021/Trained_Unet_dice_lclv_sys_150e_opt_fold{}.pt'.format(fold)
     if user == 'K':
         path_model = 'C:/Users/katrine/Desktop/Optuna/Trained_Unet_dice_2lclv_dia_200_fold{}.pt'.format(fold)
     model = torch.load(path_model, map_location=torch.device(device))
