@@ -291,7 +291,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -782,19 +782,32 @@ emap = np.expand_dims(emap, axis=1)
 
 #% Plot for visual inspection
 # argmax seg + umap + GT
-test_slice = 329
+test_slice = 31
 
-plt.figure(dpi=200, figsize=(20,10))
-plt.subplot(3,1,1)
+plt.figure(dpi=200, figsize=(30,20))
+plt.subplot(5,1,1)
+plt.imshow(im_test_ed_sub[test_slice,0,:,:])
+#plt.title('MRI. for slice: {}'.format(test_slice))
+
+plt.subplot(5,1,3)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
-plt.title('Seg. for slice: {}'.format(test_slice))
+#plt.title('Seg. for slice: {}'.format(test_slice))
 
-plt.subplot(3,1,2)
+plt.subplot(5,1,2)
 plt.imshow(emap[test_slice,0,:,:])
-plt.title('Umap for slice: {}'.format(test_slice))
+#plt.title('Umap for slice: {}'.format(test_slice))
 
-plt.subplot(3,1,3)
+plt.subplot(5,1,4)
 plt.imshow(gt_test_ed_sub[test_slice,:,:])
-plt.title('GT for slice: {}'.format(test_slice))
+#plt.title('GT for slice: {}'.format(test_slice))
 
+#plt.subplot(5,1,5)
+diff = (out_seg_mean_am-gt_test_ed_sub) !=0
+#plt.imshow(diff[test_slice,:,:])
 
+#%%
+test_slice = 31
+
+plt.figure(dpi=200, figsize=(9,4))
+diff = (out_seg_mean_am-gt_test_ed_sub) !=0
+plt.imshow(diff[test_slice,:,:])
