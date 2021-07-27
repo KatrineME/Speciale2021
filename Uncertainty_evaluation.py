@@ -94,7 +94,7 @@ print('Data loaded+concat')
 # LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
 #% Load softmax from ensemble models
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
-PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_dia_150e_opt_test_ResNet.pt'
+#PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_dia_150e_opt_test_ResNet.pt'
 
 #PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
@@ -170,7 +170,7 @@ plt.subplot(2,4,1)
 #plt.subplots_adjust(wspace = 0.4)
 plt.imshow(im[image,0,:,:])
 plt.title('cMRI slice {}'.format(image))
-plt.ylabel('Errors')
+plt.ylabel('High uncertainties')
 
 plt.subplot(2,4,2)
 plt.imshow(seg[image,0,:,:])
@@ -192,7 +192,7 @@ plt.subplot(2,4,5)
 #plt.subplots_adjust(wspace = 0.4)
 plt.imshow(im[image,0,:,:])
 plt.title('cMRI slice {}'.format(image)) 
-plt.ylabel('No Errors')
+plt.ylabel('Low uncertainties')
 
 plt.subplot(2,4,6)
 plt.imshow(seg[image,0,:,:])
