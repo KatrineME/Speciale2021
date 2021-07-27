@@ -25,12 +25,13 @@ os.chdir("C:/Users/katrine/Documents/Universitet/Speciale/ACDC_training_data/tra
 #os.chdir('/Users/michalablicher/Desktop/training')
 
 
-phase = 'Diastole'
+#c_phase = 'Systole'
+c_phase = 'Diastole'
 frame_im = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9].nii.gz'))
 frame_gt = np.sort(glob2.glob('patient*/**/patient*_frame*[0-9]_gt.nii.gz'))
 
 
-if phase == 'Diastole':
+if c_phase == 'Diastole':
    phase = np.linspace(0,len(frame_im)-2,100).astype(int)
 else:
    phase = np.linspace(1,len(frame_im)-1,100).astype(int)
@@ -97,7 +98,7 @@ for i in range(0,38):
     gt_crop.append(in_gt)
         
 
-
+"""
 s = 19
 plt.figure(dpi=200, figsize=(14,9))
 plt.subplot(1,2,1)
@@ -110,20 +111,21 @@ plt.title('Manual segmentation', fontsize=s)
 #plt.imshow(gt[:,:,c_slice])
 #plt.imshow(img[:,:,c_slice], alpha= 0.5)
 #plt.title('Overlay', fontsize=s)
-
+"""
 
 
 #%%
 #%%
-plt.figure(dpi=200)
-plt.imshow(img_p[:,:,c_slice])
-plt.imshow(bin_gt, alpha=0.3)
-plt.plot(center[-1,1],center[-1,0],'r+')
+#plt.figure(dpi=200)
+#plt.imshow(img_p[:,:,c_slice])
+#plt.imshow(bin_gt, alpha=0.3)
+#plt.plot(center[-1,1],center[-1,0],'r+')
 
 #%%
 s = 23
 
 plt.figure(dpi=200, figsize=(14,10))
+plt.suptitle('Phase: Diastolic', fontsize=40)
 plt.subplot(2,2,1)
 plt.imshow(img[:,:,c_slice])
 plt.title('Original cMRI', fontsize=s)
@@ -132,9 +134,9 @@ plt.imshow(im_crop[-1][c_slice,0,:,:])
 plt.title('Cropped cMRI', fontsize=s)
 plt.subplot(2,2,3)
 plt.imshow(gt[:,:,c_slice])
-plt.title('Original annotation', fontsize=s)
+plt.title('Original reference', fontsize=s)
 plt.subplot(2,2,4)
 plt.imshow(gt_crop[-1][c_slice,:,:])
-plt.title('Cropped annotation', fontsize=s)
+plt.title('Cropped reference', fontsize=s)
 
 

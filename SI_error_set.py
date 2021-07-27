@@ -110,6 +110,17 @@ gt_train_ed_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num
                                   np.concatenate(data_gt_ed_NOR[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_train_res]).astype(None)))
 
+im_train_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_eval_sub:num_train_res]).astype(None)))
+
+gt_train_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_eval_sub:num_train_res]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_eval_sub:num_train_res]).astype(None)))
 #im_train_ed_res = im_train_ed_res
 #gt_test_ed_res  = gt_train_ed_res
 
@@ -125,11 +136,24 @@ gt_test_ed_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num
                                   np.concatenate(data_gt_ed_MINF[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
+
+
+im_test_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_train_res:num_test_res]).astype(None)))
+
+gt_test_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_train_res:num_test_res]).astype(None)))
 print('Data loaded+concat')
 
 #%% Load model
-PATH_model_es = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_test_ResNet.pt"
-PATH_model_ed = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_test_ResNet.pt"
+PATH_model_es = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_lclv_sys_150e_test_ResNet.pt"
+PATH_model_ed = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_lclv_sys_150e_test_ResNet.pt"
 
 unet_es_soft = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 unet_ed_soft = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
@@ -145,7 +169,7 @@ unet_ed   = torch.nn.functional.one_hot(torch.as_tensor(unet_ed_mean_am), num_cl
 
 
 #%% Onehot encode class channels
-gt_es_oh = torch.nn.functional.one_hot(Tensor(gt_test_ed_res).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
+gt_es_oh = torch.nn.functional.one_hot(Tensor(gt_test_es_res).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
 gt_ed_oh = torch.nn.functional.one_hot(Tensor(gt_test_ed_res).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
 
 
@@ -173,6 +197,7 @@ roi_target_map_ed = np.zeros((dt_ed.shape))
 
 for i in range(0, dt_es.shape[0]):
     for j in range(0, dt_es.shape[3]):
+        print(j)
         roi_target_map_es[i,:,:,j] = np.logical_and(dt_es[i,:,:,j], sys_new_label[i,:,:,j])
 
 for i in range(0, dt_ed.shape[0]):
@@ -264,22 +289,22 @@ for i in range (0,4):
 
 #%% Sample patches
 patch_size = 8
-patch_grid = int(roi_target_map_ed.shape[1]/patch_size)
+patch_grid = int(roi_target_map_es.shape[1]/patch_size)
 
 
 # Preallocate
 _temp  = np.zeros((patch_grid,patch_grid))
-lin    = np.linspace(0,roi_target_map_ed.shape[1]-patch_size,patch_grid).astype(int)
-_ctemp = np.zeros((patch_grid,patch_grid,roi_target_map_ed.shape[3]))
-T_j    = np.zeros((roi_target_map_ed.shape[0],patch_grid,patch_grid,roi_target_map_ed.shape[3]))
+lin    = np.linspace(0,roi_target_map_es.shape[1]-patch_size,patch_grid).astype(int)
+_ctemp = np.zeros((patch_grid,patch_grid,roi_target_map_es.shape[3]))
+T_j    = np.zeros((roi_target_map_es.shape[0],patch_grid,patch_grid,roi_target_map_es.shape[3]))
 
 
-for j in range (0,roi_target_map_ed.shape[0]):
+for j in range (0,roi_target_map_es.shape[0]):
     for c in range(0,4):
         for pp in range(0,16):
             for p, i in enumerate(lin):
                 #_temp[pp,p] = np.count_nonzero(~np.isnan(roi_target_map_ed[j,lin[pp]:lin[pp]+8 , i:i+8, c]))
-                _temp[pp,p] = np.count_nonzero(roi_target_map_ed[j,lin[pp]:lin[pp]+8 , i:i+8, c])
+                _temp[pp,p] = np.count_nonzero(roi_target_map_es[j,lin[pp]:lin[pp]+8 , i:i+8, c])
         _ctemp[:,:,c] = _temp
     T_j[j,:,:,:] = _ctemp
 
@@ -295,7 +320,7 @@ T_j = np.sum(T_j, axis = 3)
 T_j[T_j >= 1 ] = 1
 
 #%%
-n = im_train_ed_res.shape[0]
+n = T_j.shape[0]
 
 t = np.count_nonzero(T_j.sum(axis=(1,2)))
 print('Number of slices containing min. 1 patch: ', (t/n)*100 ,'%' )
@@ -319,9 +344,9 @@ up_im   = up(Tj_temp)
 up_im[up_im >0] =1
 
 #%%
-PATH_Tj = "C:/Users/katrine/Desktop/Optuna/Final resnet models/SI_Tj_85_dice_opt.pt"
+PATH_Tj = "C:/Users/katrine/Desktop/Optuna/Final resnet models/SI_Tj_85_dice_lclv_sys.pt"
 torch.save(T_j,PATH_Tj)
-PATH_up_im = "C:/Users/katrine/Desktop/Optuna/Final resnet models/SI_UpIm_85_dice_opt.pt"
+PATH_up_im = "C:/Users/katrine/Desktop/Optuna/Final resnet models/SI_UpIm_85_dice_lclv_sys.pt"
 torch.save(torch.squeeze(up_im),PATH_up_im)
 #%%
 

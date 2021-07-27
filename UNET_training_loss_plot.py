@@ -31,10 +31,10 @@ import scipy.ndimage
 #!pip install opencv-python
 
 #%% Import results from training (Loss + Accuracy)
-#PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
-#PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt'
-PATH_dice = '/Users/michalablicher/Desktop/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
-PATH_CE   = '/Users/michalablicher/Desktop/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt'
+PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
+PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt'
+#PATH_dice = '/Users/michalablicher/Desktop/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
+#PATH_CE   = '/Users/michalablicher/Desktop/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt'
 
 res_dice = torch.load(PATH_dice, map_location=torch.device('cpu'))
 res_CE = torch.load(PATH_CE, map_location=torch.device('cpu'))

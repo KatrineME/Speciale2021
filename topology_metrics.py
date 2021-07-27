@@ -291,11 +291,35 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
 print('Data loaded+concat')
+#%% OBS DETTE ER FOR DE 85 TEST PATIENTER MED 2 FRA HVER SUBGROUP
+#%% Resnet test data (85 patients)
+num_train_sub = 12
+num_eval_sub  = num_train_sub
 
+num_train_res = num_eval_sub + 6
+num_test_res  = num_train_res + 2
+
+im_test_es_res = np.concatenate((np.concatenate(data_im_es_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_im_es_RV[num_train_res:num_test_res]).astype(None)))
+
+gt_test_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_HCM[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_MINF[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_NOR[num_train_res:num_test_res]).astype(None),
+                                  np.concatenate(data_gt_es_RV[num_train_res:num_test_res]).astype(None)))
+
+im_test_es_sub = im_test_es_res
+gt_test_es_sub = gt_test_es_res
+
+num_eval_sub = num_train_res
+num_test_sub = num_test_res
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv_opt.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_lclv_sys_150e_test_ResNet.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -344,16 +368,18 @@ print('\n')
 
 # Slices per patient
 p = []
+pp = 2 #8             # OSB HER SKAL DER ENTEN STÅR 8 ELLER 2 PATIENTER FRA HVER SUBGROUP
 
-for i in range(0,8):
+
+for i in range(0,pp):
     p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][i].shape[0])
-for i in range(0,8):
+for i in range(0,pp):
     p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][i].shape[0])
-for i in range(0,8):
+for i in range(0,pp):
     p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][i].shape[0])
-for i in range(0,8):
+for i in range(0,pp):
     p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][i].shape[0])
-for i in range(0,8):
+for i in range(0,pp):
     p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][i].shape[0])
     
 test_index = len(p)
@@ -439,15 +465,15 @@ print('Percentage of slices w. disconnect MYO RV:',(np.count_nonzero(multi_lab_a
 #%%  Slices per patient
 p = []
 
-for i in range(0,8):
+for i in range(0,pp):
     p.append(data_gt_ed_DCM[num_eval_sub:num_test_sub][i].shape[0])
-for i in range(0,8):
+for i in range(0,pp):
     p.append(data_gt_ed_HCM[num_eval_sub:num_test_sub][i].shape[0])
-for i in range(0,8):
+for i in range(0,pp):
     p.append(data_gt_ed_MINF[num_eval_sub:num_test_sub][i].shape[0])
-for i in range(0,8):
+for i in range(0,pp):
     p.append(data_gt_ed_NOR[num_eval_sub:num_test_sub][i].shape[0])
-for i in range(0,8):
+for i in range(0,pp):
     p.append(data_gt_ed_RV[num_eval_sub:num_test_sub][i].shape[0])
     
 test_index = len(p)
