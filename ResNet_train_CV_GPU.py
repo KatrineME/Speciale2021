@@ -360,7 +360,7 @@ class CombinedRSN(SimpleRSN):
 if __name__ == "__main__":
     #import torchsummary
 
-    n_channels = 1  # 3
+    n_channels = 3  # 3
     n_classes  = 2
     #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
     model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.1)
@@ -382,7 +382,7 @@ os.chdir("/home/michala/training")                      # Server directory micha
 from load_data_gt_im_sub_space import load_data_sub
 
 user = 'GPU'
-phase = 'Diastole'
+phase = 'Systole'
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
 data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
 data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
@@ -396,8 +396,8 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 num_train_sub = 12
 num_eval_sub  = num_train_sub
 
-num_train_res = num_eval_sub + 8
-num_test_res  = num_train_res + 0
+num_train_res = num_eval_sub + 6
+num_test_res  = num_train_res + 2
 
 im_train_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_train_res]).astype(None),
                                   np.concatenate(data_im_ed_HCM[num_eval_sub:num_train_res]).astype(None),
@@ -461,7 +461,7 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_tes
 #%% Load softmax from ensemble models
 
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
-PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_150dia_dice_opt.pt'
+PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg_150sys_dice_lclv_opt.pt'
 #PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop//Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
@@ -499,8 +499,8 @@ seg    = Tensor(np.expand_dims(seg_met, axis=1))
 
 print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
-#input_concat = torch.cat((im,umap,seg), dim=1)
-input_concat = umap #torch.cat((umap), dim=1)
+input_concat = torch.cat((im,umap,seg), dim=1)
+#input_concat = umap #torch.cat((umap), dim=1)
 
 #%% Distance transform maps
 #os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -595,8 +595,8 @@ def get_loss(log_pred_probs, lbls, pred_probs=None):
     fp_soft = (ones - lbls.float()) * (pred_probs[:,1,:,:])
     fp_soft = torch.sum(fp_soft) * 1 / float(batch_size)
 
-    fn_penalty_weight = 1.2
-    fp_penalty_weight = 0.085
+    fn_penalty_weight = 1#1.2
+    fp_penalty_weight = 1#0.085
     b_loss = b_loss + fn_penalty_weight * fn_soft + fp_penalty_weight * fp_soft
 
     return b_loss
@@ -732,7 +732,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             #print('output shape = ', output.shape)
 
             # Find loss
-            loss = soft_dice_loss(output, labels)
+            #loss = loss_function(output, labels)
+            loss = soft_dice_loss(labels, output)
             #print('loss',loss)
             #print('loss = ', loss)
             
@@ -797,7 +798,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             output = output["log_softmax"]
             output = torch.exp(output)
             # Find loss
-            loss = soft_dice_loss(output, labels)
+            #loss = loss_function(output, labels)
+            loss = soft_dice_loss(labels, output)
             
             # Calculate loss
             #eval_loss.append(loss.item())
@@ -843,7 +845,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_umap_dia_fold_150{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_sys_fold_150{}.pt".format(fold)
     #PATH_model = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Trained_Detection_dice_dia_fold_150{}.pt'.format(fold)
     torch.save(model, PATH_model)
 
@@ -889,7 +891,7 @@ plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_umap_dia_fold_150.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_sys_fold_150.png')
 
 #%%
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
@@ -897,7 +899,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_umap_dia_fold_150_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_sys_fold_150_results.pt"
 #PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
 torch.save(T, PATH_results)
 

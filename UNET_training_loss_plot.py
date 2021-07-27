@@ -75,8 +75,8 @@ eval_acc_5  = out_one[3][4]
 train_acc_6 = out_one[2][5]
 eval_acc_6  = out_one[3][5]
 
-train_inc = (out_mean[4])
-eval_inc  = (out_mean[5])*5
+train_inc = (out_mean[4])/5
+eval_inc  = (out_mean[5])
 
 #%% CE
 out_mean_CE = res_CE[0] # import mean from model
@@ -114,8 +114,8 @@ eval_acc_5_CE  = out_one_CE[3][4]
 train_acc_6_CE = out_one_CE[2][5]
 eval_acc_6_CE  = out_one_CE[3][5]
 
-train_inc_CE = (out_mean_CE[4])
-eval_inc_CE  = (out_mean_CE[5])*5
+train_inc_CE = (out_mean_CE[4])/5
+eval_inc_CE  = (out_mean_CE[5])
 #%%
 
 
@@ -359,7 +359,7 @@ plt.title("Accuracy (AE opt)", fontsize =28)
 
 
 #%%
-plt.figure(dpi=300)
+plt.figure(dpi=200)
 plt.semilogy(epochs_train + 1 , train_inc, 'b', label = 'Training incorrect')
 plt.semilogy(epochs_eval  + 1 , eval_inc,  'r' ,label = 'Validation incorrect')
 plt.grid(color='k', linestyle='-', linewidth=0.2)
