@@ -44,11 +44,12 @@ if user == 'GPU':
     
 from load_data_gt_im_sub_space import load_data_sub
 
-data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,'Diastole','DCM')
-data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,'Diastole','HCM')
-data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,'Diastole','MINF')
-data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,'Diastole','NOR')
-data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,'Diastole','RV')
+phase = 'Systole'
+data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
+data_im_ed_HCM,  data_gt_ed_HCM  = load_data_sub(user,phase,'HCM')
+data_im_ed_MINF, data_gt_ed_MINF = load_data_sub(user,phase,'MINF')
+data_im_ed_NOR,  data_gt_ed_NOR  = load_data_sub(user,phase,'NOR')
+data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 
 #%% BATCH GENERATOR
 num_train_sub = 12
@@ -88,7 +89,7 @@ print('Data loaded+concat')
 # LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
 #% Load softmax from ensemble models
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
-PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_dia_150e_opt_test_ResNet.pt'
+PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_lclv_sys_150e_test_ResNet.pt'
 #PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
 
 #PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
@@ -132,7 +133,7 @@ seg    = Tensor(np.expand_dims(seg_met, axis = 1))
 
 print('Sizes of concat: im, umap, seg',im.shape,umap.shape,seg.shape)
 
-input_concat = torch.cat((umap,seg), dim=1)
+input_concat = torch.cat((im, umap, seg), dim=1)
 
 image = 4*2
 
@@ -183,10 +184,10 @@ print('var dice', np.var(dice_umap))
 
 
 #%%
-out_patch_load = '/Users/michalablicher/Desktop/Out_patch_avg_dice_sdloss_umap_opt_dia_fold_150.pt'
+out_patch_load = '/Users/michalablicher/Desktop/Out_patch_avg_dice_sdloss_sys_fold_150.pt'
 
 
-PATH_SI_dice_85 = '/Users/michalablicher/Desktop/SI_Tj_85_dice_opt.pt'
+PATH_SI_dice_85 = '/Users/michalablicher/Desktop/SI_Tj_85_dice_lclv_sys.pt'
 out_patch_softmax_fold = torch.load(out_patch_load ,  map_location=torch.device(device))
 SI_set_85= torch.load(PATH_SI_dice_85 ,  map_location=torch.device(device))
 
@@ -197,7 +198,7 @@ mean_patch = out_patch_softmax_fold[:,:,:,:,:]
 m_patch_am = np.argmax(mean_patch, axis=1)
 
 
-m_patch = mean_patch > 0.1
+m_patch = mean_patch < 0.8
 #%%
 size = 5
 slice = 5
@@ -218,9 +219,16 @@ for i in range(0,6):
 
 #failure_per_slice = np.sum(m_patch_am[:,:,:], axis=(1,2))
 failure_per_slice = np.sum(m_patch[:,1,:,:], axis=(1,2))
+failure_per_slice_tj = np.sum(SI_set_85[:,:,:], axis=(1,2))
+
 
 failures = (np.count_nonzero(failure_per_slice)/failure_per_slice.shape[0])*100
 print('Failures in {} % of test slices'.format(failures))
+
+failures_tj = (np.count_nonzero(failure_per_slice_tj)/failure_per_slice_tj.shape[0])*100
+print('Failures in tj {} % of test slices'.format(failures_tj))
+
+
 
 p = []
 
@@ -230,6 +238,7 @@ p.append(data_gt_ed_DCM[num_train_res:num_test_res][1].shape[0])
 
 p.append(data_gt_ed_HCM[num_train_res:num_test_res][0].shape[0])
 p.append(data_gt_ed_HCM[num_train_res:num_test_res][1].shape[0])
+
 p.append(data_gt_ed_MINF[num_train_res:num_test_res][0].shape[0])
 p.append(data_gt_ed_MINF[num_train_res:num_test_res][1].shape[0])
 
@@ -245,34 +254,33 @@ p.append(data_gt_ed_RV[num_train_res:num_test_res][1].shape[0])
 
 #%% Upsample
 mean_patch = out_patch_softmax_fold.mean(axis=0)
-m_patch = mean_patch > 0.00001
+m_patch = mean_patch < 0.9
 
-size = 5
-slice = 5
-plt.figure(dpi=200, figsize = (10,4))
+size = 20
+slice = 15
+plt.figure(dpi=200, figsize = (12,6))
 
 plt.subplot(1,2,1)
-plt.imshow(mean_patch[slice,1,:,:])
+plt.imshow(mean_patch[slice,0,:,:])
 plt.title('Mean softmax patch',fontsize=size)
 plt.colorbar(fraction=0.045)
 
 plt.subplot(1,2,2)
 plt.imshow(m_patch[slice,1,:,:])
 plt.title('Binarized at {}'.format('threshold'),fontsize=size)
-#plt.colorbar(fraction=0.045)
+plt.colorbar(fraction=0.045)
 
 
 #%%
 
 #% Upsample
-image = 5
-upper_image = image - 1
-lower_image = image + 1
+image = 57
 
-test_im = Tensor(np.expand_dims(m_patch[upper_image:lower_image,1,:,:],axis=0))
-lab_im = Tensor(np.expand_dims(SI_set_85[upper_image:lower_image,:,:],axis=0))
+s = np.expand_dims(SI_set_85[:,:,:],axis = 1)
+test_im = Tensor(np.expand_dims(m_patch[image,:,:,:],axis=0))
+lab_im = Tensor(np.expand_dims(s[image,:,:,:],axis=0))
 
-up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
+up = nn.Upsample((128,128), mode='nearest')
 
 up_im = up(test_im) > 0
 
@@ -285,32 +293,35 @@ size = 16
 difference = (gt_test_es_res[image,:,:]-seg[image,0,:,:].detach().numpy())
 db = np.array(difference != 0)
 
-plt.figure(dpi=200, figsize =(12,7))
-plt.subplot(1,4,2)
+plt.figure(dpi=200, figsize =(12,8))
+plt.subplot(1,3,2)
 plt.suptitle('Slice {}'.format(image), y = 0.75, fontsize = 20)
 #plt.subplots_adjust(wspace = 0.4)
 plt.imshow(up_im[0,1,:,:])
-plt.imshow(input_concat[image,1,:,:], alpha = 0.6)
+plt.imshow(input_concat[image,2,:,:], alpha = 0.5)
 #plt.imshow(up_im[0,0,:,:])
 #plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
-plt.title('Segmentation',fontsize=size)
+plt.title('Error segmentation',fontsize=size)
 
-plt.subplot(1,4,1)
-plt.imshow(up_lab[0,1,:,:])
+plt.subplot(1,3,1)
+plt.imshow(up_lab[0,0,:,:])
 plt.imshow(np.argmax((ref_oh[image,:,:,:]),axis=2), alpha =0.6)
+#plt.imshow(input_concat[image,2,:,:], alpha = 0.5)
+
 #plt.imshow(input_concat[image,0,:,:], alpha= 0.4)
-plt.title('Reference',fontsize=size)
+plt.title('Error reference label',fontsize=size)
 
-plt.subplot(1,4,3)
+plt.subplot(1,3,3)
 plt.imshow(up_im[0,1,:,:])
-plt.imshow(db, cmap='coolwarm', alpha = 0.6)
+plt.imshow(db, cmap='coolwarm', alpha = 0.5)
 plt.title('Difference',fontsize=size)
-
+"""
 plt.subplot(1,4,4)
 #plt.imshow(up_im[0,1,:,:])
 plt.imshow(umap[image,0,:,:]) 
 #plt.imshow(input_concat[image,0,:,:], alpha= 0.6)
-plt.title('cMRI',fontsize=size)
+plt.title('cMRI',fontsize=
+"""
 
 
 #%% Metrics
@@ -319,16 +330,15 @@ up_im = np.zeros((85,2,128,128))
 up_lab = np.zeros((85,2,128,128))
 
 
+s = np.expand_dims(SI_set_85[:,:,:],axis = 1)
+
 for i in range(1,85):
     #% Upsample
-    image = i
-    upper_image = image - 1
-    lower_image = image + 1
     
-    test_im = Tensor(np.expand_dims(m_patch[upper_image:lower_image,1,:,:],axis=0))
-    lab_im = Tensor(np.expand_dims(SI_set_85[upper_image:lower_image,:,:],axis=0))
+    test_im = Tensor(np.expand_dims(m_patch[i,:,:,:],axis=0))
+    lab_im = Tensor(np.expand_dims(s[i,:,:,:],axis=0))
 
-    up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
+    up = nn.Upsample((128,128), mode='nearest')
     up_im[i,:,:,:] = up(test_im) > 0
     up_lab[i,:,:,:] = up(lab_im) > 0
 
@@ -338,17 +348,26 @@ difference = (gt_test_es_res[:,:,:]-seg[:,0,:,:].detach().numpy())
 db = np.array(difference != 0)    
 
 
+dice_error = np.zeros((85))
+dice_16_error = np.zeros((85))
+
+sen_error = np.zeros((85))
+for i in range(0,85):
+    dice_error[i] = dc(np.array(up_im[i,1,:,:]),np.array(up_lab[i,1,:,:]))
+    sen_error[i] = sensitivity(np.array(up_im[i,1,:,:]),np.array(up_lab[i,1,:,:]))
+
+
+print(np.mean(dice_error))
 
 #%%
-dice_error = dc(up_im,up_lab)
-print(dice_error)
 
 
+tpr = dc(np.array(up_im[:,1,:,:]),np.array(up_lab[:,1,:,:]))
+
+tpr16 = dc(np.array(up_im[:,1,:,:]),np.array(up_lab[:,1,:,:]))
 
 
-
-
-
+print(tpr)
 
 
 
