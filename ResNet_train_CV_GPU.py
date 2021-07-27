@@ -461,7 +461,7 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_tes
 #%% Load softmax from ensemble models
 
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
-PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg_150sys_dice_lclv_opt.pt'
+PATH_softmax_ensemble_unet = '/home/michala/Speciale2021/Speciale2021/Out_softmax_fold_avg_dice_sys_150e_opt_train_ResNet.pt'
 #PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop//Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
 
