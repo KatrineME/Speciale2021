@@ -710,12 +710,12 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             # Forward Pass
             output = model(inputs)     
             output = output["log_softmax"]
-            output = torch.exp(output)
+            #output = torch.exp(output)
             #print('output shape = ', output.shape)
 
             # Find loss
-            #loss = loss_function(output, labels)
-            loss = CrossEntropy(labels, output)
+            loss = loss_function(output, labels)
+
             #print('loss',loss)
             #print('loss = ', loss)
             
@@ -778,9 +778,10 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             # Forward pass
             output = model(inputs)     
             output = output["log_softmax"]
-            output = torch.exp(output)
+            #output = torch.exp(output)
+            
             # Find loss
-            loss = loss_function(labels,output)
+            loss = loss_function(output, labels)
             #loss = soft_dice_loss(labels, output)
             
             # Calculate loss
