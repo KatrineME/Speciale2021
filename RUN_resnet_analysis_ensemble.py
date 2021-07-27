@@ -254,7 +254,7 @@ p.append(data_gt_ed_RV[num_train_res:num_test_res][1].shape[0])
 
 #%% Upsample
 mean_patch = out_patch_softmax_fold.mean(axis=0)
-m_patch = mean_patch < 0.9
+m_patch = mean_patch < 0.8
 
 size = 20
 slice = 15
@@ -274,13 +274,13 @@ plt.colorbar(fraction=0.045)
 #%%
 
 #% Upsample
-image = 57
+image = 14
 
 s = np.expand_dims(SI_set_85[:,:,:],axis = 1)
 test_im = Tensor(np.expand_dims(m_patch[image,:,:,:],axis=0))
 lab_im = Tensor(np.expand_dims(s[image,:,:,:],axis=0))
 
-up = nn.Upsample((128,128), mode='nearest')
+up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
 
 up_im = up(test_im) > 0
 
@@ -338,7 +338,7 @@ for i in range(1,85):
     test_im = Tensor(np.expand_dims(m_patch[i,:,:,:],axis=0))
     lab_im = Tensor(np.expand_dims(s[i,:,:,:],axis=0))
 
-    up = nn.Upsample((128,128), mode='nearest')
+    up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
     up_im[i,:,:,:] = up(test_im) > 0
     up_lab[i,:,:,:] = up(lab_im) > 0
 
