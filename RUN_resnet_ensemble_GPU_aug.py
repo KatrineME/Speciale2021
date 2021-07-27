@@ -425,39 +425,6 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_te
                                   np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
 """
-"""
-
-num_train_sub = 12
-num_eval_sub = num_train_sub
-num_test_sub = num_eval_sub + 8
-
-im_train_res = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_ed_MINF[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_ed_NOR[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_im_ed_RV[0:num_train_sub]).astype(None)))
-
-gt_train_res = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_HCM[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_MINF[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
-
-
-im_test_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-
-gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
-                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
-
-
-"""
 
 #%% Load softmax from ensemble models
 
@@ -468,6 +435,19 @@ out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=to
 
 # mean them over dim=0
 out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
+#%% Data augmentation
+
+im_train_res_flip = np.flip(im_train_res, axis=3)
+gt_train_res_flip = np.flip(gt_train_res, axis=2)
+out_softmax_unet_flip = np.flip(out_softmax_unet, axis=3)
+
+im_train_res_rot = rotate(im_train_res, angle=45, axes=(2, 3), reshape=False)
+gt_train_res_rot = np.rint(rotate(gt_train_res, angle=45, axes=(1, 2), reshape=False))
+out_softmax_unet_rot = np.rint(rotate(out_softmax_unet, angle=45, axes=(2, 3), reshape=False))
+
+im_train_res = np.concatenate((im_train_res,im_train_res_flip,im_train_res_rot), axis=0)
+gt_train_res = np.concatenate((gt_train_res,gt_train_res_flip,gt_train_res_rot), axis=0)
+out_softmax_unet = np.concatenate((out_softmax_unet,out_softmax_unet_flip,out_softmax_unet_rot), axis=0)
 
 #%% One hot encoding
 seg_met = np.argmax(out_softmax_unet, axis=1)
@@ -734,7 +714,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
 
             # Find loss
             #loss = loss_function(output, labels)
-            loss = soft_dice_loss(labels, output)
+            loss = CrossEntropy(labels, output)
             #print('loss',loss)
             #print('loss = ', loss)
             
@@ -799,8 +779,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             output = output["log_softmax"]
             output = torch.exp(output)
             # Find loss
-            #loss = loss_function(output, labels)
-            loss = soft_dice_loss(labels, output)
+            loss = loss_function(labels,output)
+            #loss = soft_dice_loss(labels, output)
             
             # Calculate loss
             #eval_loss.append(loss.item())
@@ -846,7 +826,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_sys_fold_150{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_CEloss_sys_fold_150{}.pt".format(fold)
     #PATH_model = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Trained_Detection_dice_dia_fold_150{}.pt'.format(fold)
     torch.save(model, PATH_model)
 
@@ -892,7 +872,7 @@ plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_sys_fold_150.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_CEloss_sys_fold_150.png')
 
 #%%
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
@@ -900,7 +880,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_sdloss_sys_fold_150_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_CEloss_sys_fold_150_results.pt"
 #PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
 torch.save(T, PATH_results)
 
