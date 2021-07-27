@@ -94,7 +94,7 @@ print('Data loaded+concat')
 # LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
 #% Load softmax from ensemble models
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
-#PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_dia_150e_opt_test_ResNet.pt'
+PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_test_ResNet.pt'
 
 #PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
@@ -163,26 +163,26 @@ image = 78
 difference = (gt_test_es_res[image,:,:]-seg[image,0,:,:].detach().numpy())
 db = np.array(difference != 0)
 
-
+s = 18
 plt.figure(dpi=200, figsize = (12,7))
 
 plt.subplot(2,4,1)
 #plt.subplots_adjust(wspace = 0.4)
 plt.imshow(im[image,0,:,:])
-plt.title('cMRI slice {}'.format(image))
-plt.ylabel('High uncertainties')
+plt.title('cMRI slice {}'.format(image), fontsize = s) 
+plt.ylabel('High uncertainties', fontsize = (15))
 
 plt.subplot(2,4,2)
 plt.imshow(seg[image,0,:,:])
-plt.title('Segmentation') 
+plt.title('Segmentation', fontsize = s) 
    
 plt.subplot(2,4,3)
 plt.imshow(gt_test_es_res[image,:,:])    
-plt.title('Reference') 
+plt.title('Reference', fontsize = s)  
 
 plt.subplot(2,4,4)
 plt.imshow(umap[image,0,:,:])   
-plt.title('U-map') 
+plt.title('U-map', fontsize = s) 
 
 
 image = 79
@@ -191,25 +191,25 @@ image = 79
 plt.subplot(2,4,5)
 #plt.subplots_adjust(wspace = 0.4)
 plt.imshow(im[image,0,:,:])
-plt.title('cMRI slice {}'.format(image)) 
-plt.ylabel('Low uncertainties')
+plt.title('cMRI slice {}'.format(image), fontsize = s) 
+plt.ylabel('Low uncertainties', fontsize = (15))
 
 plt.subplot(2,4,6)
 plt.imshow(seg[image,0,:,:])
-plt.title('Segmentation') 
+plt.title('Segmentation', fontsize = s) 
    
 plt.subplot(2,4,7)
 plt.imshow(gt_test_es_res[image,:,:])    
-plt.title('Reference') 
+plt.title('Reference', fontsize = s) 
 
 plt.subplot(2,4,8)
 plt.imshow(umap[image,0,:,:])   
-plt.title('U-map') 
-plt.colorbar(fraction=0.04)
+plt.title('U-map', fontsize = s)  
+#plt.colorbar(fraction=0.04)
 
 #%%
 plt.figure(dpi=200)
-plt.imshow(umap_bin[image,0,:,:])   
+plt.imshow(entropy2[:,:])   
 plt.title('U-map') 
 plt.colorbar()
 
@@ -235,10 +235,12 @@ print('min dice', np.min(dice_umap))
 print('max dice', np.max(dice_umap))
 print('mean dice', np.mean(dice_umap))
 print('var dice', np.var(dice_umap))
+print('std dice', np.std(dice_umap))
+
 
 
 #%%
-image = 57
+image = 84
 
 plt.figure(dpi=200, figsize=(7,2))
 plt.subplot(1,3,1)
