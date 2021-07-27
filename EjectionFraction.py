@@ -94,8 +94,8 @@ gt_test_sys_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 
 #%% Load 
-path_soft_dia = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
-path_soft_sys = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
+path_soft_dia = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv_opt.pt'
+path_soft_sys = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv_opt.pt'
 
 #path_soft_dia = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
 #path_soft_sys = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_dice.pt'

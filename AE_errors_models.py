@@ -31,10 +31,10 @@ else:
 torch.cuda.manual_seed_all(808)
 
 #%% Import results from training (Loss + Accuracy)
-PATH_SD     = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
-PATH_SD_opt = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_opt.pt'
-PATH_AE     = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
-PATH_AE_opt = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv_opt.pt'
+PATH_SD     = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
+PATH_SD_opt = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_opt.pt'
+PATH_AE     = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt'
+PATH_AE_opt = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv_opt.pt'
 
 SD     = torch.load(PATH_SD, map_location=torch.device('cpu'))
 SD_opt = torch.load(PATH_SD_opt, map_location=torch.device('cpu'))
@@ -61,7 +61,7 @@ AE_opt_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(AE_opt_mean_am), n
 ##################################################################################################################
 os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from load_data_gt_im_sub_space import load_data_sub
-phase = 'Diastole'
+phase = 'Systole'
 user = 'K'
 
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
@@ -87,9 +87,13 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
 
 #%%
-slice_1 = 34
-slice_2 = 104
-slice_3 = 264
+#slice_1 = 34
+#slice_2 = 104
+#slice_3 = 264
+
+slice_1 = 264
+slice_2 = 271
+slice_3 = 315
 
 alpha = 0.3
 
@@ -153,9 +157,9 @@ plt.imshow(AE_opt_mean_am[slice_3,:,:])
 #plt.imshow(im_test_ed_sub[slice_3,0,:,:], alpha=alpha)
 
 #%%
-slice_1 = 34
-slice_2 = 104
-slice_3 = 264
+#slice_1 = 34
+#slice_2 = 104
+#slice_3 = 264
 
 alpha = 0.3
 

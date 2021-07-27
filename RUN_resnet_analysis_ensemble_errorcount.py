@@ -291,7 +291,7 @@ print('Data loaded+concat')
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_100dia_dice_lclv.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv_opt.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -303,7 +303,7 @@ alpha = 0.4
 fig = plt.figure()
 
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
-ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_ed_sub).to(torch.int64), num_classes=4)
+ref_dia = torch.nn.functional.one_hot(Tensor(gt_test_es_sub).to(torch.int64), num_classes=4)
 plt.figure(dpi=200, figsize=(18,32))
 
 w = 0.1
@@ -318,26 +318,26 @@ for fold_model in range (0,6):
     plt.subplot(7, 4, 1)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,0])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     plt.ylabel('Reference', fontsize=16)
     plt.title('Background', fontsize=16)
     
     plt.subplot(7, 4, 2)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,1])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     plt.title('Right ventricle', fontsize=16)
     
     plt.subplot(7, 4, 3)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,2])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     plt.title('Myocardium', fontsize=16)
     
     plt.subplot(7, 4, 4)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,3])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     plt.title('Left ventricle', fontsize=16)
     
     
@@ -345,23 +345,23 @@ for fold_model in range (0,6):
     plt.subplot(7, 4, 1+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,0])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     plt.ylabel('CV fold {}'.format(fold_model), fontsize=16)
     
     plt.subplot(7, 4, 2+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,1])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     
     plt.subplot(7, 4, 3+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,2])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     
     plt.subplot(7, 4, 4+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,3])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
 
 plt.show()  
 
@@ -417,6 +417,7 @@ lv_neigh = lv_loss(out_seg_per)
 c_non = np.count_nonzero(lv_neigh, axis = (1,2)) # number of error pixels in each slice
 
 cnon_slice = np.count_nonzero(c_non) # number of slices with erros 
+print('Number of pixels with errors:', c_non.sum())
 print('Number of slices with errors:', cnon_slice)
 print('Percentage of slices with errors:', (cnon_slice/len(c_non))*100,'%')
 print('Number of errornous neighbour pixels:', c_non.sum())
@@ -672,7 +673,7 @@ plt.title('Boxplot for Dice in Diastolic SD', fontsize = 20)
 
 #PATH_soft_dia_fold = path_out_soft# = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_200dia_dice_10lclv.pt'
 
-PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
+PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv_opt.pt'
 #PATH_soft_dia_fold = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_200dia.pt'
 soft_dia_fold = torch.load(PATH_soft_dia_fold, map_location=torch.device(device))
 
@@ -703,7 +704,7 @@ print('Target vol dia: ',target_vol_ed)
 print('Reference vol dia: ',ref_vol_ed)
    
 #%% Calculate volume for systolic phase
-PATH_soft_sys_fold = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
+PATH_soft_sys_fold = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv_opt.pt'
 soft_sys_fold = torch.load(PATH_soft_sys_fold, map_location=torch.device(device))
 
 soft_sys_mean = soft_sys_fold.mean(axis=0)
