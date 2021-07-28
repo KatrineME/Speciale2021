@@ -482,14 +482,17 @@ out_softmax_unet_rot = rotate(out_softmax_unet, angle=45, axes=(2, 3), reshape=F
 
 im_train_res = np.concatenate((im_train_res,im_train_res_flip,im_train_res_rot), axis=0)
 gt_train_res = np.concatenate((gt_train_res,gt_train_res_flip,gt_train_res_rot), axis=0)
-out_softmax_unet = Tensor(np.concatenate((out_softmax_unet,out_softmax_unet_flip,out_softmax_unet_rot), axis=0))
+out_softmax_unet = np.concatenate((out_softmax_unet,out_softmax_unet_flip,out_softmax_unet_rot), axis=0)
 
 
 #%% One hot encoding
 seg_met = np.argmax(out_softmax_unet, axis=1)
 
 #seg = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
-seg_oh = torch.nn.functional.one_hot(Tensor(seg_met).to(torch.int64), num_classes=4).detach().cpu().numpy()
+#seg_oh = torch.nn.functional.one_hot(Tensor(seg_met).to(torch.int64), num_classes=4).detach().cpu().numpy()
+#ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+
+seg_oh = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
 ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
 #%%%%%%%%%%%%%%%% Create input for ResNet %%%%%%%%%%%%%%%%
