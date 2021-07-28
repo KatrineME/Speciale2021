@@ -559,8 +559,8 @@ def get_loss(log_pred_probs, lbls, pred_probs=None):
     fp_soft = (ones - lbls.float()) * (pred_probs[:,1,:,:])
     fp_soft = torch.sum(fp_soft) * 1 / float(batch_size)
 
-    fn_penalty_weight = 1#1.2
-    fp_penalty_weight = 1#0.085
+    fn_penalty_weight = 1.2
+    fp_penalty_weight = 0.085
     b_loss = b_loss + fn_penalty_weight * fn_soft + fp_penalty_weight * fp_soft
 
     return b_loss
@@ -683,8 +683,6 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             labels = labels.cuda()
             #print('i=',i)
             # wrap them in Variable
-            print('inputs shape', inputs.shape)
-            print('labels shape', labels.shape)
             inputs, labels = Variable(inputs), Variable(labels)
             labels = labels.long()
                        
