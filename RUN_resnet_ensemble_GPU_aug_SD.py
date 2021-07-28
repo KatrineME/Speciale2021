@@ -478,14 +478,14 @@ im_train_res_flip = np.flip(im_train_res, axis=3)
 gt_train_res_flip = np.flip(gt_train_res, axis=2)
 out_softmax_unet_flip = np.flip(out_softmax_unet, axis=3)
 
-im_train_res_rot = rotate(im_train_res, angle=45, axes=(2, 3), reshape=False)
-gt_train_res_rot = np.rint(rotate(gt_train_res, angle=45, axes=(1, 2), reshape=False))
-gt_train_res_rot[gt_train_res_rot<0] = 0
-out_softmax_unet_rot = rotate(out_softmax_unet, angle=45, axes=(2, 3), reshape=False)
+#im_train_res_rot = rotate(im_train_res, angle=45, axes=(2, 3), reshape=False)
+#gt_train_res_rot = np.rint(rotate(gt_train_res, angle=45, axes=(1, 2), reshape=False))
+#gt_train_res_rot[gt_train_res_rot<0] = 0
+#out_softmax_unet_rot = rotate(out_softmax_unet, angle=45, axes=(2, 3), reshape=False)
 
-im_train_res = np.concatenate((im_train_res,im_train_res_flip,im_train_res_rot), axis=0)
-gt_train_res = np.concatenate((gt_train_res,gt_train_res_flip,gt_train_res_rot), axis=0)
-out_softmax_unet = np.concatenate((out_softmax_unet,out_softmax_unet_flip,out_softmax_unet_rot), axis=0)
+im_train_res = np.concatenate((im_train_res,im_train_res_flip), axis=0)
+gt_train_res = np.concatenate((gt_train_res,gt_train_res_flip), axis=0)
+out_softmax_unet = np.concatenate((out_softmax_unet,out_softmax_unet_flip), axis=0)
 
 print('im_train_res',im_train_res.shape)
 print('gt_train_res',gt_train_res.shape)
