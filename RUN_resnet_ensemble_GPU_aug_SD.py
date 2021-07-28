@@ -459,8 +459,6 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_tes
 
 """
 
-print('im_train_res',im_train_res.shape)
-print('gt_train_res',gt_train_res.shape)
 
 #%% Load softmax from ensemble models
 
@@ -487,8 +485,6 @@ im_train_res = np.concatenate((im_train_res,im_train_res_flip), axis=0)
 gt_train_res = np.concatenate((gt_train_res,gt_train_res_flip), axis=0)
 out_softmax_unet = np.concatenate((out_softmax_unet,out_softmax_unet_flip), axis=0)
 
-print('im_train_res',im_train_res.shape)
-print('gt_train_res',gt_train_res.shape)
 
 #%% One hot encoding
 seg_met = np.argmax(out_softmax_unet, axis=1)
@@ -500,8 +496,6 @@ ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_c
 #seg_oh = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
 #ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
-print('seg_oh',seg_oh.shape)
-print('ref_oh',ref_oh.shape)
 #%%%%%%%%%%%%%%%% Create input for ResNet %%%%%%%%%%%%%%%%
 
 #%% E-map
@@ -750,7 +744,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             #loss = loss_function(output, labels)
             loss = soft_dice_loss(labels, output)
             #print('loss',loss)
-            print('loss = ', loss)
+            #print('loss = ', loss)
             
             # Calculate gradients
             loss.backward()
@@ -815,7 +809,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             # Find loss
             #loss = loss_function(output, labels)
             loss = soft_dice_loss(labels, output)
-            print('loss', loss)
+            #print('loss', loss)
             # Calculate loss
             #eval_loss.append(loss.item())
             eval_loss += loss.item() #.detach().cpu().numpy()

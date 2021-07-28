@@ -769,9 +769,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             labels = np.squeeze(labels)
             #output = torch.squeeze(output)
             loss = get_loss(output, labels)
-            #loss = soft_dice_loss(labels, output)
-            print('Loss: ',loss)
-            
+            #loss = soft_dice_loss(labels, output)            
             
             # Calculate loss
             #eval_loss.append(loss.item())
