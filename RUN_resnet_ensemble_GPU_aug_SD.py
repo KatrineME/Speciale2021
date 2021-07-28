@@ -470,7 +470,7 @@ out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=to
 out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
 
 #%% Data augmentation
-
+"""
 im_train_res_flip = np.flip(im_train_res, axis=3)
 gt_train_res_flip = np.flip(gt_train_res, axis=2)
 out_softmax_unet_flip = np.flip(out_softmax_unet, axis=3)
@@ -483,17 +483,17 @@ out_softmax_unet_rot = rotate(out_softmax_unet, angle=45, axes=(2, 3), reshape=F
 im_train_res = np.concatenate((im_train_res,im_train_res_flip,im_train_res_rot), axis=0)
 gt_train_res = np.concatenate((gt_train_res,gt_train_res_flip,gt_train_res_rot), axis=0)
 out_softmax_unet = np.concatenate((out_softmax_unet,out_softmax_unet_flip,out_softmax_unet_rot), axis=0)
-
+"""
 
 #%% One hot encoding
 seg_met = np.argmax(out_softmax_unet, axis=1)
 
 #seg = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
-#seg_oh = torch.nn.functional.one_hot(Tensor(seg_met).to(torch.int64), num_classes=4).detach().cpu().numpy()
-#ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
-
-seg_oh = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
+seg_oh = torch.nn.functional.one_hot(Tensor(seg_met).to(torch.int64), num_classes=4).detach().cpu().numpy()
 ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+
+#seg_oh = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
+#ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
 print('seg_oh',seg_oh.shape)
 print('ref_oh',ref_oh.shape)
@@ -578,19 +578,7 @@ T_j[T_j >= 1 ] = 1
 
 T = np.expand_dims(T_j, axis=1)
 
-#%%    
-"""
-image = 34
-upper_image = image - 1
-lower_image = image + 1
 
-test_im = Tensor(np.expand_dims(T[upper_image:lower_image,0,:,:],axis=0))
-up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
-up_im = up(test_im) > 0
-
-plt.imshow(up_im[0,1,:,:])
-plt.imshow(input_concat[image,0,:,:],alpha=0.6)
-"""
 #%%
 
 def get_loss(log_pred_probs, lbls, pred_probs=None):
