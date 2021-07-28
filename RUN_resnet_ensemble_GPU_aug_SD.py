@@ -495,6 +495,8 @@ seg_met = np.argmax(out_softmax_unet, axis=1)
 seg_oh = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
 ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
+print('seg_oh',seg_oh.shape)
+print('ref_oh',ref_oh.shape)
 #%%%%%%%%%%%%%%%% Create input for ResNet %%%%%%%%%%%%%%%%
 
 #%% E-map
