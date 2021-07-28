@@ -482,7 +482,7 @@ out_softmax_unet_rot = rotate(out_softmax_unet, angle=45, axes=(2, 3), reshape=F
 
 im_train_res = np.concatenate((im_train_res,im_train_res_flip,im_train_res_rot), axis=0)
 gt_train_res = np.concatenate((gt_train_res,gt_train_res_flip,gt_train_res_rot), axis=0)
-out_softmax_unet = np.concatenate((out_softmax_unet,out_softmax_unet_flip,out_softmax_unet_rot), axis=0)
+out_softmax_unet = Tensor(np.concatenate((out_softmax_unet,out_softmax_unet_flip,out_softmax_unet_rot), axis=0))
 
 
 #%% One hot encoding
