@@ -627,7 +627,7 @@ def soft_dice_loss(y_true, y_pred):
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 100 #200
+num_epochs = 200 #200
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
