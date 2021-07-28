@@ -397,7 +397,7 @@ data_im_ed_RV,   data_gt_ed_RV   = load_data_sub(user,phase,'RV')
 num_train_sub = 12
 num_eval_sub  = num_train_sub
 
-num_train_res = num_eval_sub + 6
+num_train_res = num_eval_sub + 2 #6
 num_test_res  = num_train_res + 2
 
 im_train_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_train_res]).astype(None),
@@ -701,6 +701,8 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             labels = labels.cuda()
             #print('i=',i)
             # wrap them in Variable
+            print('inputs shape', inputs.shape)
+            print('labels shape', labels.shape)
             inputs, labels = Variable(inputs), Variable(labels)
             labels = labels.long()
                        
@@ -715,7 +717,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
 
             # Find loss
             #labels = torch.squeeze(labels)
-            output = torch.squeeze(output)
+            #output = torch.squeeze(output)
+            print('inputs shape', inputs.shape)
+            print('output shape', output.shape)
             loss = loss_function(output, labels)
 
             #print('loss',loss)
