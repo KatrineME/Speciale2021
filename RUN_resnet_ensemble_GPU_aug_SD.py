@@ -730,7 +730,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             loss = soft_dice_loss(labels, output)
 
             #print('loss',loss)
-            #print('loss = ', loss)
+            print('loss = ', loss)
             
             # Calculate gradients
             loss.backward()
