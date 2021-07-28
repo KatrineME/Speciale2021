@@ -801,7 +801,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             # Find loss
             #loss = loss_function(output, labels)
             loss = soft_dice_loss(labels, output)
-            
+            print('loss', loss)
             # Calculate loss
             #eval_loss.append(loss.item())
             eval_loss += loss.item() #.detach().cpu().numpy()
