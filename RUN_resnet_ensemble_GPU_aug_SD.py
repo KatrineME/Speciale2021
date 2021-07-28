@@ -459,6 +459,9 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_tes
 
 """
 
+print('im_train_res',im_train_res.shape)
+print('gt_train_res',gt_train_res.shape)
+
 #%% Load softmax from ensemble models
 
 #PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
@@ -470,7 +473,7 @@ out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=to
 out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
 
 #%% Data augmentation
-"""
+
 im_train_res_flip = np.flip(im_train_res, axis=3)
 gt_train_res_flip = np.flip(gt_train_res, axis=2)
 out_softmax_unet_flip = np.flip(out_softmax_unet, axis=3)
@@ -483,7 +486,9 @@ out_softmax_unet_rot = rotate(out_softmax_unet, angle=45, axes=(2, 3), reshape=F
 im_train_res = np.concatenate((im_train_res,im_train_res_flip,im_train_res_rot), axis=0)
 gt_train_res = np.concatenate((gt_train_res,gt_train_res_flip,gt_train_res_rot), axis=0)
 out_softmax_unet = np.concatenate((out_softmax_unet,out_softmax_unet_flip,out_softmax_unet_rot), axis=0)
-"""
+
+print('im_train_res',im_train_res.shape)
+print('gt_train_res',gt_train_res.shape)
 
 #%% One hot encoding
 seg_met = np.argmax(out_softmax_unet, axis=1)
