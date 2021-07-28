@@ -26,7 +26,7 @@ def SI_set(user, phase):
         device = 'cuda'
     else:
         # Tensor = torch.FloatTensor
-        device = 'cpu'
+        device = 'K'
     torch.cuda.manual_seed_all(808)
         
     #%% Specify directory
