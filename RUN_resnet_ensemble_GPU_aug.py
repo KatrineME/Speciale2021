@@ -441,14 +441,9 @@ im_train_res_flip = np.flip(im_train_res, axis=3)
 gt_train_res_flip = np.flip(gt_train_res, axis=2)
 out_softmax_unet_flip = np.flip(out_softmax_unet, axis=3)
 
-im_train_res_rot = rotate(im_train_res, angle=45, axes=(2, 3), reshape=False)
-gt_train_res_rot = np.rint(rotate(gt_train_res, angle=45, axes=(1, 2), reshape=False))
-gt_train_res_rot[gt_train_res_rot<0] = 0
-out_softmax_unet_rot = rotate(out_softmax_unet, angle=45, axes=(2, 3), reshape=False)
-
-im_train_res = np.concatenate((im_train_res,im_train_res_flip,im_train_res_rot), axis=0)
-gt_train_res = np.concatenate((gt_train_res,gt_train_res_flip,gt_train_res_rot), axis=0)
-out_softmax_unet = np.concatenate((out_softmax_unet,out_softmax_unet_flip,out_softmax_unet_rot), axis=0)
+im_train_res = np.concatenate((im_train_res,im_train_res_flip), axis=0)
+gt_train_res = np.concatenate((gt_train_res,gt_train_res_flip), axis=0)
+out_softmax_unet = np.concatenate((out_softmax_unet,out_softmax_unet_flip), axis=0)
 
 #%% One hot encoding
 seg_met = np.argmax(out_softmax_unet, axis=1)
@@ -538,19 +533,6 @@ T_j[T_j >= 1 ] = 1
 
 T = np.expand_dims(T_j, axis=1)
 
-#%%    
-"""
-image = 34
-upper_image = image - 1
-lower_image = image + 1
-
-test_im = Tensor(np.expand_dims(T[upper_image:lower_image,0,:,:],axis=0))
-up = nn.Upsample((128,128), mode='bilinear', align_corners=True)
-up_im = up(test_im) > 0
-
-plt.imshow(up_im[0,1,:,:])
-plt.imshow(input_concat[image,0,:,:],alpha=0.6)
-"""
 #%%
 
 def get_loss(log_pred_probs, lbls, pred_probs=None):
@@ -646,7 +628,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     ins_train  = next(iter(train_dataloader_input))
     labs_train = next(iter(train_dataloader_label))
-        
+
     # Define data loaders for training and testing data in this fold
     eval_dataloader_input = torch.utils.data.DataLoader(input_concat, batch_size=batch_size, sampler=test_subsampler, drop_last=True)
     eval_dataloader_label  = torch.utils.data.DataLoader(T, batch_size=batch_size, sampler=test_subsampler, drop_last=True)
@@ -657,7 +639,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     # Init the neural network
     #network = model()
     #model.apply(weights_init)
-    
+
     # Initialize optimizer
     optimizer = torch.optim.Adam(model.parameters(),  lr=0.0001, eps=0.0001, weight_decay=0.0001) # Optuna
     #optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, eps=0.0001 weight_decay=0.0001) # Initial
@@ -717,9 +699,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
 
             # Find loss
             labels = np.squeeze(labels)
-            #output = torch.squeeze(output)
-            print('labels shape', labels.shape)
-            print('output shape', output.shape)
+
             loss = get_loss(output, labels)
 
             #print('loss',loss)
