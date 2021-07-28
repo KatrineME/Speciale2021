@@ -33,7 +33,7 @@ import scipy.ndimage
 #%% Import results from training (Loss + Accuracy)
 #PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
 #PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt'
-PATH_dice = '/Users/michalablicher/Desktop/Trained_Unet_dice_dia_150e_train_results.pt'
+PATH_dice = '/Users/michalablicher/Desktop/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
 PATH_CE   = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_150_train_results.pt'
 
 res_dice = torch.load(PATH_dice, map_location=torch.device('cpu'))
@@ -123,77 +123,82 @@ eval_inc_CE  = (out_mean_CE[5])
 #%%
 train_loss_all  = out_one[0]
 train_mean_loss = np.mean(train_loss_all, axis=0)
-train_std_loss  = 1.96*(np.array(np.std(train_loss_all, axis=0)))
+train_std_loss  = 1*(np.array(np.std(train_loss_all, axis=0)))
 eval_loss_all   = out_one[1]
 eval_mean_loss  = np.mean(eval_loss_all, axis=0)
-eval_std_loss   = 1.96*(np.array(np.std(eval_loss_all, axis=0)))
+eval_std_loss   = 1*(np.array(np.std(eval_loss_all, axis=0)))
 
 train_acc_all  = out_one[2]
 train_mean_acc = np.mean(train_acc_all, axis=0)
-train_std_acc  = 1.96*(np.array(np.std(train_acc_all, axis=0)))
+train_std_acc  = 1*(np.array(np.std(train_acc_all, axis=0)))
 eval_acc_all   = out_one[3]
 eval_mean_acc  = np.mean(eval_acc_all, axis=0)
-eval_std_acc   = 1.96*(np.array(np.std(eval_acc_all, axis=0)))
+eval_std_acc   = 1*(np.array(np.std(eval_acc_all, axis=0)))
+
 
 #%%
 train_loss_all_CE  = out_one_CE[0]
 train_mean_loss_CE = np.mean(train_loss_all_CE, axis=0)
-train_std_loss_CE  = 1.96*(np.array(np.std(train_loss_all_CE, axis=0)))
+train_std_loss_CE  = 1*(np.array(np.std(train_loss_all_CE, axis=0)))
 eval_loss_all_CE   = out_one_CE[1]
 eval_mean_loss_CE  = np.mean(eval_loss_all_CE, axis=0)
-eval_std_loss_CE   = 1.96*(np.array(np.std(eval_loss_all_CE, axis=0)))
+eval_std_loss_CE   = 1*(np.array(np.std(eval_loss_all_CE, axis=0)))
 
 train_acc_all_CE  = out_one_CE[2]
 train_mean_acc_CE = np.mean(train_acc_all_CE, axis=0)
-train_std_acc_CE  = 1.96*(np.array(np.std(train_acc_all_CE, axis=0)))
+train_std_acc_CE  = 1*(np.array(np.std(train_acc_all_CE, axis=0)))
 eval_acc_all_CE   = out_one_CE[3]
 eval_mean_acc_CE  = np.mean(eval_acc_all_CE, axis=0)
-eval_std_acc_CE   = 1.96*(np.array(np.std(eval_acc_all_CE, axis=0)))
+eval_std_acc_CE   = 1*(np.array(np.std(eval_acc_all_CE, axis=0)))
 
 #%%
 
-plt.figure(dpi=200, figsize = (20,14))
-plt.subplot(2,2,2)
+plt.figure(dpi=200, figsize = (14,7))
+#plt.subplot(2,2,2)
+plt.subplot(1,2,1)
 plt.plot(train_mean_loss, label = 'Train loss (mean)')
-plt.fill_between(range(150), (train_mean_loss-train_std_loss), train_mean_loss+train_std_loss, alpha = 0.7, color = 'red', label = 'Train loss (1.96*std) ')
+plt.fill_between(range(150), (train_mean_loss-train_std_loss), train_mean_loss+train_std_loss, alpha = 0.7, color = 'red', label = 'Train loss (std) ')
 plt.plot(eval_mean_loss,label = 'Validation loss (mean)')
-plt.fill_between(range(150), (eval_mean_loss-eval_std_loss), eval_mean_loss+eval_std_loss, alpha = 0.2, color = 'green', label = 'Validation loss (1.96*std) ')
+plt.fill_between(range(150), (eval_mean_loss-eval_std_loss), eval_mean_loss+eval_std_loss, alpha = 0.2, color = 'green', label = 'Validation loss (std) ')
 
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-plt.xticks(np.arange(0, len(train_mean_acc) + 2, step = 50), fontsize =14)
+plt.xticks(np.arange(0, len(train_mean_acc) + 2, step = 25), fontsize =14)
 plt.yticks(fontsize =14)
 plt.ylim([0,1.2])
+plt.xlim([-2,100])
 plt.xlabel('Epochs', fontsize = 20)
-plt.ylabel('Soft Dice',  fontsize = 20)
+plt.ylabel('Anatomical error loss',  fontsize = 20)
 plt.legend(loc="upper right", fontsize = 15)
-plt.title('Loss curve (SD)', fontsize =28)
+plt.title('Loss curve (AE)', fontsize =28)
 
-plt.subplot(2,2,4)
+plt.subplot(1,2,2)
 plt.plot(train_mean_acc, label = 'Train accuracy (mean)')
-plt.fill_between(range(150), (train_mean_acc-train_std_acc), train_mean_acc+train_std_acc, alpha = 0.5, color = 'red', label = 'Train accuracy (1.96*std) ')
+plt.fill_between(range(150), (train_mean_acc-train_std_acc), train_mean_acc+train_std_acc, alpha = 0.5, color = 'red', label = 'Train accuracy (std) ')
 plt.plot(eval_mean_acc, label = 'Validation accuracy (mean)')
-plt.fill_between(range(150), (eval_mean_acc-eval_std_acc), eval_mean_acc+eval_std_acc, alpha = 0.2, color = 'green',label = 'Validation accuracy (1.96*std) ')
+plt.fill_between(range(150), (eval_mean_acc-eval_std_acc), eval_mean_acc+eval_std_acc, alpha = 0.2, color = 'green',label = 'Validation accuracy (std) ')
 
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-plt.xticks(np.arange(0, len(train_mean_acc) + 2, step = 50), fontsize =14)
+plt.xticks(np.arange(0, len(train_mean_acc) + 2, step = 25), fontsize =14)
 plt.yticks(fontsize =14)
 plt.ylim([40,101])
+plt.xlim([-2,100])
 plt.xlabel('Epochs', fontsize = 16)
 plt.ylabel('Accuracy %',  fontsize = 20)
 plt.legend(loc="lower right", fontsize = 15)
-plt.title("Accuracy (SD)", fontsize =28)
+plt.title("Accuracy (AE)", fontsize =28)
 
-
+#%%
 plt.subplot(2,2,1)
 plt.plot(train_mean_loss_CE, label = 'Train loss (mean)')
-plt.fill_between(range(150), (train_mean_loss_CE-train_std_loss_CE), train_mean_loss_CE+train_std_loss_CE, alpha = 0.7, color = 'red', label = 'Train loss (1.96*std) ')
+plt.fill_between(range(150), (train_mean_loss_CE-train_std_loss_CE), train_mean_loss_CE+train_std_loss_CE, alpha = 0.7, color = 'red', label = 'Train loss (std) ')
 plt.plot(eval_mean_loss_CE,label = 'Validation loss (mean)')
-plt.fill_between(range(150), (eval_mean_loss_CE-eval_std_loss_CE), eval_mean_loss_CE+eval_std_loss_CE, alpha = 0.2, color = 'green', label = 'Validation loss (1.96*std) ')
+plt.fill_between(range(150), (eval_mean_loss_CE-eval_std_loss_CE), eval_mean_loss_CE+eval_std_loss_CE, alpha = 0.2, color = 'green', label = 'Validation loss (std) ')
 
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-plt.xticks(np.arange(0, len(train_mean_acc) + 2, step = 50), fontsize =14)
+plt.xticks(np.arange(0, len(train_mean_acc) + 2, step = 25), fontsize =14)
 plt.yticks(fontsize =14)
 plt.ylim([0,1.2])
+plt.xlim([-2,100])
 plt.xlabel('Epochs', fontsize = 20)
 plt.ylabel('Cross-Entropy',  fontsize = 20)
 plt.legend(loc="upper right", fontsize = 15)
@@ -201,14 +206,15 @@ plt.title('Loss curve (CE)', fontsize =28)
 
 plt.subplot(2,2,3)
 plt.plot(train_mean_acc_CE, label = 'Train accuracy (mean)')
-plt.fill_between(range(150), (train_mean_acc_CE-train_std_acc_CE), train_mean_acc_CE+train_std_acc_CE, alpha = 0.5, color = 'red', label = 'Train accuracy (1.96*std) ')
+plt.fill_between(range(150), (train_mean_acc_CE-train_std_acc_CE), train_mean_acc_CE+train_std_acc_CE, alpha = 0.5, color = 'red', label = 'Train accuracy (std) ')
 plt.plot(eval_mean_acc_CE, label = 'Validation accuracy (mean)')
-plt.fill_between(range(150), (eval_mean_acc_CE-eval_std_acc_CE), eval_mean_acc_CE+eval_std_acc_CE, alpha = 0.2, color = 'green',label = 'Validation accuracy (1.96*std) ')
+plt.fill_between(range(150), (eval_mean_acc_CE-eval_std_acc_CE), eval_mean_acc_CE+eval_std_acc_CE, alpha = 0.2, color = 'green',label = 'Validation accuracy (std) ')
 
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-plt.xticks(np.arange(0, len(train_mean_acc) + 2, step = 50), fontsize =14)
+plt.xticks(np.arange(0, len(train_mean_acc) + 2, step = 25), fontsize =14)
 plt.yticks(fontsize =14)
 plt.ylim([40,101])
+plt.xlim([-2,100])
 plt.xlabel('Epochs', fontsize = 20)
 plt.ylabel('Accuracy %',  fontsize = 20)
 plt.legend(loc="lower right", fontsize = 15)

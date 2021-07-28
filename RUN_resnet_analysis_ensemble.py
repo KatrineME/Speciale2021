@@ -361,15 +361,9 @@ print(np.mean(dice_error))
 
 #%%
 
-
-tpr = dc(np.array(up_im[:,1,:,:]),np.array(up_lab[:,1,:,:]))
-
-tpr16 = dc(np.array(up_im[:,1,:,:]),np.array(up_lab[:,1,:,:]))
-
-
-print(tpr)
-
-
+h = np.sum(up_lab[:,1,:,:],axis=0)
+plt.imshow(h)
+plt.colorbar()
 
 
 
