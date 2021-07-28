@@ -32,7 +32,7 @@ torch.cuda.manual_seed_all(808)
 
 
 #%% Specify directory
-user = 'M'
+user = 'K'
 
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -88,8 +88,8 @@ print('Data loaded+concat')
 #%% U-Net
 # LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
 #% Load softmax from ensemble models
-#PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
-PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_lclv_sys_150e_test_ResNet.pt'
+PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_lclv_sys_150e_test_ResNet.pt'
+#PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_lclv_sys_150e_test_ResNet.pt'
 #PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt'
 
 #PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
@@ -158,7 +158,8 @@ for i in range(0, 4):
     plt.title('Reference') 
 
 #%%
-os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
 umap_bin = umap > 0.5
@@ -184,10 +185,12 @@ print('var dice', np.var(dice_umap))
 
 
 #%%
-out_patch_load = '/Users/michalablicher/Desktop/Out_patch_avg_dice_sdloss_sys_fold_150.pt'
+#out_patch_load = '/Users/michalablicher/Desktop/Out_patch_avg_dice_aug_CEloss_sys_fold_150.pt'
+out_patch_load = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_patch_avg_dice_aug_CEloss_sys_fold_150.pt'
 
+#PATH_SI_dice_85 = '/Users/michalablicher/Desktop/SI_Tj_85_dice_lclv_sys.pt'
+PATH_SI_dice_85 = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/SI_Tj_85_dice_lclv_sys.pt'
 
-PATH_SI_dice_85 = '/Users/michalablicher/Desktop/SI_Tj_85_dice_lclv_sys.pt'
 out_patch_softmax_fold = torch.load(out_patch_load ,  map_location=torch.device(device))
 SI_set_85= torch.load(PATH_SI_dice_85 ,  map_location=torch.device(device))
 
