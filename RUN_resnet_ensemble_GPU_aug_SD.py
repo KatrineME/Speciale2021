@@ -528,14 +528,14 @@ input_concat = torch.cat((im,umap,seg), dim=1)
 #os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from SI_error_func import dist_trans, cluster_min
 
-error_margin_inside  = 1
-error_margin_outside = 1
+error_margin_inside  = 2
+error_margin_outside = 3
 
 # Distance transform map
 dt_es_train = dist_trans(ref_oh, error_margin_inside, error_margin_outside)
 
 #%% Filter cluster size
-cluster_size = 1
+cluster_size = 10
 sys_new_label_train = cluster_min(seg_oh, ref_oh, cluster_size)
 
 roi_es_train = np.zeros((dt_es_train.shape))
@@ -686,7 +686,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     #model.apply(weights_init)
     
     # Initialize optimizer
-    optimizer = torch.optim.Adam(model.parameters(),  lr=0.001, eps=0.001, weight_decay=0.001) # Optuna
+    optimizer = torch.optim.Adam(model.parameters(),  lr=0.0001, eps=0.0001) #, weight_decay=0.001) # Optuna
     #optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, eps=0.0001 weight_decay=0.0001) # Initial
     #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=25)
 
