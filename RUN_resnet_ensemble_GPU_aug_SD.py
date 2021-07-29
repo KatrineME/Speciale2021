@@ -686,7 +686,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     #model.apply(weights_init)
     
     # Initialize optimizer
-    optimizer = torch.optim.Adam(model.parameters(),  lr=0.001, eps=0.0001, weight_decay=0.0001) # Optuna
+    optimizer = torch.optim.Adam(model.parameters(),  lr=0.001, eps=0.001, weight_decay=0.001) # Optuna
     #optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, eps=0.0001 weight_decay=0.0001) # Initial
     #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=25)
 
