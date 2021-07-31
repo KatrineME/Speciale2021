@@ -33,7 +33,7 @@ import scipy.ndimage
 #%% Import results from training (Loss + Accuracy)
 #PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
 #PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt'
-PATH_dice = '/Users/michalablicher/Desktop/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
+PATH_dice = '/Users/michalablicher/Desktop/Trained_Detection_dice_sdloss_sys_fold_500_results.pt'
 PATH_CE   = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_150_train_results.pt'
 
 res_dice = torch.load(PATH_dice, map_location=torch.device('cpu'))
@@ -153,29 +153,29 @@ eval_std_acc_CE   = 1*(np.array(np.std(eval_acc_all_CE, axis=0)))
 
 #%%
 
-plt.figure(dpi=200, figsize = (14,7))
+plt.figure(dpi=200, figsize = (10,6))
 #plt.subplot(2,2,2)
-plt.subplot(1,2,1)
+#plt.subplot(1,2,1)
 plt.plot(train_mean_loss, label = 'Train loss (mean)')
-plt.fill_between(range(150), (train_mean_loss-train_std_loss), train_mean_loss+train_std_loss, alpha = 0.7, color = 'red', label = 'Train loss (std) ')
+plt.fill_between(range(500), (train_mean_loss-train_std_loss), train_mean_loss+train_std_loss, alpha = 0.2, color = 'red', label = 'Train loss (std) ')
 plt.plot(eval_mean_loss,label = 'Validation loss (mean)')
-plt.fill_between(range(150), (eval_mean_loss-eval_std_loss), eval_mean_loss+eval_std_loss, alpha = 0.2, color = 'green', label = 'Validation loss (std) ')
+plt.fill_between(range(500), (eval_mean_loss-eval_std_loss), eval_mean_loss+eval_std_loss, alpha = 0.2, color = 'green', label = 'Validation loss (std) ')
 
 plt.grid(color='k', linestyle='-', linewidth=0.2)
-plt.xticks(np.arange(0, len(train_mean_acc) + 2, step = 25), fontsize =14)
+plt.xticks(np.arange(0, len(train_mean_acc) + 2, step = 100), fontsize =14)
 plt.yticks(fontsize =14)
-plt.ylim([0,1.2])
-plt.xlim([-2,100])
+plt.ylim([0.4,1])
+plt.xlim([-2,500])
 plt.xlabel('Epochs', fontsize = 20)
-plt.ylabel('Anatomical error loss',  fontsize = 20)
+plt.ylabel('Loss',  fontsize = 20)
 plt.legend(loc="upper right", fontsize = 15)
-plt.title('Loss curve (AE)', fontsize =28)
-
+plt.title('Loss curve', fontsize =28)
+#%%
 plt.subplot(1,2,2)
 plt.plot(train_mean_acc, label = 'Train accuracy (mean)')
-plt.fill_between(range(150), (train_mean_acc-train_std_acc), train_mean_acc+train_std_acc, alpha = 0.5, color = 'red', label = 'Train accuracy (std) ')
+plt.fill_between(range(100), (train_mean_acc-train_std_acc), train_mean_acc+train_std_acc, alpha = 0.5, color = 'red', label = 'Train accuracy (std) ')
 plt.plot(eval_mean_acc, label = 'Validation accuracy (mean)')
-plt.fill_between(range(150), (eval_mean_acc-eval_std_acc), eval_mean_acc+eval_std_acc, alpha = 0.2, color = 'green',label = 'Validation accuracy (std) ')
+plt.fill_between(range(100), (eval_mean_acc-eval_std_acc), eval_mean_acc+eval_std_acc, alpha = 0.2, color = 'green',label = 'Validation accuracy (std) ')
 
 plt.grid(color='k', linestyle='-', linewidth=0.2)
 plt.xticks(np.arange(0, len(train_mean_acc) + 2, step = 25), fontsize =14)
