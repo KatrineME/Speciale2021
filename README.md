@@ -2,11 +2,11 @@
 Master Thesis 2021
 
 **Scripts:**
-Data preprocessing
-Bayes U-Net 
-Detection Network
-Analyses
-Plots
+Data preprocessing\\
+Bayes U-Net \\
+Detection Network\\
+Analyses \\
+Plots\\
 
 
 OBS: Patients in 5 subgroups: 
