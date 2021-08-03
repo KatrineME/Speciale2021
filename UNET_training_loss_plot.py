@@ -31,10 +31,10 @@ import scipy.ndimage
 #!pip install opencv-python
 
 #%% Import results from training (Loss + Accuracy)
-#PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
-#PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Trained_Unet_dice_lclv_dia_150e_opt_train_results.pt'
-PATH_dice = '/Users/michalablicher/Desktop/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
-PATH_CE   = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_150_train_results.pt'
+PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Appendix plots/Trained_Unet_dice_sys_150e_train_results.pt'
+PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Appendix plots/Trained_Unet_dice_lclv_sys_150e_train_results.pt'
+#PATH_dice = '/Users/michalablicher/Desktop/Trained_Unet_dice_lclv_dia_150e_train_results.pt'
+#PATH_CE   = '/Users/michalablicher/Desktop/Trained_Unet_CE_dia_150_train_results.pt'
 
 res_dice = torch.load(PATH_dice, map_location=torch.device('cpu'))
 res_CE = torch.load(PATH_CE, map_location=torch.device('cpu'))
@@ -153,7 +153,7 @@ eval_std_acc_CE   = 1*(np.array(np.std(eval_acc_all_CE, axis=0)))
 
 #%%
 
-plt.figure(dpi=200, figsize = (14,7))
+plt.figure(dpi=200, figsize = (17,10))
 #plt.subplot(2,2,2)
 plt.subplot(1,2,1)
 plt.plot(train_mean_loss, label = 'Train loss (mean)')
@@ -188,7 +188,7 @@ plt.legend(loc="lower right", fontsize = 15)
 plt.title("Accuracy (AE)", fontsize =28)
 
 #%%
-plt.subplot(2,2,1)
+plt.subplot(2,2,2)
 plt.plot(train_mean_loss_CE, label = 'Train loss (mean)')
 plt.fill_between(range(150), (train_mean_loss_CE-train_std_loss_CE), train_mean_loss_CE+train_std_loss_CE, alpha = 0.7, color = 'red', label = 'Train loss (std) ')
 plt.plot(eval_mean_loss_CE,label = 'Validation loss (mean)')
@@ -204,7 +204,7 @@ plt.ylabel('Cross-Entropy',  fontsize = 20)
 plt.legend(loc="upper right", fontsize = 15)
 plt.title('Loss curve (CE)', fontsize =28)
 
-plt.subplot(2,2,3)
+plt.subplot(2,2,4)
 plt.plot(train_mean_acc_CE, label = 'Train accuracy (mean)')
 plt.fill_between(range(150), (train_mean_acc_CE-train_std_acc_CE), train_mean_acc_CE+train_std_acc_CE, alpha = 0.5, color = 'red', label = 'Train accuracy (std) ')
 plt.plot(eval_mean_acc_CE, label = 'Validation accuracy (mean)')
@@ -577,8 +577,8 @@ plt.title("Number of incorrect for averaged models", fontsize =28)
 ##################################################################################################################
 ##################################################################################################################
 #%% Import results from training (Loss + Accuracy)
-PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
-PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv_opt.pt'
+PATH_dice = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
+PATH_CE   = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt'
 #PATH_res_ed = '/Users/michalablicher/Desktop/Trained_Unet_dicew_2lv_dia_200e_train_results.pt'
 res_dice = torch.load(PATH_dice, map_location=torch.device('cpu'))
 res_CE = torch.load(PATH_CE, map_location=torch.device('cpu'))
@@ -630,7 +630,7 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_es_RV[num_eval_sub:num_test_sub]).astype(None)))
 #%% Plot softmax probabilities for all CV models
 #Plot softmax probabilities for a single slice
-test_slice = 145
+test_slice = 34
 alpha = 0.4
 
 model = 'CE'
@@ -657,30 +657,30 @@ for fold_model in range (0,6):
     
     #Reference annotation
     #plt.suptitle('Softmax probabilities for each model at test slice %i (SD)' %test_slice, fontsize=35, y=0.92)
-    plt.suptitle('Softmax probabilities for each model at test slice %i (Lclv)' %test_slice, fontsize=35, y=0.92)
+    plt.suptitle('Softmax probabilities for each model at test slice %i (AE)' %test_slice, fontsize=35, y=0.92)
     plt.subplot(7, 4, 1)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,0])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     plt.ylabel('Reference', fontsize=28)
     plt.title('Background', fontsize=28)
     
     plt.subplot(7, 4, 2)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,1])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     plt.title('Right ventricle', fontsize=28)
     
     plt.subplot(7, 4, 3)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,2])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     plt.title('Myocardium', fontsize=28)
     
     plt.subplot(7, 4, 4)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,3])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     plt.title('Left ventricle', fontsize=28)
     
     
@@ -688,23 +688,23 @@ for fold_model in range (0,6):
     plt.subplot(7, 4, 1+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,0])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     plt.ylabel('CV fold {}'.format(fold_model), fontsize=28)
     
     plt.subplot(7, 4, 2+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,1])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     
     plt.subplot(7, 4, 3+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,2])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
     
     plt.subplot(7, 4, 4+4*(fold_model+1))
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(seg_dia[test_slice,:,:,3])
-    plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+    plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
 
 plt.show()  
 #%% Averaged model
@@ -732,7 +732,7 @@ plt.show()
 #%% Averaged model
 alpha = 0.4
 
-model = 'SD'
+model = 'CE'
 
 if model == 'CE':
     out_soft = res_CE
@@ -742,7 +742,7 @@ if model == 'SD':
 out_soft_mean   = out_soft.mean(axis=0)
 
 plt.figure(dpi=300, figsize=(1.5*5,3.5*5))
-plt.suptitle('Softmax probabilies for averaged model at test slice {} (SD)'.format(test_slice), y=0.92, fontsize=18)
+plt.suptitle('Softmax probabilies for ensemble model slice {} (AE)'.format(test_slice), y=0.92, fontsize=18)
 for i in range(0,4):
     plt.subplot(4,2,i+1)
     plt.imshow(out_soft_mean[test_slice,i,:,:])
@@ -764,7 +764,7 @@ plt.figure(dpi=300, figsize=(10,7))
 plt.suptitle('Segmentations for averaged models at test slice 31', y=0.98, fontsize=20)
 
 plt.subplot(2,3,1)
-plt.imshow(im_test_ed_sub[test_slice,0,:,:])
+plt.imshow(im_test_es_sub[test_slice,0,:,:])
 plt.title('Original cMRI', fontsize=15)
 plt.ylabel('Diastolic', fontsize=15)
 
@@ -778,7 +778,7 @@ out_soft = res_dice
 out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
-plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Segmentation', fontsize=15)
 
 plt.subplot(2,3,5)
@@ -800,35 +800,37 @@ plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Reference', fontsize=15)
 
 #%% Argmax model
+test_slice = 34
+
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
 plt.figure(dpi=300, figsize=(12,7))
-plt.suptitle('Segmentations for averaged models at test slice 31', y=0.75, fontsize=20)
+plt.suptitle('Segmentations for ensemble models at test slice 34', y=0.75, fontsize=20)
 
 plt.subplot(1,4,1)
-plt.imshow(im_test_ed_sub[test_slice,0,:,:])
+plt.imshow(im_test_es_sub[test_slice,0,:,:])
 plt.title('Original cMRI', fontsize=15)
 
-plt.subplot(1,4,3)
+plt.subplot(1,4,2)
 out_soft = res_dice
 out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
-plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
-plt.title('Soft-Dice', fontsize=15)
+#plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('SD loss', fontsize=15)
 
-plt.subplot(1,4,2)
+plt.subplot(1,4,3)
 out_soft = res_CE
 out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 plt.imshow(out_seg_mean_am[test_slice,:,:])
-plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
-plt.title('Cross-Entropy', fontsize=15)
+#plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
+plt.title('AE loss', fontsize=15)
 
 plt.subplot(1,4,4)
-plt.imshow(gt_test_ed_sub[test_slice,:,:])
-plt.imshow(im_test_ed_sub[test_slice,0,:,:],alpha=alpha)
+plt.imshow(gt_test_es_sub[test_slice,:,:])
+#plt.imshow(im_test_es_sub[test_slice,0,:,:],alpha=alpha)
 plt.title('Reference', fontsize=15)
 
 

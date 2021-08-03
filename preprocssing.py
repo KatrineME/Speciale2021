@@ -9,7 +9,7 @@ import os
 import cv2
 import glob2
 import torchvision
-import scipy
+import scipy.ndimage
 
 from torch import Tensor
 from PIL   import Image
@@ -51,7 +51,7 @@ ori_resol = np.zeros((100,2))
 gt_crop = [] #np.zeros((H,W,100))
 im_crop = []
 
-for i in range(0,38):
+for i in range(0,30):
     #print('i =',i)
     nimg = nib.load(frame_im[i])
     img  = nimg.get_fdata()
@@ -112,14 +112,14 @@ plt.title('Manual segmentation', fontsize=s)
 #plt.imshow(img[:,:,c_slice], alpha= 0.5)
 #plt.title('Overlay', fontsize=s)
 """
+# slice 38
 
-
-#%%
-#%%
-#plt.figure(dpi=200)
-#plt.imshow(img_p[:,:,c_slice])
-#plt.imshow(bin_gt, alpha=0.3)
-#plt.plot(center[-1,1],center[-1,0],'r+')
+plt.figure(dpi=200)
+plt.imshow(img[:,:,c_slice], cmap='gray')
+plt.imshow(gt[:,:,c_slice], alpha =0.3)
+#plt.imshow(gt[:,:,c_slice], alpha=0.4, cmap='gray')
+plt.xticks([])
+plt.yticks([])
 
 #%%
 s = 23

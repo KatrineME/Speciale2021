@@ -319,7 +319,7 @@ num_test_sub = num_test_res
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv_opt_red.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -539,10 +539,10 @@ plt.imshow(out_seg_mean_am[slice_myo,:,:])
 plt.title('LV not fully surrounded by MYO', fontsize=17)
 plt.ylabel('Segmentation', fontsize=17)
 plt.subplot(3,4,1+4)
-plt.imshow(gt_test_ed_sub[slice_myo,:,:])
+plt.imshow(gt_test_es_sub[slice_myo,:,:])
 plt.ylabel('Reference', fontsize=17)
 plt.subplot(3,4,1+8)
-plt.imshow(im_test_ed_sub[slice_myo,0,:,:])
+plt.imshow(im_test_es_sub[slice_myo,0,:,:])
 plt.ylabel('Original cMRI', fontsize=17)
 
 
@@ -551,9 +551,9 @@ plt.imshow(out_seg_mean_am[slice_com,:,:])
 #plt.imshow(im_test_ed_sub[slice_com,0,:,:], alpha = alpha)
 plt.title('Not single components', fontsize=17)
 plt.subplot(3,4,2+4)
-plt.imshow(gt_test_ed_sub[slice_com,:,:])
+plt.imshow(gt_test_es_sub[slice_com,:,:])
 plt.subplot(3,4,2+8)
-plt.imshow(im_test_ed_sub[slice_com,0,:,:])
+plt.imshow(im_test_es_sub[slice_com,0,:,:])
 
 
 plt.subplot(3,4,3)
@@ -561,15 +561,15 @@ plt.imshow(out_seg_mean_am[slice_dis,:,:])
 #plt.imshow(im_test_ed_sub[slice_dis,0,:,:], alpha = alpha)
 plt.title('Disconnected components', fontsize=17)
 plt.subplot(3,4,3+4)
-plt.imshow(gt_test_ed_sub[slice_dis,:,:])
+plt.imshow(gt_test_es_sub[slice_dis,:,:])
 plt.subplot(3,4,3+8)
-plt.imshow(im_test_ed_sub[slice_dis,0,:,:])
+plt.imshow(im_test_es_sub[slice_dis,0,:,:])
 
 plt.subplot(3,4,4)
 plt.imshow(out_seg_mean_am[slice_nor,:,:])
 #plt.imshow(im_test_ed_sub[slice_nor,0,:,:], alpha = alpha)
 plt.title('No anatomical errors', fontsize=17)
 plt.subplot(3,4,4+4)
-plt.imshow(gt_test_ed_sub[slice_nor,:,:])
+plt.imshow(gt_test_es_sub[slice_nor,:,:])
 plt.subplot(3,4,4+8)
-plt.imshow(im_test_ed_sub[slice_nor,0,:,:])
+plt.imshow(im_test_es_sub[slice_nor,0,:,:])

@@ -152,8 +152,8 @@ gt_test_es_res = np.concatenate((np.concatenate(data_gt_es_DCM[num_train_res:num
 print('Data loaded+concat')
 
 #%% Load model
-PATH_model_es = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_lclv_sys_150e_test_ResNet.pt"
-PATH_model_ed = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_lclv_sys_150e_test_ResNet.pt"
+PATH_model_es = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt"
+PATH_model_ed = "C:/Users/katrine/Desktop/Optuna/Final resnet models/Out_softmax_fold_avg_dice_dia_150e_opt_train_ResNet.pt"
 
 unet_es_soft = torch.load(PATH_model_es, map_location=torch.device('cpu'))
 unet_ed_soft = torch.load(PATH_model_ed, map_location=torch.device('cpu'))
@@ -169,8 +169,8 @@ unet_ed   = torch.nn.functional.one_hot(torch.as_tensor(unet_ed_mean_am), num_cl
 
 
 #%% Onehot encode class channels
-gt_es_oh = torch.nn.functional.one_hot(Tensor(gt_test_es_res).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
-gt_ed_oh = torch.nn.functional.one_hot(Tensor(gt_test_ed_res).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
+gt_es_oh = torch.nn.functional.one_hot(Tensor(gt_train_es_res).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
+gt_ed_oh = torch.nn.functional.one_hot(Tensor(gt_train_ed_res).to(torch.int64), num_classes=4).detach().numpy().astype(np.bool)
 
 
 
@@ -197,7 +197,6 @@ roi_target_map_ed = np.zeros((dt_ed.shape))
 
 for i in range(0, dt_es.shape[0]):
     for j in range(0, dt_es.shape[3]):
-        print(j)
         roi_target_map_es[i,:,:,j] = np.logical_and(dt_es[i,:,:,j], sys_new_label[i,:,:,j])
 
 for i in range(0, dt_ed.shape[0]):
@@ -205,7 +204,7 @@ for i in range(0, dt_ed.shape[0]):
         roi_target_map_ed[i,:,:,j] = np.logical_and(dt_ed[i,:,:,j], dia_new_label[i,:,:,j])
 
 #%% plot all results
-test_slice = 10
+test_slice = 11
 class_title = ['Background','Right Ventricle','Myocardium','Left Ventricle']
 plt.figure(dpi=200, figsize=(9,6))
 
@@ -328,15 +327,17 @@ print('Avg. patches pr. slice: ', (T_j.sum()/n))
 
 
 #%%
-test_slice = 1
+test_slice = 10
+s = 20
 
-plt.figure(dpi=200)
+plt.figure(dpi=200, figsize=(6,6))
+#plt.subplot(1,2,1)
 plt.imshow(T_j[test_slice,:,:])
-plt.title('Binary $t_j$ label at slice {}'.format(test_slice), fontsize=14)
+plt.title('Binary $t_j$ label', fontsize=s)
 plt.xticks(np.arange(0,16, 2))
 
-#%% Upsample
-up      = nn.Upsample(scale_factor=8, mode='bilinear', align_corners=True)
+#% Upsample
+up      = nn.Upsample(scale_factor=8, mode='nearest')
 Tj_temp = Tensor(np.expand_dims(T_j, axis=1))
 up_im   = up(Tj_temp)
 
@@ -344,26 +345,24 @@ up_im   = up(Tj_temp)
 up_im[up_im >0] =1
 
 #%%
-PATH_Tj = "C:/Users/katrine/Desktop/Optuna/Final resnet models/SI_Tj_85_dice_lclv_sys.pt"
-torch.save(T_j,PATH_Tj)
-PATH_up_im = "C:/Users/katrine/Desktop/Optuna/Final resnet models/SI_UpIm_85_dice_lclv_sys.pt"
-torch.save(torch.squeeze(up_im),PATH_up_im)
-#%%
-
 test_slice = 10
 
 #% plot
-plt.figure(dpi=200)
+plt.figure(dpi=200, figsize=(6,6))
 plt.imshow(unet_ed_mean_am[test_slice,:,:])
-plt.imshow(gt_test_ed_res[test_slice,:,:], alpha =0.3)
+#plt.imshow(gt_test_ed_res[test_slice,:,:], alpha =0.3)
 plt.imshow(up_im[test_slice,0,:,:], alpha= 0.3)
 
 #plt.colorbar()
 #plt.imshow(im_test_ed_sub[test_slice,0,:,:], alpha= 0.6)
 
-plt.title('Patches containing seg. errors at slice {}'.format(test_slice), fontsize=14)
+plt.title('Patches containing seg. errors', fontsize=s)
 
-
+#%%
+PATH_Tj = "C:/Users/katrine/Desktop/Optuna/Final resnet models/SI_Tj_85_dice_lclv_sys.pt"
+torch.save(T_j,PATH_Tj)
+PATH_up_im = "C:/Users/katrine/Desktop/Optuna/Final resnet models/SI_UpIm_85_dice_lclv_sys.pt"
+torch.save(torch.squeeze(up_im),PATH_up_im)
 
 #%%
 os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")

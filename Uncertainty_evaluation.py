@@ -39,7 +39,7 @@ torch.cuda.manual_seed_all(808)
 
 
 #%% Specify directory
-user = 'M'
+user = 'K'
 
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
@@ -93,8 +93,8 @@ print('Data loaded+concat')
 #%% U-Net
 # LOAD THE SOFTMAX PROBABILITES OF THE 6 FOLD MODELS
 #% Load softmax from ensemble models
-#PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
-PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_test_ResNet.pt'
+PATH_softmax_ensemble_unet = 'C:/Users/katrine/Desktop/Optuna/Out_softmax_fold_avg_test_ResNet.pt'
+#PATH_softmax_ensemble_unet = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_dice_lclv_dia_150e_opt_test_ResNet.pt'
 
 #PATH_softmax_ensemble_unet = '/home/katrine/Speciale2021/Speciale2021/Out_softmax_fold_avg.pt'
 out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=torch.device(device))
@@ -214,10 +214,11 @@ plt.title('U-map')
 plt.colorbar()
 
 #%%
-os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+#os.chdir("/Users/michalablicher/Documents/GitHub/Speciale2021")
+os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
 from metrics import accuracy_self, EF_calculation, dc, hd, jc, precision, mcc, recall, risk, sensitivity, specificity, true_negative_rate, true_positive_rate, positive_predictive_value, hd95, assd, asd, ravd, volume_correlation, volume_change_correlation, obj_assd, obj_asd, obj_fpr, obj_tpr
 
-umap_bin = umap > 0.5
+umap_bin = umap > 0.4
 umap_bin_s = np.squeeze(umap_bin)
 
 difference = (gt_test_es_res[:,:,:]-seg[:,0,:,:].detach().numpy())
@@ -239,7 +240,7 @@ print('std dice', np.std(dice_umap))
 
 
 
-#%%
+
 image = 84
 
 plt.figure(dpi=200, figsize=(7,2))

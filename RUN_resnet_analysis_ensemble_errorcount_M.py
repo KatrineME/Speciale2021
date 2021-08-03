@@ -209,7 +209,7 @@ if device == 'cuda':
 else:
     user = 'K'
 #%%
-user = 'M'
+user = 'K'
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 if user == 'K':
@@ -286,8 +286,8 @@ print('Data loaded+concat')
 
 #%% Load model if averagered on GPU
 
-path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
-#path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100sys_CE.pt'
+#path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_100sys_CE.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -497,8 +497,9 @@ plt.subplot(1,2,1)
 plt.imshow(im_test_es_sub[187,0,:,:])
 plt.title('Original MRI')
 plt.subplot(1,2,2)
-plt.imshow(im_test_es_sub[187,0,:,:])
-plt.imshow(gt_test_es_sub[187,:,:], alpha=0.6)
+
+plt.imshow(gt_test_es_sub[187,:,:])
+plt.imshow(im_test_es_sub[187,0,:,:], alpha=0.4)
 plt.title('Reference without RV')
 
 
