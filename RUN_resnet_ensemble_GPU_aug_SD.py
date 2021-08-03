@@ -425,6 +425,40 @@ gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_train_res:num_te
                                   np.concatenate(data_gt_ed_NOR[num_train_res:num_test_res]).astype(None),
                                   np.concatenate(data_gt_ed_RV[num_train_res:num_test_res]).astype(None)))
 """
+"""
+
+num_train_sub = 12
+num_eval_sub = num_train_sub
+num_test_sub = num_eval_sub + 8
+
+im_train_res = np.concatenate((np.concatenate(data_im_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[0:num_train_sub]).astype(None)))
+
+gt_train_res = np.concatenate((np.concatenate(data_gt_ed_DCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[0:num_train_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[0:num_train_sub]).astype(None)))
+
+
+im_test_res = np.concatenate((np.concatenate(data_im_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_im_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+gt_test_res = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_HCM[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_MINF[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_NOR[num_eval_sub:num_test_sub]).astype(None),
+                                  np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
+
+
+"""
+
 
 #%% Load softmax from ensemble models
 
@@ -435,15 +469,22 @@ out_softmax_unet_fold = torch.load(PATH_softmax_ensemble_unet ,  map_location=to
 
 # mean them over dim=0
 out_softmax_unet = out_softmax_unet_fold.mean(axis=0)
+
 #%% Data augmentation
 
 im_train_res_flip = np.flip(im_train_res, axis=3)
 gt_train_res_flip = np.flip(gt_train_res, axis=2)
 out_softmax_unet_flip = np.flip(out_softmax_unet, axis=3)
 
+#im_train_res_rot = rotate(im_train_res, angle=45, axes=(2, 3), reshape=False)
+#gt_train_res_rot = np.rint(rotate(gt_train_res, angle=45, axes=(1, 2), reshape=False))
+#gt_train_res_rot[gt_train_res_rot<0] = 0
+#out_softmax_unet_rot = rotate(out_softmax_unet, angle=45, axes=(2, 3), reshape=False)
+
 im_train_res = np.concatenate((im_train_res,im_train_res_flip), axis=0)
 gt_train_res = np.concatenate((gt_train_res,gt_train_res_flip), axis=0)
 out_softmax_unet = np.concatenate((out_softmax_unet,out_softmax_unet_flip), axis=0)
+
 
 #%% One hot encoding
 seg_met = np.argmax(out_softmax_unet, axis=1)
@@ -451,6 +492,9 @@ seg_met = np.argmax(out_softmax_unet, axis=1)
 #seg = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
 seg_oh = torch.nn.functional.one_hot(Tensor(seg_met).to(torch.int64), num_classes=4).detach().cpu().numpy()
 ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
+
+#seg_oh = torch.nn.functional.one_hot(torch.as_tensor(seg_met), num_classes=4).detach().cpu().numpy()
+#ref_oh = torch.nn.functional.one_hot(Tensor(gt_train_res).to(torch.int64), num_classes=4).detach().cpu().numpy()
 
 #%%%%%%%%%%%%%%%% Create input for ResNet %%%%%%%%%%%%%%%%
 
@@ -533,6 +577,7 @@ T_j[T_j >= 1 ] = 1
 
 T = np.expand_dims(T_j, axis=1)
 
+
 #%%
 
 def get_loss(log_pred_probs, lbls, pred_probs=None):
@@ -559,8 +604,8 @@ def get_loss(log_pred_probs, lbls, pred_probs=None):
     fp_soft = (ones - lbls.float()) * (pred_probs[:,1,:,:])
     fp_soft = torch.sum(fp_soft) * 1 / float(batch_size)
 
-    fn_penalty_weight = 1.2
-    fp_penalty_weight = 0.085
+    fn_penalty_weight = 1#1.2
+    fp_penalty_weight = 1#0.085
     b_loss = b_loss + fn_penalty_weight * fn_soft + fp_penalty_weight * fp_soft
 
     return b_loss
@@ -582,7 +627,7 @@ def soft_dice_loss(y_true, y_pred):
 
 #%% Training with K-folds
 k_folds    = 6
-num_epochs = 100 #200
+num_epochs = 500 #200
 loss_function = nn.CrossEntropyLoss()
 
 # For fold results
@@ -628,7 +673,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     ins_train  = next(iter(train_dataloader_input))
     labs_train = next(iter(train_dataloader_label))
-
+        
     # Define data loaders for training and testing data in this fold
     eval_dataloader_input = torch.utils.data.DataLoader(input_concat, batch_size=batch_size, sampler=test_subsampler, drop_last=True)
     eval_dataloader_label  = torch.utils.data.DataLoader(T, batch_size=batch_size, sampler=test_subsampler, drop_last=True)
@@ -639,9 +684,9 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     # Init the neural network
     #network = model()
     #model.apply(weights_init)
-
+    
     # Initialize optimizer
-    optimizer = torch.optim.Adam(model.parameters(),  lr=0.0001, eps=0.0001, weight_decay=0.0001) # Optuna
+    optimizer = torch.optim.Adam(model.parameters(),  lr=0.0001, eps=0.0001) #, weight_decay=0.001) # Optuna
     #optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, eps=0.0001 weight_decay=0.0001) # Initial
     #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=25)
 
@@ -678,7 +723,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             inputs = Tensor(ims)
             inputs = inputs.cuda()
             
-            labels = Tensor(np.squeeze(la))
+            #labels = Tensor(np.squeeze(la))
             labels = Tensor((la))
             labels = labels.cuda()
             #print('i=',i)
@@ -692,14 +737,12 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             # Forward Pass
             output = model(inputs)     
             output = output["log_softmax"]
-            #output = torch.exp(output)
+            output = torch.exp(output)
             #print('output shape = ', output.shape)
 
             # Find loss
-            labels = np.squeeze(labels)
-
-            loss = get_loss(output, labels)
-
+            #loss = loss_function(output, labels)
+            loss = soft_dice_loss(labels, output)
             #print('loss',loss)
             #print('loss = ', loss)
             
@@ -750,8 +793,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             
             inputs = inputs.cuda()
             
-            labels = Tensor(np.squeeze(la))
-            
+            #labels = Tensor(np.squeeze(la))
             labels = Tensor((la))
             labels = labels.cuda()
             
@@ -763,14 +805,11 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
             # Forward pass
             output = model(inputs)     
             output = output["log_softmax"]
-            #output = torch.exp(output)
-            
+            output = torch.exp(output)
             # Find loss
-            labels = np.squeeze(labels)
-            #output = torch.squeeze(output)
-            loss = get_loss(output, labels)
-            #loss = soft_dice_loss(labels, output)            
-            
+            #loss = loss_function(output, labels)
+            loss = soft_dice_loss(labels, output)
+            #print('loss', loss)
             # Calculate loss
             #eval_loss.append(loss.item())
             eval_loss += loss.item() #.detach().cpu().numpy()
@@ -815,7 +854,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_CEloss_sys_fold_150_{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_sdloss_sys_fold_500{}.pt".format(fold)
     #PATH_model = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Trained_Detection_dice_dia_fold_150{}.pt'.format(fold)
     torch.save(model, PATH_model)
 
@@ -861,7 +900,7 @@ plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_CEloss_sys_fold_150_fig.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_sdloss_sys_fold_500.png')
 
 #%%
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
@@ -869,7 +908,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_CEloss_sys_fold_150_results_res.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_sdloss_sys_fold_500_results.pt"
 #PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
 torch.save(T, PATH_results)
 
