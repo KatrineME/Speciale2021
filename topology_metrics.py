@@ -218,7 +218,7 @@ if device == 'cuda':
 else:
     user = 'K'
 
-user = 'K'
+user = 'M'
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 if user == 'K':
@@ -318,8 +318,8 @@ num_eval_sub = num_train_res
 num_test_sub = num_test_res
 #%% Load model if averagered on GPU
 
-#path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv_opt_red.pt'
+path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_dice_opt.pt'
+#path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv_opt_red.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -368,7 +368,7 @@ print('\n')
 
 # Slices per patient
 p = []
-pp = 8#2 #8             # OSB HER SKAL DER ENTEN STÅR 8 ELLER 2 PATIENTER FRA HVER SUBGROUP
+pp = 2#2 #8             # OSB HER SKAL DER ENTEN STÅR 8 ELLER 2 PATIENTER FRA HVER SUBGROUP
 
 
 for i in range(0,pp):
@@ -412,7 +412,7 @@ for i in range(0, (out_seg_mean.shape[0])):
     labeled_image_lv.append(skimage.measure.label(out_seg_mean[i,:,:,3], connectivity=2, return_num=True))
 
 #%%
-slice = 15
+slice = 4
 plt.figure(dpi=200)
 plt.subplot(2,2,1)
 plt.imshow(labeled_image_rv[slice][0])
