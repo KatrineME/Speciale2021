@@ -87,13 +87,13 @@ gt_test_ed_sub = np.concatenate((np.concatenate(data_gt_ed_DCM[num_eval_sub:num_
                                   np.concatenate(data_gt_ed_RV[num_eval_sub:num_test_sub]).astype(None)))
 
 #%%
-#slice_1 = 34
-#slice_2 = 104
-#slice_3 = 264
+slice_1 = 34
+slice_2 = 104
+slice_3 = 264
 
-slice_1 = 264
-slice_2 = 271
-slice_3 = 315
+#slice_1 = 264
+#slice_2 = 271
+#slice_3 = 315
 
 alpha = 0.3
 
