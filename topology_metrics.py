@@ -218,7 +218,7 @@ if device == 'cuda':
 else:
     user = 'K'
 
-user = 'K'
+user = 'M'
 if user == 'M':
     os.chdir('/Users/michalablicher/Documents/GitHub/Speciale2021')
 if user == 'K':
@@ -318,6 +318,7 @@ num_eval_sub = num_train_res
 num_test_sub = num_test_res
 #%% Load model if averagered on GPU
 
+
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
 path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_CE.pt'
 #path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv_proof.pt'
@@ -369,7 +370,7 @@ print('\n')
 
 # Slices per patient
 p = []
-pp = 8#2 #8             # OSB HER SKAL DER ENTEN STÅR 8 ELLER 2 PATIENTER FRA HVER SUBGROUP
+pp = 2#2 #8             # OSB HER SKAL DER ENTEN STÅR 8 ELLER 2 PATIENTER FRA HVER SUBGROUP
 
 
 for i in range(0,pp):
