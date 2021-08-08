@@ -633,7 +633,7 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
 test_slice = 34
 alpha = 0.4
 
-model = 'CE'
+model = 'SD'
 #model = 'SD'
 
 if model == 'CE':      # lclv
@@ -657,7 +657,7 @@ for fold_model in range (0,6):
     
     #Reference annotation
     #plt.suptitle('Softmax probabilities for each model at test slice %i (SD)' %test_slice, fontsize=35, y=0.92)
-    plt.suptitle('Softmax probabilities for each model at test slice %i (AE)' %test_slice, fontsize=35, y=0.92)
+    plt.suptitle('Softmax probabilities for each model at test slice %i (SD)' %test_slice, fontsize=35, y=0.92)
     plt.subplot(7, 4, 1)
     plt.subplots_adjust(hspace = 0.05, wspace = w)
     plt.imshow(ref_dia[test_slice,:,:,0])
@@ -711,7 +711,7 @@ plt.show()
 #test_slice = 27
 alpha = 0.4
 
-model = 'CE'
+model = 'SD'
 
 if model == 'CE':
     out_soft = res_CE
@@ -732,7 +732,7 @@ plt.show()
 #%% Averaged model
 alpha = 0.4
 
-model = 'CE'
+model = 'SD'
 
 if model == 'CE':
     out_soft = res_CE
@@ -742,7 +742,7 @@ if model == 'SD':
 out_soft_mean   = out_soft.mean(axis=0)
 
 plt.figure(dpi=300, figsize=(1.5*5,3.5*5))
-plt.suptitle('Softmax probabilies for ensemble model slice {} (AE)'.format(test_slice), y=0.92, fontsize=18)
+plt.suptitle('Softmax probabilies for ensemble model slice {} (SD)'.format(test_slice), y=0.92, fontsize=18)
 for i in range(0,4):
     plt.subplot(4,2,i+1)
     plt.imshow(out_soft_mean[test_slice,i,:,:])

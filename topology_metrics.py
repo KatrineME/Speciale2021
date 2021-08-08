@@ -319,7 +319,8 @@ num_test_sub = num_test_res
 #%% Load model if averagered on GPU
 
 #path_out_soft = '/Users/michalablicher/Desktop/Out_softmax_fold_avg_150dia_CE.pt'
-path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
+path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_CE.pt'
+#path_out_soft = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv_proof.pt'
 
 out_soft = torch.load(path_out_soft ,  map_location=torch.device(device))
 
@@ -331,7 +332,7 @@ out_soft_mean   = out_soft.mean(axis=0)
 out_seg_mean_am = np.argmax(out_soft_mean, axis=1)
 out_seg_mean    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am), num_classes=4).detach().cpu().numpy()
 
-ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 
 #%%
 def lv_loss(y_pred):
@@ -397,7 +398,7 @@ print('Number of patient volumes w. errors:',np.count_nonzero(cnon_pt))
 print('Percentage of patient volumes w. errors:',(np.count_nonzero(cnon_pt)/len(p))*100)   
 
 
-#%%
+#%
 labeled_image_rv = []
 labeled_image_myo = []
 labeled_image_lv = []
@@ -411,7 +412,8 @@ for i in range(0, (out_seg_mean.shape[0])):
     labeled_image_myo.append(skimage.measure.label(out_seg_mean[i,:,:,2], connectivity=2, return_num=True))
     labeled_image_lv.append(skimage.measure.label(out_seg_mean[i,:,:,3], connectivity=2, return_num=True))
 
-#%%
+#%
+"""
 slice = 15
 plt.figure(dpi=200)
 plt.subplot(2,2,1)
@@ -422,8 +424,8 @@ plt.subplot(2,2,3)
 plt.imshow(labeled_image_lv[slice][0])
 plt.subplot(2,2,4)
 plt.imshow(labeled_image_all[slice][0])
-
-#%%
+"""
+#%
 multi_lab_rv = []
 multi_lab_myo = []
 multi_lab_lv = []
@@ -462,7 +464,8 @@ print('\n')
 print('Number of slices w. disconnect MYO RV:',np.count_nonzero(multi_lab_all))
 print('Percentage of slices w. disconnect MYO RV:',(np.count_nonzero(multi_lab_all)/len(multi_lab_all))*100)  
 
-#%%  Slices per patient
+
+#%  Slices per patient
 p = []
 
 for i in range(0,pp):
@@ -498,8 +501,7 @@ print('\n')
 print('Number of patient volumes w. disconnect MYO RV:',np.count_nonzero(final_myo_rv_pt))
 print('Percentage of patient volumes w. disconnect MYO RV:',(np.count_nonzero(final_myo_rv_pt)/len(p))*100) 
 
-
-#%% OVERALL
+#% OVERALL
 
 overall_errors_slices = (np.array(multi_lab_all) + final_both)
 overall_errors_slices_bin = overall_errors_slices > 0
@@ -520,6 +522,145 @@ for i in range(0,test_index):
     #print('s= ',s)
 print('Number of patient volumes w.any error:',np.count_nonzero(overall_count_pt))
 print('Percentage of patient volumes w. any error:',(np.count_nonzero(overall_count_pt)/len(p))*100)   
+
+
+
+
+
+
+#%% Filter 
+
+num_com_rv = np.zeros((337))
+labeled_rv =  labeled_image_rv
+
+for i in range(0, (out_seg_mean.shape[0])):
+    num_com_rv[i] = labeled_image_rv[i][1]
+    if num_com_rv[i] > 1:
+        #print('i = ',i)
+        for a in np.unique(labeled_image_rv[i][0]):
+            c_size = np.count_nonzero(labeled_image_rv[i][0]==a)
+            #print('a = ',a,'size = ', c_size)
+            if c_size < 10:
+                labeled_rv[i][0][labeled_image_rv[i][0] == a] = 0
+
+num_com_myo = np.zeros((337))
+labeled_myo =  labeled_image_myo
+
+for i in range(0, (out_seg_mean.shape[0])):
+    num_com_myo[i] = labeled_image_myo[i][1]
+    if num_com_myo[i] > 1:
+        #print('i = ',i)
+        for a in np.unique(labeled_image_myo[i][0]):
+            c_size = np.count_nonzero(labeled_image_myo[i][0]==a)
+            #print('a = ',a,'size = ', c_size)
+            if c_size < 10:
+                labeled_myo[i][0][labeled_image_myo[i][0] == a] = 0
+
+num_com_lv = np.zeros((337))
+labeled_lv =  labeled_image_lv
+
+for i in range(0, (out_seg_mean.shape[0])):
+    num_com_lv[i] = labeled_image_lv[i][1]
+    if num_com_lv[i] > 1:
+        #print('i = ',i)
+        for a in np.unique(labeled_image_lv[i][0]):
+            c_size = np.count_nonzero(labeled_image_lv[i][0]==a)
+            #print('a = ',a,'size = ', c_size)
+            if c_size < 10:
+                labeled_lv[i][0][labeled_image_lv[i][0] == a] = 0
+
+num_com_all  = np.zeros((337))
+labeled_all = labeled_image_all
+
+for i in range(0, (out_seg_mean.shape[0])):
+    num_com_all[i] = labeled_image_all[i][1]
+    if num_com_all[i] > 1:
+        #print('i = ',i)
+        for a in np.unique(labeled_image_all[i][0]):
+            c_size = np.count_nonzero(labeled_image_all[i][0]==a)
+            #print('a = ',a,'size = ', c_size)
+            if c_size < 10:
+                labeled_all[i][0][labeled_image_all[i][0] == a] = 0
+
+#% Filtered
+
+multi_rv  = []
+multi_myo = []
+multi_lv  = []
+multi_all = []
+
+for i in range(0, (out_seg_mean.shape[0])):
+    multi_rv.append(float(labeled_rv[i][1]   > 2))
+    multi_myo.append(float(labeled_myo[i][1] > 2))
+    multi_lv.append(float(labeled_lv[i][1]   > 2))
+    multi_all.append(float(labeled_all[i][1] > 2))
+
+tot_rv = np.sum(multi_rv)
+tot_myo = np.sum(multi_myo)
+tot_lv = np.sum(multi_lv)
+
+all_tot_sum = []
+for i in range(0, (out_seg_mean.shape[0])):
+    all_tot_sum.append(multi_rv[i] + multi_myo[i] + multi_lv[i])
+
+
+c_non_bin = (c_non > 0).astype(int)
+tot_miss_bin = (np.array(all_tot_sum) > 0).astype(int)
+
+
+final_both = tot_miss_bin + c_non_bin# + multi_lab_all
+final_bin = (final_both > 0).astype(int)
+final_count = np.sum(final_bin)
+
+print('Number of slices w. multiple components (filter):',np.count_nonzero(tot_miss_bin))
+print('Percentage of slices w. multiple components (filter):',(np.count_nonzero(tot_miss_bin)/len(tot_miss_bin))*100)   
+
+s = 0
+final_count_pt = np.zeros(test_index)
+final_myo_rv_pt = np.zeros(test_index)
+for i in range(0,test_index):
+    for j in range(0, p[i]):
+        final_count_pt[i] += np.count_nonzero(tot_miss_bin[j+s])
+        final_myo_rv_pt[i] += np.count_nonzero(multi_all[j+s])
+    s += p[i] 
+    #print('s= ',s)
+
+
+print('\n')
+print('Number of patient volumes w. multiple comp (filter):',np.count_nonzero(final_count_pt))
+print('Percentage of patient volumes w. multiple comp (filter):',(np.count_nonzero(final_count_pt)/len(p))*100)  
+
+
+print('\n')
+print('Number of slices w. disconnect MYO RV (filter):',np.count_nonzero(multi_all))
+print('Percentage of slices w. disconnect MYO RV (filter):',(np.count_nonzero(multi_all)/len(multi_all))*100)  
+print('\n')
+print('Number of patient volumes w. disconnect MYO RV (filter):',np.count_nonzero(final_myo_rv_pt))
+print('Percentage of patient volumes w. disconnect MYO RV (filter):',(np.count_nonzero(final_myo_rv_pt)/len(p))*100) 
+print('\n')
+
+
+#% OVERALL (filter)
+
+overall_errors_slices = (np.array(multi_all) + final_both)
+overall_errors_slices_bin = overall_errors_slices > 0
+overall_errors_count = overall_errors_slices_bin.sum()
+
+print('Number of slices w. any error:',overall_errors_count)
+print('Percentage of slices w.any error:',overall_errors_count/len(overall_errors_slices)*100)  
+print('\n')
+
+s = 0
+overall_count_pt = np.zeros(test_index)
+
+for i in range(0,test_index):
+    for j in range(0, p[i]):
+        overall_count_pt[i] += np.count_nonzero(overall_errors_slices_bin[j+s])
+        
+    s += p[i] 
+    #print('s= ',s)
+print('Number of patient volumes w.any error (filter):',np.count_nonzero(overall_count_pt))
+print('Percentage of patient volumes w. any error (filter):',(np.count_nonzero(overall_count_pt)/len(p))*100)   
 
 #%% Plot of anantomical errors
 
@@ -573,3 +714,60 @@ plt.subplot(3,4,4+4)
 plt.imshow(gt_test_es_sub[slice_nor,:,:])
 plt.subplot(3,4,4+8)
 plt.imshow(im_test_es_sub[slice_nor,0,:,:])
+
+
+
+#%% Plot of anantomical errors
+
+alpha = 0.4
+
+slice_myo = 28
+slice_com = 34
+slice_dis = 67
+slice_nor = 56
+
+plt.figure(dpi=400, figsize=(16,12))
+#plt.suptitle('Examples of anatomical errors', fontsize=28, y=0.95)
+plt.subplot(3,4,2)
+plt.imshow(out_seg_mean_am[slice_myo,:,:])
+#plt.imshow(im_test_ed_sub[slice_myo,0,:,:], alpha = alpha)
+plt.title('LV not surrounded by MYO', fontsize=17)
+plt.subplot(3,4,2+4)
+plt.imshow(gt_test_ed_sub[slice_myo,:,:])
+plt.subplot(3,4,2+8)
+plt.imshow(im_test_ed_sub[slice_myo,0,:,:])
+
+
+
+plt.subplot(3,4,3)
+plt.imshow(out_seg_mean_am[slice_com,:,:])
+#plt.imshow(im_test_ed_sub[slice_com,0,:,:], alpha = alpha)
+plt.title('Not single components', fontsize=17)
+plt.subplot(3,4,3+4)
+plt.imshow(gt_test_ed_sub[slice_com,:,:])
+plt.subplot(3,4,3+8)
+plt.imshow(im_test_ed_sub[slice_com,0,:,:])
+
+
+plt.subplot(3,4,4)
+plt.imshow(out_seg_mean_am[slice_dis,:,:])
+#plt.imshow(im_test_ed_sub[slice_dis,0,:,:], alpha = alpha)
+plt.title('Disconnected components', fontsize=17)
+plt.subplot(3,4,4+4)
+plt.imshow(gt_test_ed_sub[slice_dis,:,:])
+plt.subplot(3,4,4+8)
+plt.imshow(im_test_ed_sub[slice_dis,0,:,:])
+
+plt.subplot(3,4,1)
+plt.imshow(out_seg_mean_am[slice_nor,:,:])
+#plt.imshow(im_test_ed_sub[slice_nor,0,:,:], alpha = alpha)
+plt.title('No anatomical errors', fontsize=17)
+plt.ylabel('Segmentation', fontsize=20)
+plt.subplot(3,4,1+4)
+plt.imshow(gt_test_ed_sub[slice_nor,:,:])
+plt.ylabel('Reference', fontsize=20)
+plt.subplot(3,4,1+8)
+plt.imshow(im_test_ed_sub[slice_nor,0,:,:])
+plt.ylabel('Original cMRI', fontsize=20)
+
+

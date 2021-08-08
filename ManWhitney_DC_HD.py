@@ -94,7 +94,7 @@ gt_test_es_sub = np.concatenate((np.concatenate(data_gt_es_DCM[num_eval_sub:num_
 print('Data loaded+concat')
 
 #%%
-path_out_1 = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_opt.pt'
+path_out_1 = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv_opt.pt'
 path_out_2 = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv_opt.pt'
 
 out_soft1 = torch.load(path_out_1 ,  map_location=torch.device(device))
@@ -113,7 +113,8 @@ out_seg_mean2    = torch.nn.functional.one_hot(torch.as_tensor(out_seg_mean_am2)
 
 
 # OBS: PHASE
-ref = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+ref_dia = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_ed_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
+ref_sys = torch.nn.functional.one_hot(torch.as_tensor(Tensor(gt_test_es_sub).to(torch.int64)), num_classes=4).detach().cpu().numpy()
 
 #% Metrics
 os.chdir("C:/Users/katrine/Documents/GitHub/Speciale2021")
@@ -128,36 +129,36 @@ haus95_2 = np.zeros((out_seg_mean2.shape[0],3))
 
 for i in range(0,out_seg_mean1.shape[0]):
       
-    dice1[i,0] = dc(out_seg_mean1[i,:,:,1],ref[i,:,:,1])  # = RV
-    dice1[i,1] = dc(out_seg_mean1[i,:,:,2],ref[i,:,:,2])  # = MYO
-    dice1[i,2] = dc(out_seg_mean1[i,:,:,3],ref[i,:,:,3])  # = LV
+    dice1[i,0] = dc(out_seg_mean1[i,:,:,1],ref_dia[i,:,:,1])  # = RV
+    dice1[i,1] = dc(out_seg_mean1[i,:,:,2],ref_dia[i,:,:,2])  # = MYO
+    dice1[i,2] = dc(out_seg_mean1[i,:,:,3],ref_dia[i,:,:,3])  # = LV
     
-    dice2[i,0] = dc(out_seg_mean2[i,:,:,1],ref[i,:,:,1])  # = RV
-    dice2[i,1] = dc(out_seg_mean2[i,:,:,2],ref[i,:,:,2])  # = MYO
-    dice2[i,2] = dc(out_seg_mean2[i,:,:,3],ref[i,:,:,3])  # = LV
+    dice2[i,0] = dc(out_seg_mean2[i,:,:,1],ref_sys[i,:,:,1])  # = RV
+    dice2[i,1] = dc(out_seg_mean2[i,:,:,2],ref_sys[i,:,:,2])  # = MYO
+    dice2[i,2] = dc(out_seg_mean2[i,:,:,3],ref_sys[i,:,:,3])  # = LV
     
     # If there is no prediction or annotation then don't calculate Hausdorff distance and
     # skip to calculation for next class
     h_count = 0
     
-    if len(np.unique(ref[i,:,:,1]))!=1 and len(np.unique(out_seg_mean1[i,:,:,1]))!=1 and len(np.unique(out_seg_mean2[i,:,:,1]))!=1:
-        haus95_1[i,0]    = hd95(out_seg_mean1[i,:,:,1],ref[i,:,:,1])  
-        haus95_2[i,0]    = hd95(out_seg_mean2[i,:,:,1],ref[i,:,:,1])  
+    if len(np.unique(ref_sys[i,:,:,1]))!=1 and len(np.unique(out_seg_mean1[i,:,:,1]))!=1 and len(np.unique(out_seg_mean2[i,:,:,1]))!=1:
+        haus95_1[i,0]    = hd95(out_seg_mean1[i,:,:,1],ref_dia[i,:,:,1])  
+        haus95_2[i,0]    = hd95(out_seg_mean2[i,:,:,1],ref_sys[i,:,:,1])  
         h_count += 1
     else:
         pass
 
     
-    if len(np.unique(ref[i,:,:,2]))!=1 and len(np.unique(out_seg_mean1[i,:,:,2]))!=1 and len(np.unique(out_seg_mean2[i,:,:,2]))!=1:      
-        haus95_1[i,1]    = hd95(out_seg_mean1[i,:,:,2],ref[i,:,:,2])
-        haus95_2[i,1]    = hd95(out_seg_mean2[i,:,:,2],ref[i,:,:,2])
+    if len(np.unique(ref_sys[i,:,:,2]))!=1 and len(np.unique(out_seg_mean1[i,:,:,2]))!=1 and len(np.unique(out_seg_mean2[i,:,:,2]))!=1:      
+        haus95_1[i,1]    = hd95(out_seg_mean1[i,:,:,2],ref_dia[i,:,:,2])
+        haus95_2[i,1]    = hd95(out_seg_mean2[i,:,:,2],ref_sys[i,:,:,2])
         h_count += 1
     else:
         pass
     
-    if len(np.unique(ref[i,:,:,3]))!=1 and len(np.unique(out_seg_mean1[i,:,:,3]))!=1 and len(np.unique(out_seg_mean2[i,:,:,3]))!=1:
-        haus95_1[i,2]    = hd95(out_seg_mean1[i,:,:,3],ref[i,:,:,3])
-        haus95_2[i,2]    = hd95(out_seg_mean2[i,:,:,3],ref[i,:,:,3])
+    if len(np.unique(ref_sys[i,:,:,3]))!=1 and len(np.unique(out_seg_mean1[i,:,:,3]))!=1 and len(np.unique(out_seg_mean2[i,:,:,3]))!=1:
+        haus95_1[i,2]    = hd95(out_seg_mean1[i,:,:,3],ref_dia[i,:,:,3])
+        haus95_2[i,2]    = hd95(out_seg_mean2[i,:,:,3],ref_sys[i,:,:,3])
         h_count += 1
     else:
         pass

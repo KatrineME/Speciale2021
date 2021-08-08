@@ -116,27 +116,27 @@ class DRN(nn.Module):
                 channels[0], layers[0], stride=1)
             # 16-07 jorg
             if self.mc_dropout:
-                self.layer1.add_module("dropout_layer", DropOut(p=0.1))
+                self.layer1.add_module("dropout_layer", DropOut(p=0.0)) # Before DropOut(p=0.1)
             self.layer2 = self._make_conv_layers(
                 channels[1], layers[1], stride=2)
             if self.mc_dropout:
-                self.layer2.add_module("dropout_layer", DropOut(p=0.1))
+                self.layer2.add_module("dropout_layer", DropOut(p=0.0)) # Before DropOut(p=0.1)
 
         self.layer3 = self._make_layer(block, channels[2], layers[2], stride=2)
         if self.mc_dropout:
-            self.layer3.add_module("dropout_layer", DropOut(p=0.1))
+            self.layer3.add_module("dropout_layer", DropOut(p=0.0))   # Before DropOut(p=0.1)
         self.layer4 = self._make_layer(block, channels[3], layers[3], stride=2)
         if self.mc_dropout:
-            self.layer4.add_module("dropout_layer", DropOut(p=0.1))
+            self.layer4.add_module("dropout_layer", DropOut(p=0.0))  # Before DropOut(p=0.1)
         self.layer5 = self._make_layer(block, channels[4], layers[4],
                                        dilation=2, new_level=False)
         if self.mc_dropout:
-            self.layer5.add_module("dropout_layer", DropOut(p=0.1))
+            self.layer5.add_module("dropout_layer", DropOut(p=0.0))  # Before DropOut(p=0.1)
         self.layer6 = None if layers[5] == 0 else \
             self._make_layer(block, channels[5], layers[5], dilation=4,
                              new_level=False)
         if self.mc_dropout:
-            self.layer6.add_module("dropout_layer", DropOut(p=0.1))
+            self.layer6.add_module("dropout_layer", DropOut(p=0.0))  # Before DropOut(p=0.1)
 
         if arch == 'C':
             self.layer7 = None if layers[6] == 0 else \
@@ -149,11 +149,11 @@ class DRN(nn.Module):
             self.layer7 = None if layers[6] == 0 else \
                 self._make_conv_layers(channels[6], layers[6], dilation=2)
             if self.mc_dropout:
-                self.layer7.add_module("dropout_layer", DropOut(p=0.1))
+                self.layer7.add_module("dropout_layer", DropOut(p=0.0))   # Before DropOut(p=0.1)
             self.layer8 = None if layers[7] == 0 else \
                 self._make_conv_layers(channels[7], layers[7], dilation=1)
             if self.mc_dropout:
-                self.layer8.add_module("dropout_layer", DropOut(p=0.1))
+                self.layer8.add_module("dropout_layer", DropOut(p=0.0))  # Before DropOut(p=0.1)
 
         if num_classes > 0:
             # Note: this is only used in case self.out_map is True
@@ -256,7 +256,7 @@ class DRN(nn.Module):
 
 class SimpleRSN(nn.Module):
 
-    def __init__(self, block, channels=(16, 32, 64, 128), n_channels_input=3, n_classes=2, drop_prob=0.):
+    def __init__(self, block, channels=(16, 32, 64, 128), n_channels_input=3, n_classes=2, drop_prob=0.0): # Before DropOut(p=0.3)
         super(SimpleRSN, self).__init__()
         self.inplanes = channels[0]
         self.out_dim = channels[-1]
@@ -334,7 +334,7 @@ class SimpleRSN(nn.Module):
 
 class CombinedRSN(SimpleRSN):
 
-    def __init__(self, BasicBlock, channels=(16, 32, 64, 128), n_channels_input=3, n_classes=2, drop_prob=0.3):
+    def __init__(self, BasicBlock, channels=(16, 32, 64, 128), n_channels_input=3, n_classes=2, drop_prob=0.0):    # Before DropOut(p=0.3)
         super(CombinedRSN, self).__init__(block=BasicBlock, channels=channels, n_channels_input=n_channels_input,
                                           n_classes=n_classes, drop_prob=drop_prob)
 
@@ -364,7 +364,7 @@ if __name__ == "__main__":
     n_channels = 3  # 3
     n_classes  = 2
     #model  = CombinedRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.5)
-    model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.1)
+    model = SimpleRSN(BasicBlock, channels=(16, 32, 64, 128), n_channels_input=n_channels, n_classes=n_classes, drop_prob=0.0)  # Before DropOut(p=0.1)
     if device == 'cuda':
         model.cuda()
     #torchsummary.summary(model, (n_channels, 80, 80))
@@ -854,7 +854,7 @@ for fold, (train_ids, test_ids) in enumerate(kfold.split(input_concat)):
     
     #Save model for each fold
     #PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_fold{}.pt".format(fold)
-    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_sdloss_sys_fold_500{}.pt".format(fold)
+    PATH_model = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_sdloss_sys_NoDrop_fold_500{}.pt".format(fold)
     #PATH_model = 'C:/Users/katrine/Desktop/Optuna/Final resnet models/Trained_Detection_dice_dia_fold_150{}.pt'.format(fold)
     torch.save(model, PATH_model)
 
@@ -900,7 +900,7 @@ plt.legend(loc="upper right")
 plt.title("Incorrect")
 
 #plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Unet_CE_dia_CV_scheduler.png')
-plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_sdloss_sys_fold_500.png')
+plt.savefig('/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_sdloss_sys_NoDrop_fold_500.png')
 
 #%%
 t_res_mean = [m_fold_train_losses, m_fold_eval_losses, m_fold_train_res, m_fold_eval_res, m_fold_train_incorrect, m_fold_eval_incorrect] # mean loss and accuracy
@@ -908,7 +908,7 @@ t_res      = [fold_train_losses, fold_eval_losses, fold_train_res, fold_eval_res
 
 T = [t_res_mean, t_res] # listed together
 
-PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_sdloss_sys_fold_500_results.pt"
+PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_dice_aug_sdloss_sys_NoDrop_fold_500_results.pt"
 #PATH_results = "/home/michala/Speciale2021/Speciale2021/Trained_Detection_CE_dia_train_results.pt"
 torch.save(T, PATH_results)
 

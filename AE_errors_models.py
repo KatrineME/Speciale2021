@@ -1,4 +1,4 @@
-epochs# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Created on Thu Jul 15 09:20:49 2021
 
@@ -31,10 +31,10 @@ else:
 torch.cuda.manual_seed_all(808)
 
 #%% Import results from training (Loss + Accuracy)
-PATH_SD     = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice.pt'
-PATH_SD_opt = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_opt.pt'
-PATH_AE     = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv.pt'
-PATH_AE_opt = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150sys_dice_lclv_opt.pt'
+PATH_SD     = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice.pt'
+PATH_SD_opt = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_opt.pt'
+PATH_AE     = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv.pt'
+PATH_AE_opt = 'C:/Users/katrine/Desktop/Optuna/Final CV models/Out_softmax_fold_avg_150dia_dice_lclv_opt.pt'
 
 SD     = torch.load(PATH_SD, map_location=torch.device('cpu'))
 SD_opt = torch.load(PATH_SD_opt, map_location=torch.device('cpu'))
@@ -61,7 +61,7 @@ AE_opt_seg_mean = torch.nn.functional.one_hot(torch.as_tensor(AE_opt_mean_am), n
 ##################################################################################################################
 os.chdir('C:/Users/katrine/Documents/GitHub/Speciale2021')
 from load_data_gt_im_sub_space import load_data_sub
-phase = 'Systole'
+phase = 'Diastole'
 user = 'K'
 
 data_im_ed_DCM,  data_gt_ed_DCM  = load_data_sub(user,phase,'DCM')
@@ -216,3 +216,58 @@ plt.imshow(AE_opt_mean_am[slice_2,:,:])
 plt.subplot(6,3,15+3)
 plt.imshow(AE_opt_mean_am[slice_3,:,:])
 
+#%%
+alpha = 0.3
+
+plt.figure(dpi=300, figsize=(20,10))
+plt.subplot(3,6,1)
+plt.imshow(im_test_ed_sub[slice_1,0,:,:])
+plt.title('Original cMRI', fontsize=20)
+plt.ylabel('Slice: {}'.format(slice_1), fontsize=20)
+plt.subplot(3,6,1+6)
+plt.imshow(im_test_ed_sub[slice_2,0,:,:])
+plt.ylabel('Slice: {}'.format(slice_2), fontsize=20)
+plt.subplot(3,6,1+12)
+plt.imshow(im_test_ed_sub[slice_3,0,:,:])
+plt.ylabel('Slice: {}'.format(slice_3), fontsize=20)
+
+plt.subplot(3,6,2)
+plt.imshow(gt_test_ed_sub[slice_1,:,:])
+plt.title('Reference', fontsize=20)
+plt.subplot(3,6,2+6)
+plt.imshow(gt_test_ed_sub[slice_2,:,:])
+plt.subplot(3,6,2+12)
+plt.imshow(gt_test_ed_sub[slice_3,:,:])
+
+
+plt.subplot(3,6,3)
+plt.imshow(SD_mean_am[slice_1,:,:])
+plt.title('SD model', fontsize=20)
+plt.subplot(3,6,3+6)
+plt.imshow(SD_mean_am[slice_2,:,:])
+plt.subplot(3,6,3+12)
+plt.imshow(SD_mean_am[slice_3,:,:])
+
+plt.subplot(3,6,4)
+plt.imshow(SD_opt_mean_am[slice_1,:,:])
+plt.title('SD opt model', fontsize=20)
+plt.subplot(3,6,4+6)
+plt.imshow(SD_opt_mean_am[slice_2,:,:])
+plt.subplot(3,6,4+12)
+plt.imshow(SD_opt_mean_am[slice_3,:,:])
+
+plt.subplot(3,6,5)
+plt.imshow(AE_mean_am[slice_1,:,:])
+plt.title('AE model', fontsize=20)
+plt.subplot(3,6,5+6)
+plt.imshow(AE_mean_am[slice_2,:,:])
+plt.subplot(3,6,5+12)
+plt.imshow(AE_mean_am[slice_3,:,:])
+
+plt.subplot(3,6,6)
+plt.imshow(AE_opt_mean_am[slice_1,:,:])
+plt.title('AE opt model', fontsize=20)
+plt.subplot(3,6,6+6)
+plt.imshow(AE_opt_mean_am[slice_2,:,:])
+plt.subplot(3,6,6+12)
+plt.imshow(AE_opt_mean_am[slice_3,:,:])
